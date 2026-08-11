@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 import java.math.BigDecimal;
+import com.transparencychain.backend.dto.FundRequestDto;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -63,5 +64,33 @@ public class MilestoneController {
     @GetMapping
     public ResponseEntity<?> getMilestones(@PathVariable UUID projectId) {
         return ResponseEntity.ok(milestoneRepository.findByProjectId(projectId));
+    }
+
+    @PostMapping("/{milestoneId}/submit")
+    @PreAuthorize("hasRole('NGO')")
+    public ResponseEntity<?> submitMilestone(@PathVariable UUID projectId, @PathVariable UUID milestoneId) {
+        Milestone milestone = milestoneRepository.findById(milestoneId).orElseThrow();
+        milestone.setStatus(Milestone.MilestoneStatus.IN_REVIEW);
+        milestoneRepository.save(milestone);
+        
+        auditLogService.logAction(milestone.getId(), "MILESTONE", "Milestone submitted to Funder for final approval");
+        return ResponseEntity.ok(new MessageResponse("Milestone submitted successfully"));
+    }
+
+    @PostMapping("/{milestoneId}/fund-request")
+    @PreAuthorize("hasRole('NGO')")
+    public ResponseEntity<?> requestAdditionalFunds(
+            @PathVariable UUID projectId, 
+            @PathVariable UUID milestoneId,
+            @RequestParam("amount") BigDecimal amount,
+            @RequestParam("reason") String reason,
+            @RequestParam(value = "proof", required = false) org.springframework.web.multipart.MultipartFile proof) {
+        Milestone milestone = milestoneRepository.findById(milestoneId).orElseThrow();
+        
+        String proofLog = proof != null ? " with proof document: " + proof.getOriginalFilename() : "";
+        auditLogService.logAction(milestone.getId(), "FUND_REQUEST", "Requested additional ₹" + amount + " for reason: " + reason + proofLog);
+        
+        // This is a simple implementation for the demo, logging the request to the audit log which the Funder can view.
+        return ResponseEntity.ok(new MessageResponse("Fund request submitted successfully"));
     }
 }

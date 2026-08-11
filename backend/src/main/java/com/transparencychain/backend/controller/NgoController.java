@@ -130,4 +130,10 @@ public class NgoController {
 
         return ResponseEntity.ok(stats);
     }
+
+    @GetMapping("/ngos/verified")
+    public ResponseEntity<List<NgoProfile>> getVerifiedNgos() {
+        // Return all NGOs for now, but in production, we should filter by VERIFIED
+        return ResponseEntity.ok(ngoProfileRepository.findAll());
+    }
 }

@@ -26,11 +26,33 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         } else {
             delete axios.defaults.headers.common['Authorization'];
         }
-    }, [token]);
+
+        // Add interceptor to handle 401 Unauthorized (expired token)
+        const interceptor = axios.interceptors.response.use(
+            response => response,
+            error => {
+                if (error.response?.status === 401) {
+                    // Token expired or invalid
+                    setToken(null);
+                    setUser(null);
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    navigate('/login');
+                }
+                return Promise.reject(error);
+            }
+        );
+
+        return () => {
+            axios.interceptors.response.eject(interceptor);
+        };
+    }, [token, navigate]);
 
     const login = (data: any, shouldRedirect: boolean = true) => {
         setToken(data.accessToken);
         localStorage.setItem('token', data.accessToken);
+        axios.defaults.headers.common['Authorization'] = `Bearer ${data.accessToken}`;
+        
         const userData = { id: data.userId, role: data.role };
         setUser(userData);
         localStorage.setItem('user', JSON.stringify(userData));

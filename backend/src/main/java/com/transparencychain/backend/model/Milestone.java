@@ -2,6 +2,7 @@ package com.transparencychain.backend.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.math.BigDecimal;
 import java.util.UUID;
 
@@ -13,6 +14,7 @@ public class Milestone {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id", nullable = false)
     private Project project;
@@ -28,6 +30,14 @@ public class Milestone {
 
     @Enumerated(EnumType.STRING)
     private MilestoneStatus status;
+
+    private java.time.LocalDate dueDate;
+    
+    @Column(columnDefinition = "TEXT")
+    private String requiredEvidence;
+    
+    @Column(columnDefinition = "TEXT")
+    private String verificationRequirements;
 
     public enum MilestoneStatus {
         PENDING, IN_REVIEW, VERIFIED, REJECTED

@@ -28,7 +28,7 @@ public class ProofSubmission {
     private ProofStatus status;
     
     @OneToOne(mappedBy = "proof", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private FraudCheck fraudCheck;
+    private EvidenceAnalysis evidenceAnalysis;
 
     private LocalDateTime submittedAt;
 

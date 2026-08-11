@@ -13,4 +13,13 @@ public class ProjectRequest {
     private String geography;
     private Double latitude;
     private Double longitude;
+    
+    // New fields
+    private String sdgTarget;
+    private String projectDuration;
+    private String impactKpi;
+    private Integer expectedBeneficiaries;
+    
+    private java.util.UUID ngoId;
+    private java.util.List<MilestoneRequest> milestones;
 }

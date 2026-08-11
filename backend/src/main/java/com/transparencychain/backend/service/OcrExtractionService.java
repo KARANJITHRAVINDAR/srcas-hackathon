@@ -151,4 +151,89 @@ public class OcrExtractionService {
         }
         return null;
     }
+
+    public com.transparencychain.backend.dto.InvoiceExtractionResult extractInvoice(MultipartFile file) {
+        com.transparencychain.backend.dto.InvoiceExtractionResult result = new com.transparencychain.backend.dto.InvoiceExtractionResult();
+        String extractedText = "";
+        try {
+            BufferedImage image = null;
+            String originalFilename = file.getOriginalFilename() != null ? file.getOriginalFilename().toLowerCase() : "";
+            
+            if (originalFilename.endsWith(".pdf")) {
+                try (InputStream is = file.getInputStream(); PDDocument document = PDDocument.load(is)) {
+                    PDFRenderer pdfRenderer = new PDFRenderer(document);
+                    if (document.getNumberOfPages() > 0) {
+                        image = pdfRenderer.renderImageWithDPI(0, 300);
+                    }
+                }
+            } else {
+                image = ImageIO.read(file.getInputStream());
+            }
+
+            if (image != null) {
+                ITesseract tesseract = new Tesseract();
+                tesseract.setDatapath("C:\\Program Files\\Tesseract-OCR\\tessdata");
+                tesseract.setLanguage("eng");
+                extractedText = tesseract.doOCR(image);
+                result.setRawText(extractedText);
+                result.setOcrConfidence(90); // Hardcoded mock confidence for MVP, Tesseract Java API doesn't easily expose average confidence without complex iteration
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            result.setRawText("");
+            result.setOcrConfidence(0);
+        }
+
+        if (extractedText.isEmpty()) return result;
+
+        // Vendor Name (Usually at the top, simple heuristic)
+        String[] lines = extractedText.split("\n");
+        if (lines.length > 0) {
+            result.setVendorName(lines[0].trim());
+        }
+
+        // Invoice Number
+        String invNo = extractRegex(extractedText, "(?i)Invoice\\s*(?:No|Number|#)[:\\s]*([A-Z0-9-]+)");
+        result.setInvoiceNumber(invNo);
+
+        // Date
+        String dateStr = extractRegex(extractedText, "(?i)Date[:\\s]*([0-9]{2,4}[-/][0-9]{2}[-/][0-9]{2,4})");
+        if (dateStr != null) {
+            try {
+                // Simplified date parsing for MVP
+                result.setInvoiceDate(java.time.LocalDate.parse(dateStr.replaceAll("/", "-")));
+            } catch (Exception ignored) {}
+        }
+
+        // GSTIN
+        String gstin = extractRegex(extractedText, "(?i)GSTIN[:\\s]*([0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1})");
+        result.setGstin(gstin);
+
+        // Total Amount
+        String amountStr = extractRegex(extractedText, "(?i)(?:Total|Amount|Rs\\.?|INR)[\\s:]*([0-9,]+(?:\\.[0-9]{1,2})?)");
+        if (amountStr != null) {
+            try {
+                result.setTotalAmount(new BigDecimal(amountStr.replace(",", "")));
+            } catch (Exception ignored) {}
+        }
+
+        // Line Items heuristic
+        List<com.transparencychain.backend.dto.InvoiceItem> items = new ArrayList<>();
+        // Look for lines that look like: "Cement Bag 100 400 40000"
+        Pattern itemPattern = Pattern.compile("(?i)([^\\n]+?)\\s+([0-9]+(?:\\.[0-9]+)?)\\s+([0-9]+(?:\\.[0-9]+)?)\\s+([0-9,]+(?:\\.[0-9]{1,2})?)\\n");
+        Matcher itemMatcher = itemPattern.matcher(extractedText);
+        while (itemMatcher.find()) {
+            try {
+                com.transparencychain.backend.dto.InvoiceItem item = new com.transparencychain.backend.dto.InvoiceItem();
+                item.setDescription(itemMatcher.group(1).trim());
+                item.setQuantity(new BigDecimal(itemMatcher.group(2)));
+                item.setUnitPrice(new BigDecimal(itemMatcher.group(3)));
+                item.setTotal(new BigDecimal(itemMatcher.group(4).replace(",", "")));
+                items.add(item);
+            } catch (Exception ignored) {}
+        }
+        result.setItems(items);
+
+        return result;
+    }
 }

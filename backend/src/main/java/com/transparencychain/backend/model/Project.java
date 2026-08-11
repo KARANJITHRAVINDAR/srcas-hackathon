@@ -2,6 +2,7 @@ package com.transparencychain.backend.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -16,10 +17,12 @@ public class Project {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "funder_id", nullable = false)
+    @JsonIgnore
     private FunderProfile funder;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ngo_id")
+    @JsonIgnore
     private NgoProfile ngo;
 
     @Column(nullable = false)
@@ -40,6 +43,11 @@ public class Project {
 
     @Enumerated(EnumType.STRING)
     private ProjectStatus status;
+
+    private String sdgTarget;
+    private String projectDuration;
+    private String impactKpi;
+    private Integer expectedBeneficiaries;
 
     private LocalDateTime createdAt;
     

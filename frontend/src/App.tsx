@@ -13,7 +13,9 @@ import NgoNeedFormPage from './pages/NgoNeedFormPage';
 import NgoMatchRequestsPage from './pages/NgoMatchRequestsPage';
 import MilestoneCreationPage from './pages/MilestoneCreationPage';
 import PublicAuditDashboard from './pages/PublicAuditDashboard';
-
+import NgoProjectsPage from './pages/NgoProjectsPage';
+import NgoProfilePage from './pages/NgoProfilePage';
+import EvidenceUploadPage from './pages/EvidenceUploadPage';
 import DashboardLayout from './components/DashboardLayout';
 
 const ProtectedRoute = ({ children, role }: { children: JSX.Element, role?: string }) => {
@@ -48,6 +50,18 @@ function AppRoutes() {
       <Route 
         path="/ngo/dashboard" 
         element={<ProtectedRoute role="NGO"><DashboardWrapper><NgoDashboardPage /></DashboardWrapper></ProtectedRoute>} 
+      />
+      <Route 
+        path="/ngo/projects" 
+        element={<ProtectedRoute role="NGO"><DashboardWrapper><NgoProjectsPage /></DashboardWrapper></ProtectedRoute>} 
+      />
+      <Route 
+        path="/ngo/profile" 
+        element={<ProtectedRoute role="NGO"><DashboardWrapper><NgoProfilePage /></DashboardWrapper></ProtectedRoute>} 
+      />
+      <Route 
+        path="/ngo/evidence/new" 
+        element={<ProtectedRoute role="NGO"><DashboardWrapper><EvidenceUploadPage /></DashboardWrapper></ProtectedRoute>} 
       />
       <Route 
         path="/projects/:id/milestones/new" 

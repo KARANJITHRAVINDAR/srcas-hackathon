@@ -14,7 +14,7 @@ import java.util.Map;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
-@RequestMapping("/api/v1/milestones/{milestoneId}/proofs")
+@RequestMapping("/api/v1")
 public class ProofController {
 
     @Autowired
@@ -24,7 +24,7 @@ public class ProofController {
     MilestoneRepository milestoneRepository;
     
     @Autowired
-    FraudCheckRepository fraudCheckRepository;
+    EvidenceAnalysisRepository evidenceAnalysisRepository;
     
     @Autowired
     AiFraudDetectionService aiFraudDetectionService;
@@ -32,17 +32,12 @@ public class ProofController {
     @Autowired
     AuditLogService auditLogService;
     
-    @Autowired
-    com.transparencychain.backend.service.BlockchainService blockchainService;
-    
-    @Autowired
-    EscrowAccountRepository escrowAccountRepository;
-    
-    @PostMapping
+    @PostMapping("/milestones/{milestoneId}/proofs")
     @PreAuthorize("hasRole('NGO')")
     public ResponseEntity<?> submitProof(@PathVariable UUID milestoneId, 
-                                         @org.springframework.web.bind.annotation.RequestParam("file") org.springframework.web.multipart.MultipartFile file,
-                                         @org.springframework.web.bind.annotation.RequestParam("metadata") String metadata) {
+                                         @RequestParam("file") org.springframework.web.multipart.MultipartFile file,
+                                         @RequestParam("metadata") String metadata,
+                                         @RequestParam(value = "expectedType", defaultValue = "INVOICE") String expectedType) {
         Milestone milestone = milestoneRepository.findById(milestoneId).orElseThrow();
         
         ProofSubmission proof = new ProofSubmission();
@@ -56,57 +51,52 @@ public class ProofController {
         milestone.setStatus(Milestone.MilestoneStatus.IN_REVIEW);
         milestoneRepository.save(milestone);
         
-        auditLogService.logAction(milestone.getId(), "MILESTONE", "Proof submitted. ID: " + proof.getId());
+        auditLogService.logAction(milestone.getId(), "MILESTONE", "Evidence submitted. ID: " + proof.getId());
         
         try {
-            byte[] fileBytes = file.getBytes();
-            String filename = file.getOriginalFilename();
             // Trigger async AI analysis
             new Thread(() -> {
-                String aiResult = aiFraudDetectionService.analyzeProof(fileBytes, filename, proof.getMetadata(), milestone);
-            
-            FraudCheck fraudCheck = new FraudCheck();
-            fraudCheck.setProof(proof);
-            fraudCheck.setAiAnalysisResult(aiResult);
-            
-            if (aiResult.contains("\"fraud\": true")) {
-                fraudCheck.setIsFraudulent(true);
-                fraudCheck.setOverallConfidenceScore(100 - Double.parseDouble(aiResult.split("\"score\": ")[1].split(",")[0]));
-                proof.setStatus(ProofSubmission.ProofStatus.AI_FLAGGED);
-                milestone.setStatus(Milestone.MilestoneStatus.REJECTED);
-            } else {
-                fraudCheck.setIsFraudulent(false);
-                fraudCheck.setOverallConfidenceScore(Double.parseDouble(aiResult.split("\"score\": ")[1].split(",")[0]));
-                proof.setStatus(ProofSubmission.ProofStatus.AI_VERIFIED);
-                milestone.setStatus(Milestone.MilestoneStatus.VERIFIED);
+                EvidenceAnalysis analysis = aiFraudDetectionService.analyzeProof(file, proof, expectedType);
                 
-                // Smart contract logic to release funds
-                String txHash = blockchainService.releaseFunds(milestone.getProject().getId(), milestone.getId(), milestone.getAmountAllocated());
-                auditLogService.logAction(milestone.getId(), "BLOCKCHAIN", "Funds released via Smart Contract. Tx Hash: " + txHash);
-                
-                EscrowAccount escrow = escrowAccountRepository.findByProjectId(milestone.getProject().getId()).orElse(null);
-                if (escrow != null) {
-                    escrow.setReleasedAmount(escrow.getReleasedAmount().add(milestone.getAmountAllocated()));
-                    escrowAccountRepository.save(escrow);
+                if (analysis.getResult() == EvidenceAnalysisResult.FLAGGED) {
+                    proof.setStatus(ProofSubmission.ProofStatus.AI_FLAGGED);
+                } else if (analysis.getResult() == EvidenceAnalysisResult.LOW_RISK || analysis.getResult() == EvidenceAnalysisResult.NOT_APPLICABLE) {
+                    proof.setStatus(ProofSubmission.ProofStatus.AI_VERIFIED); // Note: AI doesn't release funds, just marks its own check passed
+                } else {
+                    proof.setStatus(ProofSubmission.ProofStatus.PENDING_AI_CHECK); // Stay in review
                 }
-            }
-            
-            fraudCheckRepository.save(fraudCheck);
-            proofRepository.save(proof);
-            milestoneRepository.save(milestone);
-            
-            auditLogService.logAction(proof.getId(), "PROOF", "AI analysis completed. Fraudulent: " + fraudCheck.getIsFraudulent());
+                
+                proofRepository.save(proof);
+                auditLogService.logAction(proof.getId(), "PROOF", "AI analysis completed. Result: " + analysis.getResult());
             }).start();
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.badRequest().body(new MessageResponse("Failed to read uploaded file"));
         }
 
-        return ResponseEntity.ok(new MessageResponse("Proof submitted and sent for AI analysis."));
+        return ResponseEntity.ok(proof);
     }
     
-    @GetMapping
+    @GetMapping("/milestones/{milestoneId}/proofs")
     public ResponseEntity<?> getProofs(@PathVariable UUID milestoneId) {
         return ResponseEntity.ok(proofRepository.findByMilestoneId(milestoneId));
+    }
+
+    @PostMapping("/evidence/{evidenceId}/analyze")
+    public ResponseEntity<?> analyzeEvidence(@PathVariable UUID evidenceId, 
+                                             @RequestParam("file") org.springframework.web.multipart.MultipartFile file,
+                                             @RequestParam(value = "expectedType", defaultValue = "INVOICE") String expectedType) {
+        ProofSubmission proof = proofRepository.findById(evidenceId).orElseThrow();
+        EvidenceAnalysis analysis = aiFraudDetectionService.analyzeProof(file, proof, expectedType);
+        return ResponseEntity.ok(analysis);
+    }
+
+    @GetMapping("/evidence/{evidenceId}/analysis")
+    public ResponseEntity<?> getAnalysis(@PathVariable UUID evidenceId) {
+        EvidenceAnalysis analysis = evidenceAnalysisRepository.findByProofId(evidenceId);
+        if (analysis == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(analysis);
     }
 }
