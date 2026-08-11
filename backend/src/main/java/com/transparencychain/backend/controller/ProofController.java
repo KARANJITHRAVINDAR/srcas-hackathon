@@ -40,14 +40,16 @@ public class ProofController {
     
     @PostMapping
     @PreAuthorize("hasRole('NGO')")
-    public ResponseEntity<?> submitProof(@PathVariable UUID milestoneId, @RequestBody Map<String, String> request) {
+    public ResponseEntity<?> submitProof(@PathVariable UUID milestoneId, 
+                                         @org.springframework.web.bind.annotation.RequestParam("file") org.springframework.web.multipart.MultipartFile file,
+                                         @org.springframework.web.bind.annotation.RequestParam("metadata") String metadata) {
         Milestone milestone = milestoneRepository.findById(milestoneId).orElseThrow();
         
         ProofSubmission proof = new ProofSubmission();
         proof.setMilestone(milestone);
-        proof.setFileUrl(request.get("fileUrl"));
-        proof.setFileType(request.get("fileType"));
-        proof.setMetadata(request.get("metadata"));
+        proof.setFileUrl(file.getOriginalFilename());
+        proof.setFileType(file.getContentType());
+        proof.setMetadata(metadata);
         proof.setStatus(ProofSubmission.ProofStatus.PENDING_AI_CHECK);
         proofRepository.save(proof);
         
@@ -56,9 +58,12 @@ public class ProofController {
         
         auditLogService.logAction(milestone.getId(), "MILESTONE", "Proof submitted. ID: " + proof.getId());
         
-        // Trigger async AI analysis
-        new Thread(() -> {
-            String aiResult = aiFraudDetectionService.analyzeProof(proof.getFileUrl(), proof.getMetadata());
+        try {
+            byte[] fileBytes = file.getBytes();
+            String filename = file.getOriginalFilename();
+            // Trigger async AI analysis
+            new Thread(() -> {
+                String aiResult = aiFraudDetectionService.analyzeProof(fileBytes, filename, proof.getMetadata(), milestone);
             
             FraudCheck fraudCheck = new FraudCheck();
             fraudCheck.setProof(proof);
@@ -91,7 +96,11 @@ public class ProofController {
             milestoneRepository.save(milestone);
             
             auditLogService.logAction(proof.getId(), "PROOF", "AI analysis completed. Fraudulent: " + fraudCheck.getIsFraudulent());
-        }).start();
+            }).start();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(new MessageResponse("Failed to read uploaded file"));
+        }
 
         return ResponseEntity.ok(new MessageResponse("Proof submitted and sent for AI analysis."));
     }

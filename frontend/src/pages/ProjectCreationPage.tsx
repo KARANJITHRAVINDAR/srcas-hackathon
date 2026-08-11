@@ -16,7 +16,7 @@ export default function ProjectCreationPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const res = await axios.post('http://localhost:8080/api/v1/projects', formData);
+            const res = await axios.post('http://localhost:8081/api/v1/projects', formData);
             navigate(`/projects/${res.data.id}`);
         } catch (err: any) {
             alert(err.response?.data?.message || 'Failed to create project');

@@ -13,8 +13,8 @@ export default function ProjectDetailPage() {
 
     useEffect(() => {
         Promise.all([
-            axios.get(`http://localhost:8080/api/v1/projects/${id}`),
-            axios.get(`http://localhost:8080/api/v1/projects/${id}/milestones`)
+            axios.get(`http://localhost:8081/api/v1/projects/${id}`),
+            axios.get(`http://localhost:8081/api/v1/projects/${id}/milestones`)
         ])
         .then(([projRes, msRes]) => {
             setProject(projRes.data);
@@ -26,27 +26,35 @@ export default function ProjectDetailPage() {
 
     const escrowReleased = milestones.filter(m => m.status === 'VERIFIED').reduce((sum, m) => sum + m.amountAllocated, 0);
 
-    const handleUpload = async (milestoneId: string) => {
-        const fileUrl = prompt("Enter simulated image URL (e.g., https://example.com/invoice.jpg):", "https://example.com/invoice.jpg");
-        if (!fileUrl) return;
-        
-        try {
-            await axios.post(`http://localhost:8080/api/v1/milestones/${milestoneId}/proofs`, {
-                fileUrl,
-                fileType: "image/jpeg",
-                metadata: '{"lat": 12.9716, "lng": 77.5946}'
-            });
-            alert("Proof submitted for AI verification. The smart contract will execute if AI validates it.");
-            window.location.reload();
-        } catch (err: any) {
-            alert(err.response?.data?.message || 'Failed to submit proof');
-        }
+    const handleUpload = (milestoneId: string) => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*,application/pdf';
+        input.onchange = async (e: any) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('metadata', '{"lat": 12.9716, "lng": 77.5946}');
+            
+            try {
+                await axios.post(`http://localhost:8081/api/v1/milestones/${milestoneId}/proofs`, formData, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
+                alert("Proof submitted for AI verification. The smart contract will execute if AI validates it.");
+                window.location.reload();
+            } catch (err: any) {
+                alert(err.response?.data?.message || 'Failed to submit proof');
+            }
+        };
+        input.click();
     };
 
     const lockEscrow = async () => {
         if(window.confirm('Are you sure you want to lock these funds into the escrow smart contract?')) {
             try {
-                await axios.post(`http://localhost:8080/api/v1/projects/${id}/escrow`);
+                await axios.post(`http://localhost:8081/api/v1/projects/${id}/escrow`);
                 alert('Funds locked successfully!');
                 window.location.reload();
             } catch (err: any) {

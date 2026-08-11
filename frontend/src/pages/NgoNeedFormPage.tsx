@@ -25,7 +25,7 @@ export default function NgoNeedFormPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const res = await axios.post('http://localhost:8080/api/v1/needs', formData);
+            const res = await axios.post('http://localhost:8081/api/v1/needs', formData);
             const needId = res.data.id;
 
             // Upload documents
@@ -33,7 +33,7 @@ export default function NgoNeedFormPage() {
                 const docForm = new FormData();
                 docForm.append('file', documents[docType]);
                 docForm.append('documentType', docType);
-                await axios.post(`http://localhost:8080/api/v1/needs/${needId}/documents`, docForm);
+                await axios.post(`http://localhost:8081/api/v1/needs/${needId}/documents`, docForm);
             }
 
             alert('Need posted to marketplace successfully!');

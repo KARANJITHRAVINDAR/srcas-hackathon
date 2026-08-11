@@ -9,7 +9,7 @@ export default function MilestoneCreationPage() {
     const [milestones, setMilestones] = useState([{ title: '', description: '', amountAllocated: '' }]);
 
     useEffect(() => {
-        axios.get(`http://localhost:8080/api/v1/projects/${id}`)
+        axios.get(`http://localhost:8081/api/v1/projects/${id}`)
             .then(res => setProject(res.data))
             .catch(console.error);
     }, [id]);
@@ -32,7 +32,7 @@ export default function MilestoneCreationPage() {
             return;
         }
         try {
-            await axios.post(`http://localhost:8080/api/v1/projects/${id}/milestones/bulk`, milestones);
+            await axios.post(`http://localhost:8081/api/v1/projects/${id}/milestones/bulk`, milestones);
             alert('Milestones created successfully!');
             navigate(`/projects/${id}`);
         } catch (err: any) {

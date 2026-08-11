@@ -6,7 +6,7 @@ export default function PublicAuditDashboard() {
     const [projects, setProjects] = useState<any[]>([]);
 
     useEffect(() => {
-        axios.get('http://localhost:8080/api/v1/projects')
+        axios.get('http://localhost:8081/api/v1/projects')
             .then(res => setProjects(res.data.filter((p: any) => p.status !== 'DRAFT')))
             .catch(console.error);
     }, []);

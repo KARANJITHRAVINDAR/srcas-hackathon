@@ -53,7 +53,7 @@ public class NgoRegistrationController {
         for (MultipartFile file : files) {
             String docType = classifierService.classifyDocument(file);
             if (!docType.equals("UNKNOWN")) {
-                List<OcrExtractionService.OcrResult> results = ocrService.extractFields(docType);
+                List<OcrExtractionService.OcrResult> results = ocrService.extractFields(file, docType);
                 allResults.put(docType, results);
             }
         }

@@ -27,6 +27,12 @@ public class NgoController {
     @Autowired
     NgoDocumentRepository ngoDocumentRepository;
 
+    @Autowired
+    com.transparencychain.backend.repository.ProjectRepository projectRepository;
+
+    @Autowired
+    com.transparencychain.backend.repository.EscrowAccountRepository escrowAccountRepository;
+
     @PostMapping("/ngo/{id}/documents")
     public ResponseEntity<?> uploadDocument(@PathVariable UUID id,
                                             @RequestParam("file") MultipartFile file,
@@ -87,5 +93,41 @@ public class NgoController {
         }
 
         return ResponseEntity.ok(new MessageResponse("NGO verification status updated to " + statusStr));
+    }
+    @GetMapping("/ngo/{id}/dashboard-stats")
+    public ResponseEntity<?> getDashboardStats(@PathVariable UUID id) {
+        NgoProfile ngo = ngoProfileRepository.findByUserId(id).orElse(null);
+        if (ngo == null) {
+            return ResponseEntity.badRequest().body(new MessageResponse("NGO not found"));
+        }
+
+        List<com.transparencychain.backend.model.Project> projects = projectRepository.findByNgoId(ngo.getId());
+        
+        long activeProjects = projects.stream()
+            .filter(p -> p.getStatus() != com.transparencychain.backend.model.Project.ProjectStatus.COMPLETED && p.getStatus() != com.transparencychain.backend.model.Project.ProjectStatus.CANCELLED)
+            .count();
+
+        java.math.BigDecimal totalAllocated = java.math.BigDecimal.ZERO;
+        java.math.BigDecimal released = java.math.BigDecimal.ZERO;
+        java.math.BigDecimal pending = java.math.BigDecimal.ZERO;
+
+        for (com.transparencychain.backend.model.Project p : projects) {
+            totalAllocated = totalAllocated.add(p.getTotalBudget() != null ? p.getTotalBudget() : java.math.BigDecimal.ZERO);
+            com.transparencychain.backend.model.EscrowAccount escrow = escrowAccountRepository.findByProjectId(p.getId()).orElse(null);
+            if (escrow != null) {
+                released = released.add(escrow.getReleasedAmount() != null ? escrow.getReleasedAmount() : java.math.BigDecimal.ZERO);
+                pending = pending.add(escrow.getBalanceAmount());
+            }
+        }
+
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("activeProjects", activeProjects);
+        stats.put("totalAllocated", totalAllocated);
+        stats.put("released", released);
+        stats.put("pending", pending);
+        stats.put("trustScore", ngo.getTrustScore());
+        stats.put("projects", projects); // Send the raw projects for the active projects list
+
+        return ResponseEntity.ok(stats);
     }
 }

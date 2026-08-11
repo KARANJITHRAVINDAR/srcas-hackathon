@@ -7,5 +7,6 @@ import java.util.UUID;
 
 public interface ProjectRepository extends JpaRepository<Project, UUID> {
     List<Project> findByFunderId(UUID funderId);
+    List<Project> findByNgoId(UUID ngoId);
     List<Project> findByStatus(Project.ProjectStatus status);
 }

@@ -14,12 +14,18 @@ import NgoMatchRequestsPage from './pages/NgoMatchRequestsPage';
 import MilestoneCreationPage from './pages/MilestoneCreationPage';
 import PublicAuditDashboard from './pages/PublicAuditDashboard';
 
+import DashboardLayout from './components/DashboardLayout';
+
 const ProtectedRoute = ({ children, role }: { children: JSX.Element, role?: string }) => {
     const { token, user } = useAuth();
     if (!token) return <Navigate to="/login" />;
     // if (role && user?.role !== role) return <Navigate to="/dashboard" />;
     return children;
 };
+
+const DashboardWrapper = ({ children }: { children: React.ReactNode }) => (
+    <DashboardLayout>{children}</DashboardLayout>
+);
 
 function AppRoutes() {
   return (
@@ -29,37 +35,39 @@ function AppRoutes() {
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/marketplace" element={<MarketplacePage />} />
       <Route path="/audit" element={<PublicAuditDashboard />} />
+      
+      {/* NGO Routes */}
       <Route 
         path="/ngo/needs/new" 
-        element={<ProtectedRoute role="NGO"><NgoNeedFormPage /></ProtectedRoute>} 
+        element={<ProtectedRoute role="NGO"><DashboardWrapper><NgoNeedFormPage /></DashboardWrapper></ProtectedRoute>} 
       />
       <Route 
         path="/ngo/match-requests" 
-        element={<ProtectedRoute role="NGO"><NgoMatchRequestsPage /></ProtectedRoute>} 
+        element={<ProtectedRoute role="NGO"><DashboardWrapper><NgoMatchRequestsPage /></DashboardWrapper></ProtectedRoute>} 
       />
       <Route 
         path="/ngo/dashboard" 
-        element={
-          <ProtectedRoute role="NGO">
-            <NgoDashboardPage />
-          </ProtectedRoute>
-        } 
-      />
-      <Route 
-        path="/funder/dashboard" 
-        element={<ProtectedRoute role="FUNDER"><FunderDashboardPage /></ProtectedRoute>} 
-      />
-      <Route 
-        path="/funder/projects/new" 
-        element={<ProtectedRoute role="FUNDER"><ProjectCreationPage /></ProtectedRoute>} 
-      />
-      <Route 
-        path="/projects/:id" 
-        element={<ProtectedRoute><ProjectDetailPage /></ProtectedRoute>} 
+        element={<ProtectedRoute role="NGO"><DashboardWrapper><NgoDashboardPage /></DashboardWrapper></ProtectedRoute>} 
       />
       <Route 
         path="/projects/:id/milestones/new" 
-        element={<ProtectedRoute role="NGO"><MilestoneCreationPage /></ProtectedRoute>} 
+        element={<ProtectedRoute role="NGO"><DashboardWrapper><MilestoneCreationPage /></DashboardWrapper></ProtectedRoute>} 
+      />
+
+      {/* Funder Routes */}
+      <Route 
+        path="/funder/dashboard" 
+        element={<ProtectedRoute role="FUNDER"><DashboardWrapper><FunderDashboardPage /></DashboardWrapper></ProtectedRoute>} 
+      />
+      <Route 
+        path="/funder/projects/new" 
+        element={<ProtectedRoute role="FUNDER"><DashboardWrapper><ProjectCreationPage /></DashboardWrapper></ProtectedRoute>} 
+      />
+
+      {/* Shared Authenticated Routes */}
+      <Route 
+        path="/projects/:id" 
+        element={<ProtectedRoute><DashboardWrapper><ProjectDetailPage /></DashboardWrapper></ProtectedRoute>} 
       />
     </Routes>
   );
