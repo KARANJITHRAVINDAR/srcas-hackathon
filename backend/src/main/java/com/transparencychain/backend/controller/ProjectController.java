@@ -89,7 +89,7 @@ public class ProjectController {
                 milestone.setDueDate(milestoneReq.getDueDate());
                 milestone.setRequiredEvidence(milestoneReq.getRequiredEvidence());
                 milestone.setVerificationRequirements(milestoneReq.getVerificationRequirements());
-                milestone.setStatus(com.transparencychain.backend.model.Milestone.MilestoneStatus.PENDING);
+                milestone.setStatus(com.transparencychain.backend.model.Milestone.MilestoneStatus.AVAILABLE);
                 milestoneRepository.save(milestone);
             }
         }
@@ -118,7 +118,7 @@ public class ProjectController {
         escrow.setStatus(EscrowAccount.EscrowStatus.LOCKED);
         escrowAccountRepository.save(escrow);
         
-        project.setStatus(Project.ProjectStatus.ESCROWED);
+        project.setStatus(Project.ProjectStatus.FUNDED);
         projectRepository.save(project);
         
         auditLogService.logAction(project.getId(), "PROJECT", "Funds locked in escrow. EscrowAccount ID: " + escrow.getId());
@@ -157,5 +157,68 @@ public class ProjectController {
             return ResponseEntity.ok(projectRepository.findByStatus(status));
         }
         return ResponseEntity.ok(projectRepository.findAll());
+    }
+    
+    @PostMapping("/propose")
+    @PreAuthorize("hasRole('NGO')")
+    public ResponseEntity<?> proposeProject(@RequestBody ProjectRequest request) {
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        com.transparencychain.backend.model.NgoProfile ngo = ngoProfileRepository.findByUserId(userDetails.getId())
+                .orElseThrow(() -> new RuntimeException("NGO profile not found"));
+                
+        Project project = new Project();
+        project.setNgo(ngo);
+        project.setTitle(request.getTitle());
+        project.setSdgGoal(request.getSdgGoal());
+        project.setDescription(request.getDescription());
+        project.setTotalBudget(request.getTotalBudget());
+        project.setGeography(request.getGeography());
+        project.setLatitude(request.getLatitude());
+        project.setLongitude(request.getLongitude());
+        project.setSdgTarget(request.getSdgTarget());
+        project.setProjectDuration(request.getProjectDuration());
+        project.setImpactKpi(request.getImpactKpi());
+        project.setExpectedBeneficiaries(request.getExpectedBeneficiaries());
+        
+        if (request.getFunderId() != null) {
+            FunderProfile funder = funderProfileRepository.findById(request.getFunderId())
+                    .orElseThrow(() -> new RuntimeException("Funder not found"));
+            project.setFunder(funder);
+        }
+        
+        project.setStatus(Project.ProjectStatus.SUBMITTED);
+        project = projectRepository.save(project);
+        
+        auditLogService.logAction(project.getId(), "PROJECT", "Project PROPOSED by NGO " + ngo.getOrgName());
+        
+        return ResponseEntity.ok(project);
+    }
+    
+    @PatchMapping("/{id}/status")
+    @PreAuthorize("hasRole('FUNDER')")
+    public ResponseEntity<?> reviewProposal(@PathVariable UUID id, @RequestBody java.util.Map<String, String> request) {
+        Project project = projectRepository.findById(id).orElseThrow(() -> new RuntimeException("Project not found"));
+        
+        String newStatusStr = request.get("status");
+        if (newStatusStr == null) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Status is required"));
+        }
+        
+        Project.ProjectStatus newStatus = Project.ProjectStatus.valueOf(newStatusStr);
+        project.setStatus(newStatus);
+        
+        // If approved and no funder was assigned, assign the approving funder
+        if (newStatus == Project.ProjectStatus.APPROVED && project.getFunder() == null) {
+            UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            FunderProfile funder = funderProfileRepository.findByUserId(userDetails.getId())
+                    .orElseThrow(() -> new RuntimeException("Funder not found"));
+            project.setFunder(funder);
+        }
+        
+        projectRepository.save(project);
+        
+        auditLogService.logAction(project.getId(), "PROJECT_REVIEW", "Project status updated to " + newStatusStr);
+        
+        return ResponseEntity.ok(new MessageResponse("Project status updated successfully"));
     }
 }

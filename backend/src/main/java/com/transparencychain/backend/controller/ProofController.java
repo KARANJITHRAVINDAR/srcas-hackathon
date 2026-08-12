@@ -24,6 +24,9 @@ public class ProofController {
     MilestoneRepository milestoneRepository;
     
     @Autowired
+    MilestoneTaskRepository milestoneTaskRepository;
+    
+    @Autowired
     EvidenceAnalysisRepository evidenceAnalysisRepository;
     
     @Autowired
@@ -48,7 +51,7 @@ public class ProofController {
         proof.setStatus(ProofSubmission.ProofStatus.PENDING_AI_CHECK);
         proofRepository.save(proof);
         
-        milestone.setStatus(Milestone.MilestoneStatus.IN_REVIEW);
+        milestone.setStatus(Milestone.MilestoneStatus.AWAITING_FUNDER_APPROVAL);
         milestoneRepository.save(milestone);
         
         auditLogService.logAction(milestone.getId(), "MILESTONE", "Evidence submitted. ID: " + proof.getId());
@@ -77,9 +80,66 @@ public class ProofController {
         return ResponseEntity.ok(proof);
     }
     
+    @PostMapping("/projects/{projectId}/milestones/{milestoneId}/tasks/{taskId}/evidence")
+    @PreAuthorize("hasRole('NGO')")
+    public ResponseEntity<?> submitTaskProof(@PathVariable UUID projectId,
+                                             @PathVariable UUID milestoneId,
+                                             @PathVariable UUID taskId,
+                                             @RequestParam("file") org.springframework.web.multipart.MultipartFile file,
+                                             @RequestParam(value = "metadata", required = false) String metadata,
+                                             @RequestParam(value = "expectedType", defaultValue = "INVOICE") String expectedType) {
+        Milestone milestone = milestoneRepository.findById(milestoneId).orElseThrow();
+        MilestoneTask task = milestoneTaskRepository.findById(taskId).orElseThrow();
+        
+        ProofSubmission proof = new ProofSubmission();
+        proof.setMilestone(milestone);
+        proof.setMilestoneTask(task);
+        proof.setFileUrl(file.getOriginalFilename());
+        proof.setFileType(file.getContentType());
+        proof.setMetadata(metadata);
+        proof.setStatus(ProofSubmission.ProofStatus.PENDING_AI_CHECK);
+        proofRepository.save(proof);
+        
+        task.setStatus(MilestoneTask.TaskStatus.PROOF_SUBMITTED);
+        milestoneTaskRepository.save(task);
+        
+        auditLogService.logAction(milestone.getId(), "TASK_EVIDENCE", "Evidence submitted for task: " + task.getTaskName() + " ID: " + proof.getId());
+        
+        try {
+            // Trigger async AI analysis
+            new Thread(() -> {
+                EvidenceAnalysis analysis = aiFraudDetectionService.analyzeProof(file, proof, expectedType);
+                
+                if (analysis.getResult() == EvidenceAnalysisResult.FLAGGED) {
+                    proof.setStatus(ProofSubmission.ProofStatus.AI_FLAGGED);
+                    task.setStatus(MilestoneTask.TaskStatus.REJECTED);
+                } else if (analysis.getResult() == EvidenceAnalysisResult.LOW_RISK || analysis.getResult() == EvidenceAnalysisResult.NOT_APPLICABLE) {
+                    proof.setStatus(ProofSubmission.ProofStatus.AI_VERIFIED);
+                    task.setStatus(MilestoneTask.TaskStatus.UNDER_VALIDATION); // Real logic might advance directly to completed depending on human validation
+                } else {
+                    proof.setStatus(ProofSubmission.ProofStatus.PENDING_AI_CHECK);
+                }
+                
+                proofRepository.save(proof);
+                milestoneTaskRepository.save(task);
+                auditLogService.logAction(proof.getId(), "PROOF", "AI analysis completed. Result: " + analysis.getResult());
+            }).start();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(new MessageResponse("Failed to read uploaded file"));
+        }
+
+        return ResponseEntity.ok(proof);
+    }
+    
     @GetMapping("/milestones/{milestoneId}/proofs")
     public ResponseEntity<?> getProofs(@PathVariable UUID milestoneId) {
         return ResponseEntity.ok(proofRepository.findByMilestoneId(milestoneId));
+    }
+
+    @GetMapping("/projects/{projectId}/proofs")
+    public ResponseEntity<?> getProjectProofs(@PathVariable UUID projectId) {
+        return ResponseEntity.ok(proofRepository.findByMilestone_ProjectIdOrderBySubmittedAtDesc(projectId));
     }
 
     @PostMapping("/evidence/{evidenceId}/analyze")

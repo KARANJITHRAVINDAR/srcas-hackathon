@@ -19,7 +19,7 @@ public class Project {
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "funder_id", nullable = true)
+    @JoinColumn(name = "funder_id")
     @JsonIgnore
     private FunderProfile funder;
 
@@ -45,6 +45,7 @@ public class Project {
     private Double longitude;
 
     @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "VARCHAR(255)")
     private ProjectStatus status;
 
     private String sdgTarget;
@@ -64,6 +65,6 @@ public class Project {
     }
 
     public enum ProjectStatus {
-        DRAFT, PUBLISHED, ESCROWED, IN_PROGRESS, COMPLETED, FLAGGED, CANCELLED
+        DRAFT, PUBLISHED, SUBMITTED, UNDER_REVIEW, CHANGES_REQUESTED, APPROVED, REJECTED, FUNDED, ESCROWED, ACTIVE, IN_PROGRESS, PAUSED, COMPLETED, FLAGGED, CANCELLED
     }
 }

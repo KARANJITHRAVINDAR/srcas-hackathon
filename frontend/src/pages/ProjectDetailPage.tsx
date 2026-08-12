@@ -299,11 +299,21 @@ export default function ProjectDetailPage() {
         }
     };
 
+    const handleReviewProposal = async (status: string) => {
+        try {
+            await axios.patch(`http://localhost:8081/api/v1/projects/${id}/status`, { status });
+            alert(`Project ${status} successfully!`);
+            window.location.reload();
+        } catch (err: any) {
+            alert(err.response?.data?.message || 'Failed to update project status');
+        }
+    };
+
     if (loading) return <div className="p-8 flex items-center justify-center min-h-screen text-slate-500 font-bold">Loading project details...</div>;
     if (!project) return <div className="p-8 text-center text-red-500 font-bold">Project not found.</div>;
 
     const allMilestonesLocked = milestones.length > 0 && milestones.every(m => m.status === 'LOCKED');
-    const computedNegotiatedBudget = milestones.reduce((sum, m) => sum + m.amountAllocated, 0);
+    const computedNegotiatedBudget = milestones.reduce((sum, m) => sum + (m.amountAllocated || 0), 0);
 
     return (
         <div className="min-h-screen bg-slate-50 p-6 lg:p-8">

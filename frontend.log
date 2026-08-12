@@ -10,3 +10,206 @@ Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
 
   ➜  Local:   http://localhost:5173/
   ➜  Network: use --host to expose
+3:29:36 pm [vite] (client) hmr update /src/index.css
+3:29:36 pm [vite] (client) hmr update /src/App.tsx, /src/index.css
+3:29:36 pm [vite] (client) hmr update /src/components/DashboardLayout.tsx, /src/index.css
+3:29:36 pm [vite] (client) hmr update /src/pages/NgoDashboardPage.tsx, /src/index.css
+3:29:36 pm [vite] (client) hmr update /src/pages/NgoProjectsPage.tsx, /src/index.css
+3:29:36 pm [vite] (client) hmr update /src/pages/ProjectDetailPage.tsx, /src/index.css
+3:29:36 pm [vite] (client) hmr update /src/pages/NgoProjectsPage.tsx, /src/index.css
+3:29:36 pm [vite] (client) Pre-transform error: Transform failed with 1 error:
+
+[31m[PARSE_ERROR] [0mEncountered diff marker
+     [38;5;246m╭[0m[38;5;246m─[0m[38;5;246m[[0m src/pages/ProjectDetailPage.tsx:302:1 [38;5;246m][0m
+     [38;5;246m│[0m
+ [38;5;246m302 │[0m <<<<<<<[38;5;249m [0m[38;5;249mH[0m[38;5;249mE[0m[38;5;249mA[0m[38;5;249mD[0m
+ [38;5;240m    │[0m ───┬───  
+ [38;5;240m    │[0m    ╰───── between this marker and `=======` is the code that we're merging into
+ [38;5;240m    │[0m 
+ [38;5;246m308 │[0m =======
+ [38;5;240m    │[0m ───┬───  
+ [38;5;240m    │[0m    ╰───── between this marker and `>>>>>>>` is the incoming code
+ [38;5;240m    │[0m 
+ [38;5;240m    │[0m [38;5;115mHelp[0m: Conflict markers indicate that a merge was started but could not be completed due to merge conflicts.
+ [38;5;240m    │[0m       To resolve a conflict, keep only the code you want and then delete the lines containing conflict markers.
+ [38;5;240m    │[0m       If you're having merge conflicts after pulling new code, the top section is the code you already had and the bottom section is the remote code.
+ [38;5;240m    │[0m       If you're in the middle of a rebase, the top section is the code being rebased onto and the bottom section is the code coming from the current commit being rebased.
+ [38;5;240m    │[0m       If you have nested conflicts, resolve the outermost conflict first.
+[38;5;246m─────╯[0m
+
+  Plugin: vite:oxc
+  File: /home/froxy/Documents/srmcas/Transparency-Chain/frontend/src/pages/ProjectDetailPage.tsx
+3:29:36 pm [vite] Internal server error: Transform failed with 1 error:
+
+[31m[PARSE_ERROR] [0mEncountered diff marker
+     [38;5;246m╭[0m[38;5;246m─[0m[38;5;246m[[0m src/pages/ProjectDetailPage.tsx:302:1 [38;5;246m][0m
+     [38;5;246m│[0m
+ [38;5;246m302 │[0m <<<<<<<[38;5;249m [0m[38;5;249mH[0m[38;5;249mE[0m[38;5;249mA[0m[38;5;249mD[0m
+ [38;5;240m    │[0m ───┬───  
+ [38;5;240m    │[0m    ╰───── between this marker and `=======` is the code that we're merging into
+ [38;5;240m    │[0m 
+ [38;5;246m308 │[0m =======
+ [38;5;240m    │[0m ───┬───  
+ [38;5;240m    │[0m    ╰───── between this marker and `>>>>>>>` is the incoming code
+ [38;5;240m    │[0m 
+ [38;5;240m    │[0m [38;5;115mHelp[0m: Conflict markers indicate that a merge was started but could not be completed due to merge conflicts.
+ [38;5;240m    │[0m       To resolve a conflict, keep only the code you want and then delete the lines containing conflict markers.
+ [38;5;240m    │[0m       If you're having merge conflicts after pulling new code, the top section is the code you already had and the bottom section is the remote code.
+ [38;5;240m    │[0m       If you're in the middle of a rebase, the top section is the code being rebased onto and the bottom section is the code coming from the current commit being rebased.
+ [38;5;240m    │[0m       If you have nested conflicts, resolve the outermost conflict first.
+[38;5;246m─────╯[0m
+
+  Plugin: vite:oxc
+  File: /home/froxy/Documents/srmcas/Transparency-Chain/frontend/src/pages/ProjectDetailPage.tsx
+      at transformWithOxc (file:///home/froxy/Documents/srmcas/Transparency-Chain/frontend/node_modules/vite/dist/node/chunks/node.js:4097:19)
+      at TransformPluginContext.transform (file:///home/froxy/Documents/srmcas/Transparency-Chain/frontend/node_modules/vite/dist/node/chunks/node.js:4168:26)
+      at EnvironmentPluginContainer.transform (file:///home/froxy/Documents/srmcas/Transparency-Chain/frontend/node_modules/vite/dist/node/chunks/node.js:30851:51)
+      at async loadAndTransform (file:///home/froxy/Documents/srmcas/Transparency-Chain/frontend/node_modules/vite/dist/node/chunks/node.js:20619:26)
+      at async viteTransformMiddleware (file:///home/froxy/Documents/srmcas/Transparency-Chain/frontend/node_modules/vite/dist/node/chunks/node.js:25142:20)
+3:29:36 pm [vite] (client) [console.error] [vite] Failed to reload /src/App.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above)
+3:29:36 pm [vite] (client) Pre-transform error: Failed to resolve import "react-qr-code" from "src/pages/components/ProjectBeneficiariesTab.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /home/froxy/Documents/srmcas/Transparency-Chain/frontend/src/pages/components/ProjectBeneficiariesTab.tsx:4:19
+  2  |  import axios from "axios";
+  3  |  import { FileText, Link, QrCode, CheckCircle, AlertCircle, Clock, BarChart3, Edit, Share2, Activity, Play } from "luc...
+  4  |  import QRCode from "react-qr-code";
+     |                      ^
+  5  |  var _jsxFileName = "/home/froxy/Documents/srmcas/Transparency-Chain/frontend/src/pages/components/ProjectBeneficiarie...
+  6  |  import { jsxDEV as _jsxDEV, Fragment as _Fragment } from "react/jsx-dev-runtime";
+3:29:36 pm [vite] (client) Pre-transform error: Failed to resolve import "react-qr-code" from "src/pages/components/ProjectBeneficiariesTab.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /home/froxy/Documents/srmcas/Transparency-Chain/frontend/src/pages/components/ProjectBeneficiariesTab.tsx:4:19
+  2  |  import axios from "axios";
+  3  |  import { FileText, Link, QrCode, CheckCircle, AlertCircle, Clock, BarChart3, Edit, Share2, Activity, Play } from "luc...
+  4  |  import QRCode from "react-qr-code";
+     |                      ^
+  5  |  var _jsxFileName = "/home/froxy/Documents/srmcas/Transparency-Chain/frontend/src/pages/components/ProjectBeneficiarie...
+  6  |  import { jsxDEV as _jsxDEV, Fragment as _Fragment } from "react/jsx-dev-runtime";
+3:29:36 pm [vite] Internal server error: Failed to resolve import "react-qr-code" from "src/pages/components/ProjectBeneficiariesTab.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /home/froxy/Documents/srmcas/Transparency-Chain/frontend/src/pages/components/ProjectBeneficiariesTab.tsx:4:19
+  2  |  import axios from "axios";
+  3  |  import { FileText, Link, QrCode, CheckCircle, AlertCircle, Clock, BarChart3, Edit, Share2, Activity, Play } from "luc...
+  4  |  import QRCode from "react-qr-code";
+     |                      ^
+  5  |  var _jsxFileName = "/home/froxy/Documents/srmcas/Transparency-Chain/frontend/src/pages/components/ProjectBeneficiarie...
+  6  |  import { jsxDEV as _jsxDEV, Fragment as _Fragment } from "react/jsx-dev-runtime";
+      at TransformPluginContext._formatLog (file:///home/froxy/Documents/srmcas/Transparency-Chain/frontend/node_modules/vite/dist/node/chunks/node.js:31066:39)
+      at TransformPluginContext.error (file:///home/froxy/Documents/srmcas/Transparency-Chain/frontend/node_modules/vite/dist/node/chunks/node.js:31063:14)
+      at normalizeUrl (file:///home/froxy/Documents/srmcas/Transparency-Chain/frontend/node_modules/vite/dist/node/chunks/node.js:28008:18)
+      at async file:///home/froxy/Documents/srmcas/Transparency-Chain/frontend/node_modules/vite/dist/node/chunks/node.js:28076:30
+      at async Promise.all (index 3)
+      at async TransformPluginContext.transform (file:///home/froxy/Documents/srmcas/Transparency-Chain/frontend/node_modules/vite/dist/node/chunks/node.js:28044:4)
+      at async EnvironmentPluginContainer.transform (file:///home/froxy/Documents/srmcas/Transparency-Chain/frontend/node_modules/vite/dist/node/chunks/node.js:30851:14)
+      at async loadAndTransform (file:///home/froxy/Documents/srmcas/Transparency-Chain/frontend/node_modules/vite/dist/node/chunks/node.js:20619:26)
+      at async viteTransformMiddleware (file:///home/froxy/Documents/srmcas/Transparency-Chain/frontend/node_modules/vite/dist/node/chunks/node.js:25142:20)
+3:29:36 pm [vite] (client) Pre-transform error: Failed to resolve import "react-qr-code" from "src/pages/components/ProjectBeneficiariesTab.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /home/froxy/Documents/srmcas/Transparency-Chain/frontend/src/pages/components/ProjectBeneficiariesTab.tsx:4:19
+  2  |  import axios from "axios";
+  3  |  import { FileText, Link, QrCode, CheckCircle, AlertCircle, Clock, BarChart3, Edit, Share2, Activity, Play } from "luc...
+  4  |  import QRCode from "react-qr-code";
+     |                      ^
+  5  |  var _jsxFileName = "/home/froxy/Documents/srmcas/Transparency-Chain/frontend/src/pages/components/ProjectBeneficiarie...
+  6  |  import { jsxDEV as _jsxDEV, Fragment as _Fragment } from "react/jsx-dev-runtime";
+3:29:36 pm [vite] (client) [console.error] [vite] Failed to reload /src/pages/ProjectDetailPage.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above)
+3:29:36 pm [vite] (client) Pre-transform error: Failed to resolve import "react-qr-code" from "src/pages/components/ProjectBeneficiariesTab.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /home/froxy/Documents/srmcas/Transparency-Chain/frontend/src/pages/components/ProjectBeneficiariesTab.tsx:4:19
+  2  |  import axios from "axios";
+  3  |  import { FileText, Link, QrCode, CheckCircle, AlertCircle, Clock, BarChart3, Edit, Share2, Activity, Play } from "luc...
+  4  |  import QRCode from "react-qr-code";
+     |                      ^
+  5  |  var _jsxFileName = "/home/froxy/Documents/srmcas/Transparency-Chain/frontend/src/pages/components/ProjectBeneficiarie...
+  6  |  import { jsxDEV as _jsxDEV, Fragment as _Fragment } from "react/jsx-dev-runtime";
+3:29:36 pm [vite] (client) Pre-transform error: Failed to resolve import "react-qr-code" from "src/pages/components/ProjectBeneficiariesTab.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /home/froxy/Documents/srmcas/Transparency-Chain/frontend/src/pages/components/ProjectBeneficiariesTab.tsx:4:19
+  2  |  import axios from "axios";
+  3  |  import { FileText, Link, QrCode, CheckCircle, AlertCircle, Clock, BarChart3, Edit, Share2, Activity, Play } from "luc...
+  4  |  import QRCode from "react-qr-code";
+     |                      ^
+  5  |  var _jsxFileName = "/home/froxy/Documents/srmcas/Transparency-Chain/frontend/src/pages/components/ProjectBeneficiarie...
+  6  |  import { jsxDEV as _jsxDEV, Fragment as _Fragment } from "react/jsx-dev-runtime";
+3:29:36 pm [vite] (client) Pre-transform error: Failed to resolve import "react-qr-code" from "src/pages/components/ProjectBeneficiariesTab.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /home/froxy/Documents/srmcas/Transparency-Chain/frontend/src/pages/components/ProjectBeneficiariesTab.tsx:4:19
+  2  |  import axios from "axios";
+  3  |  import { FileText, Link, QrCode, CheckCircle, AlertCircle, Clock, BarChart3, Edit, Share2, Activity, Play } from "luc...
+  4  |  import QRCode from "react-qr-code";
+     |                      ^
+  5  |  var _jsxFileName = "/home/froxy/Documents/srmcas/Transparency-Chain/frontend/src/pages/components/ProjectBeneficiarie...
+  6  |  import { jsxDEV as _jsxDEV, Fragment as _Fragment } from "react/jsx-dev-runtime";
+3:29:36 pm [vite] (client) Pre-transform error: Failed to resolve import "react-qr-code" from "src/pages/components/ProjectBeneficiariesTab.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /home/froxy/Documents/srmcas/Transparency-Chain/frontend/src/pages/components/ProjectBeneficiariesTab.tsx:4:19
+  2  |  import axios from "axios";
+  3  |  import { FileText, Link, QrCode, CheckCircle, AlertCircle, Clock, BarChart3, Edit, Share2, Activity, Play } from "luc...
+  4  |  import QRCode from "react-qr-code";
+     |                      ^
+  5  |  var _jsxFileName = "/home/froxy/Documents/srmcas/Transparency-Chain/frontend/src/pages/components/ProjectBeneficiarie...
+  6  |  import { jsxDEV as _jsxDEV, Fragment as _Fragment } from "react/jsx-dev-runtime";
+3:29:36 pm [vite] (client) Pre-transform error: Failed to resolve import "react-qr-code" from "src/pages/components/ProjectBeneficiariesTab.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /home/froxy/Documents/srmcas/Transparency-Chain/frontend/src/pages/components/ProjectBeneficiariesTab.tsx:4:19
+  2  |  import axios from "axios";
+  3  |  import { FileText, Link, QrCode, CheckCircle, AlertCircle, Clock, BarChart3, Edit, Share2, Activity, Play } from "luc...
+  4  |  import QRCode from "react-qr-code";
+     |                      ^
+  5  |  var _jsxFileName = "/home/froxy/Documents/srmcas/Transparency-Chain/frontend/src/pages/components/ProjectBeneficiarie...
+  6  |  import { jsxDEV as _jsxDEV, Fragment as _Fragment } from "react/jsx-dev-runtime";
+3:29:36 pm [vite] (client) Pre-transform error: Failed to resolve import "react-qr-code" from "src/pages/components/ProjectBeneficiariesTab.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /home/froxy/Documents/srmcas/Transparency-Chain/frontend/src/pages/components/ProjectBeneficiariesTab.tsx:4:19
+  2  |  import axios from "axios";
+  3  |  import { FileText, Link, QrCode, CheckCircle, AlertCircle, Clock, BarChart3, Edit, Share2, Activity, Play } from "luc...
+  4  |  import QRCode from "react-qr-code";
+     |                      ^
+  5  |  var _jsxFileName = "/home/froxy/Documents/srmcas/Transparency-Chain/frontend/src/pages/components/ProjectBeneficiarie...
+  6  |  import { jsxDEV as _jsxDEV, Fragment as _Fragment } from "react/jsx-dev-runtime";
+3:29:36 pm [vite] (client) Pre-transform error: Failed to resolve import "react-qr-code" from "src/pages/components/ProjectBeneficiariesTab.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /home/froxy/Documents/srmcas/Transparency-Chain/frontend/src/pages/components/ProjectBeneficiariesTab.tsx:4:19
+  2  |  import axios from "axios";
+  3  |  import { FileText, Link, QrCode, CheckCircle, AlertCircle, Clock, BarChart3, Edit, Share2, Activity, Play } from "luc...
+  4  |  import QRCode from "react-qr-code";
+     |                      ^
+  5  |  var _jsxFileName = "/home/froxy/Documents/srmcas/Transparency-Chain/frontend/src/pages/components/ProjectBeneficiarie...
+  6  |  import { jsxDEV as _jsxDEV, Fragment as _Fragment } from "react/jsx-dev-runtime";
+3:29:36 pm [vite] (client) Pre-transform error: Failed to resolve import "react-qr-code" from "src/pages/components/ProjectBeneficiariesTab.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /home/froxy/Documents/srmcas/Transparency-Chain/frontend/src/pages/components/ProjectBeneficiariesTab.tsx:4:19
+  2  |  import axios from "axios";
+  3  |  import { FileText, Link, QrCode, CheckCircle, AlertCircle, Clock, BarChart3, Edit, Share2, Activity, Play } from "luc...
+  4  |  import QRCode from "react-qr-code";
+     |                      ^
+  5  |  var _jsxFileName = "/home/froxy/Documents/srmcas/Transparency-Chain/frontend/src/pages/components/ProjectBeneficiarie...
+  6  |  import { jsxDEV as _jsxDEV, Fragment as _Fragment } from "react/jsx-dev-runtime";
+3:29:37 pm [vite] (client) Pre-transform error: Failed to resolve import "react-qr-code" from "src/pages/components/ProjectBeneficiariesTab.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /home/froxy/Documents/srmcas/Transparency-Chain/frontend/src/pages/components/ProjectBeneficiariesTab.tsx:4:19
+  2  |  import axios from "axios";
+  3  |  import { FileText, Link, QrCode, CheckCircle, AlertCircle, Clock, BarChart3, Edit, Share2, Activity, Play } from "luc...
+  4  |  import QRCode from "react-qr-code";
+     |                      ^
+  5  |  var _jsxFileName = "/home/froxy/Documents/srmcas/Transparency-Chain/frontend/src/pages/components/ProjectBeneficiarie...
+  6  |  import { jsxDEV as _jsxDEV, Fragment as _Fragment } from "react/jsx-dev-runtime";
+3:29:37 pm [vite] (client) Pre-transform error: Failed to resolve import "react-qr-code" from "src/pages/components/ProjectBeneficiariesTab.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /home/froxy/Documents/srmcas/Transparency-Chain/frontend/src/pages/components/ProjectBeneficiariesTab.tsx:4:19
+  2  |  import axios from "axios";
+  3  |  import { FileText, Link, QrCode, CheckCircle, AlertCircle, Clock, BarChart3, Edit, Share2, Activity, Play } from "luc...
+  4  |  import QRCode from "react-qr-code";
+     |                      ^
+  5  |  var _jsxFileName = "/home/froxy/Documents/srmcas/Transparency-Chain/frontend/src/pages/components/ProjectBeneficiarie...
+  6  |  import { jsxDEV as _jsxDEV, Fragment as _Fragment } from "react/jsx-dev-runtime";
+3:29:37 pm [vite] (client) Pre-transform error: Failed to resolve import "react-qr-code" from "src/pages/components/ProjectBeneficiariesTab.tsx". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /home/froxy/Documents/srmcas/Transparency-Chain/frontend/src/pages/components/ProjectBeneficiariesTab.tsx:4:19
+  2  |  import axios from "axios";
+  3  |  import { FileText, Link, QrCode, CheckCircle, AlertCircle, Clock, BarChart3, Edit, Share2, Activity, Play } from "luc...
+  4  |  import QRCode from "react-qr-code";
+     |                      ^
+  5  |  var _jsxFileName = "/home/froxy/Documents/srmcas/Transparency-Chain/frontend/src/pages/components/ProjectBeneficiarie...
+  6  |  import { jsxDEV as _jsxDEV, Fragment as _Fragment } from "react/jsx-dev-runtime";
+3:30:44 pm [vite] (client) hmr update /src/pages/ProjectDetailPage.tsx, /src/index.css

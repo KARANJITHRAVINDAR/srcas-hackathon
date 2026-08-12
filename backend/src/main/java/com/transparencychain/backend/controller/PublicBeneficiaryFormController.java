@@ -1,0 +1,103 @@
+package com.transparencychain.backend.controller;
+
+import com.transparencychain.backend.model.*;
+import com.transparencychain.backend.repository.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.*;
+
+@CrossOrigin(origins = "*", maxAge = 3600)
+@RestController
+@RequestMapping("/api/v1/public/beneficiary-forms")
+public class PublicBeneficiaryFormController {
+
+    @Autowired
+    private BeneficiaryVerificationFormRepository formRepository;
+
+    @Autowired
+    private BeneficiaryFormResponseRepository responseRepository;
+    
+    @Autowired
+    private BeneficiaryFormAnswerRepository answerRepository;
+    
+    @Autowired
+    private BeneficiaryFormQuestionRepository questionRepository;
+
+    @GetMapping("/{secureToken}")
+    public ResponseEntity<?> getForm(@PathVariable String secureToken) {
+        BeneficiaryVerificationForm form = formRepository.findByShareToken(secureToken).orElse(null);
+        if (form == null || form.getStatus() != BeneficiaryVerificationForm.FormStatus.ACTIVE) {
+            return ResponseEntity.badRequest().body("Form is not active or does not exist.");
+        }
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("formId", form.getId());
+        response.put("title", form.getTitle());
+        response.put("description", form.getDescription());
+        response.put("projectTitle", form.getProject().getTitle());
+        response.put("projectLocation", form.getProject().getGeography());
+
+        List<Map<String, Object>> qList = new ArrayList<>();
+        for (BeneficiaryFormQuestion q : form.getQuestions()) {
+            Map<String, Object> qMap = new HashMap<>();
+            qMap.put("id", q.getId());
+            qMap.put("text", q.getQuestionText());
+            qMap.put("type", q.getQuestionType().name());
+            qMap.put("required", q.isRequired());
+            qList.add(qMap);
+        }
+        response.put("questions", qList);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/{secureToken}/responses")
+    public ResponseEntity<?> submitResponse(@PathVariable String secureToken, @RequestBody Map<String, Object> payload) {
+        BeneficiaryVerificationForm form = formRepository.findByShareToken(secureToken).orElseThrow();
+        if (form.getStatus() != BeneficiaryVerificationForm.FormStatus.ACTIVE) {
+            return ResponseEntity.badRequest().body("Form is closed.");
+        }
+
+        BeneficiaryFormResponse response = new BeneficiaryFormResponse();
+        response.setForm(form);
+        
+        // Parse answers
+        List<Map<String, Object>> answers = (List<Map<String, Object>>) payload.get("answers");
+        boolean hasNo = false;
+        Integer rating = null;
+        String feedback = null;
+
+        response = responseRepository.save(response); // Save first to get ID
+        
+        for (Map<String, Object> ans : answers) {
+            UUID qId = UUID.fromString((String) ans.get("questionId"));
+            String answerVal = (String) ans.get("answer");
+            
+            BeneficiaryFormQuestion q = questionRepository.findById(qId).orElse(null);
+            if (q != null) {
+                BeneficiaryFormAnswer formAnswer = new BeneficiaryFormAnswer();
+                formAnswer.setResponse(response);
+                formAnswer.setQuestion(q);
+                formAnswer.setAnswerText(answerVal);
+                answerRepository.save(formAnswer);
+
+                if (q.getQuestionType() == BeneficiaryFormQuestion.QuestionType.YES_NO) {
+                    if ("NO".equalsIgnoreCase(answerVal)) hasNo = true;
+                } else if (q.getQuestionType() == BeneficiaryFormQuestion.QuestionType.RATING) {
+                    try { rating = Integer.parseInt(answerVal); } catch (Exception e) {}
+                } else if (q.getQuestionType() == BeneficiaryFormQuestion.QuestionType.SHORT_TEXT) {
+                    feedback = answerVal;
+                }
+            }
+        }
+
+        response.setOverallResponse(hasNo ? BeneficiaryFormResponse.OverallResponse.NO : BeneficiaryFormResponse.OverallResponse.YES);
+        response.setRating(rating);
+        response.setFeedback(feedback);
+        responseRepository.save(response);
+
+        return ResponseEntity.ok(Map.of("message", "Response submitted successfully"));
+    }
+}

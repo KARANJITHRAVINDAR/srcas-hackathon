@@ -7,4 +7,5 @@ import java.util.UUID;
 
 public interface MilestoneRepository extends JpaRepository<Milestone, UUID> {
     List<Milestone> findByProjectId(UUID projectId);
+    List<Milestone> findByProjectIdOrderByDueDateAsc(UUID projectId);
 }

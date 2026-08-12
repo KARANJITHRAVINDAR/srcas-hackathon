@@ -14,8 +14,12 @@ public class ProofSubmission {
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "milestone_id", nullable = false)
+    @JoinColumn(name = "milestone_id") // changed to nullable = true since it could be tied to a task directly instead of milestone directly, though wait, we can just keep milestone_id and add task_id.
     private Milestone milestone;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "milestone_task_id")
+    private MilestoneTask milestoneTask;
 
     @Column(nullable = false)
     private String fileUrl; // URL to S3/IPFS

@@ -30,7 +30,14 @@ public class Milestone {
     @Column(precision = 15, scale = 2)
     private BigDecimal amountAllocated;
 
+    @Column(precision = 15, scale = 2)
+    private BigDecimal releasedAmount = BigDecimal.ZERO;
+
+    @Column(precision = 15, scale = 2)
+    private BigDecimal additionalAllocatedAmount = BigDecimal.ZERO;
+
     @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "VARCHAR(255)")
     private MilestoneStatus status;
 
     private java.time.LocalDate dueDate;
@@ -54,21 +61,6 @@ public class Milestone {
     private UUID currentVersionId;
 
     public enum MilestoneStatus {
-        // Pre-commitment lifecycle
-        PENDING,
-        MODIFIED,          // Org has an open change request on this milestone
-        LOCKED,            // Both sides have accepted — budget is frozen
-        // Post-commitment lifecycle (existing + extended)
-        IN_PROGRESS,
-        EVIDENCE_SUBMITTED,
-        TICKET_RAISED,
-        UNDER_REVIEW,
-        ACCEPTED,
-        REJECTED,
-        DISBURSED,
-        CLOSED,
-        // Legacy statuses (kept for backward-compat with existing data)
-        IN_REVIEW,
-        VERIFIED
+        PENDING, MODIFIED, LOCKED, AVAILABLE, IN_PROGRESS, EVIDENCE_SUBMITTED, TICKET_RAISED, UNDER_REVIEW, READY_FOR_APPROVAL, AWAITING_FUNDER_APPROVAL, CHANGES_REQUIRED, ACCEPTED, REJECTED, DISBURSED, CLOSED, IN_REVIEW, VERIFIED, COMPLETED
     }
 }

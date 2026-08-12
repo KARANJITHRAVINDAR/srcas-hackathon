@@ -34,8 +34,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     const ngoLinks = [
         { name: 'Dashboard', path: '/ngo/dashboard', icon: <LayoutDashboard size={20} /> },
         { name: 'My Projects', path: '/ngo/projects', icon: <FolderKanban size={20} /> },
-        { name: 'Milestones', path: '/ngo/milestones', icon: <CheckSquare size={20} /> },
-        { name: 'Submit Evidence', path: '/ngo/evidence/new', icon: <FileUp size={20} /> },
+        { name: 'Create Project', path: '/ngo/projects/new', icon: <PlusCircle size={20} /> },
         { name: 'Expenses', path: '/ngo/expenses', icon: <Wallet size={20} /> },
         { name: 'Verification', path: '/ngo/verification', icon: <ShieldCheck size={20} /> },
         { name: 'Funds', path: '/ngo/funds', icon: <Database size={20} /> },
