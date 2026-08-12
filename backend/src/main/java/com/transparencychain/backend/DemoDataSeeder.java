@@ -7,18 +7,14 @@ import com.transparencychain.backend.model.Role;
 import com.transparencychain.backend.model.NgoProfile;
 import com.transparencychain.backend.model.FunderProfile;
 import com.transparencychain.backend.model.Milestone;
-import com.transparencychain.backend.repository.ProjectRepository;
-import com.transparencychain.backend.repository.UserRepository;
-import com.transparencychain.backend.repository.NgoProfileRepository;
-import com.transparencychain.backend.repository.FunderProfileRepository;
-import com.transparencychain.backend.repository.MilestoneRepository;
-import com.transparencychain.backend.model.MilestoneTask;
-import com.transparencychain.backend.repository.MilestoneTaskRepository;
+import com.transparencychain.backend.model.*;
+import com.transparencychain.backend.repository.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Component
@@ -29,15 +25,37 @@ public class DemoDataSeeder implements CommandLineRunner {
     private final ProjectRepository projectRepository;
     private final FunderProfileRepository funderProfileRepository;
     private final MilestoneRepository milestoneRepository;
-    private final MilestoneTaskRepository milestoneTaskRepository;
 
-    public DemoDataSeeder(UserRepository userRepository, NgoProfileRepository ngoProfileRepository, ProjectRepository projectRepository, FunderProfileRepository funderProfileRepository, MilestoneRepository milestoneRepository, MilestoneTaskRepository milestoneTaskRepository) {
+    @Autowired
+    private MilestoneTaskRepository milestoneTaskRepository;
+
+    @Autowired
+    private ProjectImpactKpiRepository impactKpiRepository;
+
+    @Autowired
+    private ImpactReportRepository impactReportRepository;
+
+    @Autowired
+    private ImpactVerificationRepository impactVerificationRepository;
+
+    @Autowired
+    private BeneficiaryVerificationFormRepository formRepository;
+
+    @Autowired
+    private BeneficiaryFormQuestionRepository questionRepository;
+
+    @Autowired
+    private BeneficiaryFormResponseRepository responseRepository;
+
+    @Autowired
+    private BeneficiaryFormAnswerRepository answerRepository;
+
+    public DemoDataSeeder(UserRepository userRepository, NgoProfileRepository ngoProfileRepository, ProjectRepository projectRepository, FunderProfileRepository funderProfileRepository, MilestoneRepository milestoneRepository) {
         this.userRepository = userRepository;
         this.ngoProfileRepository = ngoProfileRepository;
         this.projectRepository = projectRepository;
         this.funderProfileRepository = funderProfileRepository;
         this.milestoneRepository = milestoneRepository;
-        this.milestoneTaskRepository = milestoneTaskRepository;
     }
 
     @Override
@@ -60,11 +78,9 @@ public class DemoDataSeeder implements CommandLineRunner {
         if (userOpt.isPresent()) {
             User user = userOpt.get();
             System.out.println("Found user for seeding: " + targetEmail);
-            // Force update the password to ensure it's a valid BCrypt hash for "123456"
             user.setPasswordHash("$2a$10$K.6Kc3Gq0T4CCuaoRGRRdORR3yu2FeCSZtejPPg/tg/2VJGCbd3xa");
             userRepository.save(user);
             
-            // Check if NgoProfile exists
             NgoProfile ngoProfile = ngoProfileRepository.findByUserId(user.getId())
                 .orElseGet(() -> {
                     System.out.println("Creating NGO Profile for demo user.");
@@ -76,12 +92,11 @@ public class DemoDataSeeder implements CommandLineRunner {
                     return ngoProfileRepository.save(newProfile);
                 });
 
-            // Create or get a FunderProfile
             FunderProfile funder = funderProfileRepository.findAll().stream().findFirst().orElseGet(() -> {
                 System.out.println("Creating dummy Funder Profile for demo.");
                 User funderUser = new User();
                 funderUser.setEmail("dummyfunder@demo.com");
-                funderUser.setPasswordHash("$2a$10$K.6Kc3Gq0T4CCuaoRGRRdORR3yu2FeCSZtejPPg/tg/2VJGCbd3xa"); // BCrypt for "123456"
+                funderUser.setPasswordHash("$2a$10$K.6Kc3Gq0T4CCuaoRGRRdORR3yu2FeCSZtejPPg/tg/2VJGCbd3xa"); 
                 funderUser.setRole(Role.FUNDER);
                 funderUser.setFullName("Demo Funder");
                 funderUser.setVerified(true);
@@ -93,12 +108,10 @@ public class DemoDataSeeder implements CommandLineRunner {
                 return funderProfileRepository.save(newFunder);
             });
 
-            // Force update funder password as well just in case
             User funderUser = funder.getUser();
             funderUser.setPasswordHash("$2a$10$K.6Kc3Gq0T4CCuaoRGRRdORR3yu2FeCSZtejPPg/tg/2VJGCbd3xa");
             userRepository.save(funderUser);
 
-            // Create some dummy projects assigned to this NGO
             if (projectRepository.findByNgoId(ngoProfile.getId()).isEmpty()) {
                 System.out.println("Seeding dummy projects...");
 
@@ -109,7 +122,7 @@ public class DemoDataSeeder implements CommandLineRunner {
                 project1.setSdgTarget("6.1 Universal and equitable access to safe and affordable drinking water");
                 project1.setTotalBudget(BigDecimal.valueOf(500000.0));
                 project1.setGeography("Tamil Nadu, India");
-                project1.setExpectedBeneficiaries(1500);
+                project1.setExpectedBeneficiaries(500);
                 project1.setProjectDuration("12 Months");
                 project1.setImpactKpi("Number of borewells installed");
                 project1.setLatitude(11.0168);
@@ -221,6 +234,135 @@ public class DemoDataSeeder implements CommandLineRunner {
             }
         } else {
             System.out.println("Target user not found: " + targetEmail);
+        }
+
+        // --- Safe Impact Seeding for existing Project 1 ---
+        Optional<Project> p1Opt = projectRepository.findAll().stream().filter(p -> p.getTitle().equals("Clean Water Initiative - Rural TN")).findFirst();
+        if (p1Opt.isPresent()) {
+            Project p1 = p1Opt.get();
+            if (impactKpiRepository.findByProjectId(p1.getId()).isEmpty()) {
+                System.out.println("Seeding Impact KPIs for Project 1...");
+                
+                ProjectImpactKpi kpi1 = new ProjectImpactKpi();
+                kpi1.setProject(p1);
+                kpi1.setSdgGoal(Project.SdgGoal.SDG6);
+                kpi1.setKpiName("Clean Water Access");
+                kpi1.setUnit("People");
+                kpi1.setTargetValue(500.0);
+                impactKpiRepository.save(kpi1);
+
+                ProjectImpactKpi kpi2 = new ProjectImpactKpi();
+                kpi2.setProject(p1);
+                kpi2.setSdgGoal(Project.SdgGoal.SDG6);
+                kpi2.setKpiName("Wells Completed");
+                kpi2.setUnit("Wells");
+                kpi2.setTargetValue(2.0);
+                impactKpiRepository.save(kpi2);
+
+                ProjectImpactKpi kpi3 = new ProjectImpactKpi();
+                kpi3.setProject(p1);
+                kpi3.setSdgGoal(Project.SdgGoal.SDG6);
+                kpi3.setKpiName("Water Saved");
+                kpi3.setUnit("Liters");
+                kpi3.setTargetValue(15000.0);
+                impactKpiRepository.save(kpi3);
+
+                ImpactReport rep1 = new ImpactReport();
+                rep1.setKpi(kpi1);
+                rep1.setReportingPeriod("August 2026");
+                rep1.setReportedValue(450.0);
+                rep1.setDescription("Water access provided to 450 individuals.");
+                rep1.setStatus(ImpactReport.ReportStatus.VERIFIED);
+                impactReportRepository.save(rep1);
+
+                ImpactVerification ver1 = new ImpactVerification();
+                ver1.setImpactReport(rep1);
+                ver1.setVerifiedValue(420.0);
+                ver1.setVerificationMethod(ImpactVerification.VerificationMethod.FIELD_OFFICER);
+                ver1.setComments("420 beneficiaries physically verified.");
+                impactVerificationRepository.save(ver1);
+
+                ImpactReport rep2 = new ImpactReport();
+                rep2.setKpi(kpi2);
+                rep2.setReportingPeriod("August 2026");
+                rep2.setReportedValue(2.0);
+                rep2.setDescription("Both wells fully constructed.");
+                rep2.setStatus(ImpactReport.ReportStatus.VERIFIED);
+                impactReportRepository.save(rep2);
+
+                ImpactVerification ver2 = new ImpactVerification();
+                ver2.setImpactReport(rep2);
+                ver2.setVerifiedValue(2.0);
+                ver2.setVerificationMethod(ImpactVerification.VerificationMethod.EVIDENCE);
+                impactVerificationRepository.save(ver2);
+                
+                System.out.println("Impact data seeded successfully.");
+            }
+
+            // --- Safe Beneficiary Form Seeding ---
+            if (formRepository.findByProjectIdOrderByCreatedAtDesc(p1.getId()).isEmpty()) {
+                System.out.println("Seeding Beneficiary Verification Form for Project 1...");
+                
+                BeneficiaryVerificationForm form = new BeneficiaryVerificationForm();
+                form.setProject(p1);
+                form.setTitle("Final Impact Verification");
+                form.setDescription("Please help us verify the impact of " + p1.getTitle());
+                form.setStatus(BeneficiaryVerificationForm.FormStatus.ACTIVE);
+                form.setTargetResponses(p1.getExpectedBeneficiaries());
+                form.setMinimumResponsePercentage(20);
+                form.setMinimumPositivePercentage(80);
+                form.setShareToken("demo-water-form");
+                form.setPublishedAt(LocalDateTime.now().minusDays(2));
+                form = formRepository.save(form);
+
+                BeneficiaryFormQuestion q1 = new BeneficiaryFormQuestion();
+                q1.setForm(form);
+                q1.setQuestionText("Did the project provide the promised water facility to your area?");
+                q1.setQuestionType(BeneficiaryFormQuestion.QuestionType.YES_NO);
+                q1.setRequired(true);
+                q1.setDisplayOrder(1);
+                questionRepository.save(q1);
+
+                BeneficiaryFormQuestion q2 = new BeneficiaryFormQuestion();
+                q2.setForm(form);
+                q2.setQuestionText("Is the facility currently usable?");
+                q2.setQuestionType(BeneficiaryFormQuestion.QuestionType.YES_NO);
+                q2.setRequired(true);
+                q2.setDisplayOrder(2);
+                questionRepository.save(q2);
+
+                BeneficiaryFormQuestion q3 = new BeneficiaryFormQuestion();
+                q3.setForm(form);
+                q3.setQuestionText("How would you rate the benefit?");
+                q3.setQuestionType(BeneficiaryFormQuestion.QuestionType.RATING);
+                q3.setRequired(false);
+                q3.setDisplayOrder(3);
+                questionRepository.save(q3);
+
+                // Seed some YES responses
+                for (int i = 0; i < 74; i++) {
+                    BeneficiaryFormResponse resp = new BeneficiaryFormResponse();
+                    resp.setForm(form);
+                    resp.setOverallResponse(BeneficiaryFormResponse.OverallResponse.YES);
+                    resp.setRating(5);
+                    resp.setSubmittedAt(LocalDateTime.now().minusHours(i));
+                    resp.setStatus(BeneficiaryFormResponse.ResponseStatus.VALID);
+                    responseRepository.save(resp);
+                }
+
+                // Seed some NO responses
+                for (int i = 0; i < 8; i++) {
+                    BeneficiaryFormResponse resp = new BeneficiaryFormResponse();
+                    resp.setForm(form);
+                    resp.setOverallResponse(BeneficiaryFormResponse.OverallResponse.NO);
+                    resp.setRating(1);
+                    resp.setSubmittedAt(LocalDateTime.now().minusHours(i + 74));
+                    resp.setStatus(BeneficiaryFormResponse.ResponseStatus.VALID);
+                    responseRepository.save(resp);
+                }
+
+                System.out.println("Beneficiary Form data seeded successfully.");
+            }
         }
     }
 }

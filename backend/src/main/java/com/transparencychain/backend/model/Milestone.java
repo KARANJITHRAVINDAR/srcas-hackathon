@@ -28,6 +28,12 @@ public class Milestone {
     @Column(precision = 15, scale = 2)
     private BigDecimal amountAllocated;
 
+    @Column(precision = 15, scale = 2)
+    private BigDecimal releasedAmount = BigDecimal.ZERO;
+
+    @Column(precision = 15, scale = 2)
+    private BigDecimal additionalAllocatedAmount = BigDecimal.ZERO;
+
     @Enumerated(EnumType.STRING)
     @Column(columnDefinition = "VARCHAR(255)")
     private MilestoneStatus status;

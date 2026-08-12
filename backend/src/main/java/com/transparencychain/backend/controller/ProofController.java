@@ -137,6 +137,11 @@ public class ProofController {
         return ResponseEntity.ok(proofRepository.findByMilestoneId(milestoneId));
     }
 
+    @GetMapping("/projects/{projectId}/proofs")
+    public ResponseEntity<?> getProjectProofs(@PathVariable UUID projectId) {
+        return ResponseEntity.ok(proofRepository.findByMilestone_ProjectIdOrderBySubmittedAtDesc(projectId));
+    }
+
     @PostMapping("/evidence/{evidenceId}/analyze")
     public ResponseEntity<?> analyzeEvidence(@PathVariable UUID evidenceId, 
                                              @RequestParam("file") org.springframework.web.multipart.MultipartFile file,

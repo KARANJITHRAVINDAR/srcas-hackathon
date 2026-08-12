@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { 
     CheckCircle2, Circle, AlertCircle, PlusCircle, 
@@ -10,24 +10,34 @@ import {
 import ProjectMilestonesTab from './components/ProjectMilestonesTab';
 import ProjectExpensesTab from './components/ProjectExpensesTab';
 import ProjectVerificationTab from './components/ProjectVerificationTab';
+import ProjectEvidenceTab from './components/ProjectEvidenceTab';
+import ProjectFundsTab from './components/ProjectFundsTab';
+import ProjectImpactTab from './components/ProjectImpactTab';
+import ProjectBeneficiariesTab from './components/ProjectBeneficiariesTab';
 
 export default function NgoProjectWorkspace() {
     const { id, milestoneId } = useParams<{id: string, milestoneId?: string}>();
     const { user } = useAuth();
+    const location = useLocation();
+    const queryParams = new URLSearchParams(location.search);
+    const tabParam = queryParams.get('tab');
+
     const [project, setProject] = useState<any>(null);
     const [milestones, setMilestones] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
-    const initialTab = milestoneId ? 'MILESTONES' : 'OVERVIEW';
+    const initialTab = (tabParam as any) || (milestoneId ? 'MILESTONES' : 'OVERVIEW');
     const [activeTab, setActiveTab] = useState<'OVERVIEW' | 'MILESTONES' | 'EVIDENCE' | 'VERIFICATION' | 'EXPENSES' | 'FUNDS' | 'IMPACT' | 'BENEFICIARIES'>(initialTab);
 
     // Sync tab with URL if it changes
     useEffect(() => {
-        if (milestoneId && activeTab !== 'MILESTONES') {
+        if (milestoneId && activeTab !== 'MILESTONES' && !tabParam) {
             setActiveTab('MILESTONES');
+        } else if (tabParam && tabParam !== activeTab) {
+            setActiveTab(tabParam as any);
         }
-    }, [milestoneId]);
+    }, [milestoneId, tabParam]);
 
     useEffect(() => {
         Promise.all([
@@ -215,15 +225,21 @@ export default function NgoProjectWorkspace() {
                     <ProjectVerificationTab project={project} milestones={milestones} />
                 )}
 
-                {/* Additional tabs (EVIDENCE, FUNDS, IMPACT, BENEFICIARIES) will be wired similarly */}
-                {['EVIDENCE', 'FUNDS', 'IMPACT', 'BENEFICIARIES'].includes(activeTab) && (
-                    <div className="text-center py-20">
-                        <IconMap tab={activeTab} />
-                        <h2 className="text-xl font-bold text-[#10172A] mt-4 mb-2">{activeTab.charAt(0) + activeTab.slice(1).toLowerCase()}</h2>
-                        <p className="text-[#52627A] font-medium max-w-md mx-auto">This project-scoped view ensures all {activeTab.toLowerCase()} data is tied directly to {project.title}. Data will be loaded here from respective services.</p>
-                    </div>
+                {activeTab === 'EVIDENCE' && (
+                    <ProjectEvidenceTab project={project} />
                 )}
 
+                {activeTab === 'FUNDS' && (
+                    <ProjectFundsTab project={project} />
+                )}
+
+                {activeTab === 'IMPACT' && (
+                    <ProjectImpactTab project={project} />
+                )}
+
+                {activeTab === 'BENEFICIARIES' && (
+                    <ProjectBeneficiariesTab project={project} />
+                )}
             </div>
         </div>
     );

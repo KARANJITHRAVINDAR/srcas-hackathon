@@ -31,4 +31,7 @@ public interface ExpenseRepository extends JpaRepository<Expense, UUID> {
     BigDecimal calculateTotalSpentForNgo(@Param("ngoId") UUID ngoId);
     
     long countByNgoIdAndStatus(UUID ngoId, Expense.ExpenseStatus status);
+
+    @Query("SELECT e FROM Expense e WHERE e.ngo.id = :ngoId AND e.status IN :statuses ORDER BY e.createdAt DESC")
+    List<Expense> findByNgoIdAndStatuses(@Param("ngoId") UUID ngoId, @Param("statuses") List<Expense.ExpenseStatus> statuses);
 }
