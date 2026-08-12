@@ -11,35 +11,35 @@ WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
  =========|_|==============|___/=/_/_/_/
  :: Spring Boot ::                (v3.2.5)
 
-2026-08-12T15:07:36.949+05:30  INFO 157260 --- [demo] [           main] com.example.demo.DemoApplication         : Starting DemoApplication using Java 25.0.3-ea with PID 157260 (/home/froxy/Documents/srmcas/Transparency-Chain/backend/target/classes started by froxy in /home/froxy/Documents/srmcas/Transparency-Chain/backend)
-2026-08-12T15:07:36.950+05:30  INFO 157260 --- [demo] [           main] com.example.demo.DemoApplication         : No active profile set, falling back to 1 default profile: "default"
-2026-08-12T15:07:37.435+05:30  INFO 157260 --- [demo] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
-2026-08-12T15:07:37.513+05:30  INFO 157260 --- [demo] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 71 ms. Found 25 JPA repository interfaces.
+2026-08-12T17:03:25.150+05:30  INFO 196844 --- [demo] [           main] com.example.demo.DemoApplication         : Starting DemoApplication using Java 25.0.3-ea with PID 196844 (/home/froxy/Documents/srmcas/Transparency-Chain/backend/target/classes started by froxy in /home/froxy/Documents/srmcas/Transparency-Chain/backend)
+2026-08-12T17:03:25.152+05:30  INFO 196844 --- [demo] [           main] com.example.demo.DemoApplication         : No active profile set, falling back to 1 default profile: "default"
+2026-08-12T17:03:25.622+05:30  INFO 196844 --- [demo] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-12T17:03:25.707+05:30  INFO 196844 --- [demo] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 78 ms. Found 36 JPA repository interfaces.
 WARNING: A restricted method in java.lang.System has been called
 WARNING: java.lang.System::load has been called by org.apache.tomcat.jni.Library in an unnamed module (file:/home/froxy/.m2/repository/org/apache/tomcat/embed/tomcat-embed-core/10.1.20/tomcat-embed-core-10.1.20.jar)
 WARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module
 WARNING: Restricted methods will be blocked in a future release unless native access is enabled
 
-2026-08-12T15:07:38.267+05:30  INFO 157260 --- [demo] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8081 (http)
-2026-08-12T15:07:38.278+05:30  INFO 157260 --- [demo] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2026-08-12T15:07:38.279+05:30  INFO 157260 --- [demo] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.20]
-2026-08-12T15:07:38.333+05:30  INFO 157260 --- [demo] [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
-2026-08-12T15:07:38.334+05:30  INFO 157260 --- [demo] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1333 ms
-2026-08-12T15:07:38.489+05:30  INFO 157260 --- [demo] [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
-2026-08-12T15:07:38.532+05:30  INFO 157260 --- [demo] [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.4.4.Final
-2026-08-12T15:07:38.562+05:30  INFO 157260 --- [demo] [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
-2026-08-12T15:07:38.747+05:30  INFO 157260 --- [demo] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
-2026-08-12T15:07:38.773+05:30  INFO 157260 --- [demo] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
-2026-08-12T15:07:38.890+05:30  INFO 157260 --- [demo] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.mariadb.jdbc.Connection@516195cf
-2026-08-12T15:07:38.891+05:30  INFO 157260 --- [demo] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
-2026-08-12T15:07:38.913+05:30  WARN 157260 --- [demo] [           main] org.hibernate.orm.deprecation            : HHH90000025: MariaDBDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
-2026-08-12T15:07:40.026+05:30  INFO 157260 --- [demo] [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
-2026-08-12T15:07:40.134+05:30  INFO 157260 --- [demo] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
-2026-08-12T15:07:40.468+05:30  INFO 157260 --- [demo] [           main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
-2026-08-12T15:07:41.364+05:30  WARN 157260 --- [demo] [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
-2026-08-12T15:07:41.649+05:30  INFO 157260 --- [demo] [           main] o.s.s.web.DefaultSecurityFilterChain     : Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@4f1dd46b, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@d3bf018, org.springframework.security.web.context.SecurityContextHolderFilter@3b310465, org.springframework.security.web.header.HeaderWriterFilter@58d1340e, org.springframework.web.filter.CorsFilter@be60fad, org.springframework.security.web.authentication.logout.LogoutFilter@223973a9, com.transparencychain.backend.security.AuthTokenFilter@4924ad09, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@543e228c, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@3aac686f, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@234635cc, org.springframework.security.web.session.SessionManagementFilter@17ae4b7c, org.springframework.security.web.access.ExceptionTranslationFilter@623f27a9, org.springframework.security.web.access.intercept.AuthorizationFilter@166a81d9]
-2026-08-12T15:07:41.870+05:30  INFO 157260 --- [demo] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8081 (http) with context path ''
-2026-08-12T15:07:41.877+05:30  INFO 157260 --- [demo] [           main] com.example.demo.DemoApplication         : Started DemoApplication in 5.324 seconds (process running for 5.58)
+2026-08-12T17:03:26.517+05:30  INFO 196844 --- [demo] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8081 (http)
+2026-08-12T17:03:26.533+05:30  INFO 196844 --- [demo] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-08-12T17:03:26.533+05:30  INFO 196844 --- [demo] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.20]
+2026-08-12T17:03:26.582+05:30  INFO 196844 --- [demo] [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-08-12T17:03:26.582+05:30  INFO 196844 --- [demo] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1383 ms
+2026-08-12T17:03:26.727+05:30  INFO 196844 --- [demo] [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-08-12T17:03:26.785+05:30  INFO 196844 --- [demo] [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.4.4.Final
+2026-08-12T17:03:26.815+05:30  INFO 196844 --- [demo] [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-08-12T17:03:27.009+05:30  INFO 196844 --- [demo] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-12T17:03:27.030+05:30  INFO 196844 --- [demo] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-08-12T17:03:27.175+05:30  INFO 196844 --- [demo] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.mariadb.jdbc.Connection@6ba6557e
+2026-08-12T17:03:27.179+05:30  INFO 196844 --- [demo] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-08-12T17:03:27.206+05:30  WARN 196844 --- [demo] [           main] org.hibernate.orm.deprecation            : HHH90000025: MariaDBDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-08-12T17:03:28.695+05:30  INFO 196844 --- [demo] [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-08-12T17:03:28.859+05:30  INFO 196844 --- [demo] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-12T17:03:29.263+05:30  INFO 196844 --- [demo] [           main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-08-12T17:03:30.527+05:30  WARN 196844 --- [demo] [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-08-12T17:03:30.870+05:30  INFO 196844 --- [demo] [           main] o.s.s.web.DefaultSecurityFilterChain     : Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@4fbc8862, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@7f5e2cf1, org.springframework.security.web.context.SecurityContextHolderFilter@d2eb3a0, org.springframework.security.web.header.HeaderWriterFilter@6cb2e94, org.springframework.web.filter.CorsFilter@265c5489, org.springframework.security.web.authentication.logout.LogoutFilter@139be871, com.transparencychain.backend.security.AuthTokenFilter@74474fc0, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@520acc7a, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@5d2d4939, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@1469d14a, org.springframework.security.web.session.SessionManagementFilter@2b91de7c, org.springframework.security.web.access.ExceptionTranslationFilter@6a39c005, org.springframework.security.web.access.intercept.AuthorizationFilter@616a370b]
+2026-08-12T17:03:31.204+05:30  INFO 196844 --- [demo] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8081 (http) with context path ''
+2026-08-12T17:03:31.212+05:30  INFO 196844 --- [demo] [           main] com.example.demo.DemoApplication         : Started DemoApplication in 6.433 seconds (process running for 6.698)
 Hibernate: 
     select
         u1_0.id,
@@ -56,6 +56,20 @@ Hibernate:
     where
         u1_0.email=?
 Found user for seeding: 727724eucy040@skcet.ac.in
+Hibernate: 
+    update
+        users 
+    set
+        created_at=?,
+        email=?,
+        full_name=?,
+        is_verified=?,
+        password_hash=?,
+        phone=?,
+        role=?,
+        updated_at=? 
+    where
+        id=?
 Hibernate: 
     select
         np1_0.id,
@@ -109,6 +123,21 @@ Hibernate:
         funder_profiles fp1_0
 Hibernate: 
     select
+        u1_0.id,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.full_name,
+        u1_0.is_verified,
+        u1_0.password_hash,
+        u1_0.phone,
+        u1_0.role,
+        u1_0.updated_at 
+    from
+        users u1_0 
+    where
+        u1_0.id=?
+Hibernate: 
+    select
         p1_0.id,
         p1_0.created_at,
         p1_0.description,
@@ -133,12 +162,89 @@ Hibernate:
     where
         n1_0.id=?
 Projects already exist for this NGO. Skipping seed.
-2026-08-12T15:07:43.034+05:30  INFO 157260 --- [demo] [nio-8081-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
-2026-08-12T15:07:43.034+05:30  INFO 157260 --- [demo] [nio-8081-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
-2026-08-12T15:07:43.036+05:30  INFO 157260 --- [demo] [nio-8081-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 2 ms
-2026-08-12T15:07:43.055+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-1] o.s.security.web.FilterChainProxy        : Securing POST /api/v1/auth/login
-2026-08-12T15:07:43.063+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-1] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
-2026-08-12T15:07:43.065+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-1] o.s.security.web.FilterChainProxy        : Secured POST /api/v1/auth/login
+Hibernate: 
+    select
+        p1_0.id,
+        p1_0.created_at,
+        p1_0.description,
+        p1_0.expected_beneficiaries,
+        p1_0.funder_id,
+        p1_0.geography,
+        p1_0.impact_kpi,
+        p1_0.latitude,
+        p1_0.longitude,
+        p1_0.ngo_id,
+        p1_0.project_duration,
+        p1_0.sdg_goal,
+        p1_0.sdg_target,
+        p1_0.status,
+        p1_0.title,
+        p1_0.total_budget 
+    from
+        projects p1_0
+Hibernate: 
+    select
+        pik1_0.id,
+        pik1_0.created_at,
+        pik1_0.kpi_description,
+        pik1_0.kpi_name,
+        pik1_0.project_id,
+        pik1_0.sdg_goal,
+        pik1_0.target_value,
+        pik1_0.unit,
+        pik1_0.updated_at 
+    from
+        project_impact_kpis pik1_0 
+    left join
+        projects p1_0 
+            on p1_0.id=pik1_0.project_id 
+    where
+        p1_0.id=?
+Hibernate: 
+    select
+        bvf1_0.id,
+        bvf1_0.closed_at,
+        bvf1_0.created_at,
+        bvf1_0.description,
+        bvf1_0.milestone_id,
+        bvf1_0.minimum_positive_percentage,
+        bvf1_0.minimum_response_percentage,
+        bvf1_0.project_id,
+        bvf1_0.published_at,
+        bvf1_0.share_token,
+        bvf1_0.status,
+        bvf1_0.target_responses,
+        bvf1_0.title,
+        bvf1_0.version 
+    from
+        beneficiary_verification_forms bvf1_0 
+    left join
+        projects p1_0 
+            on p1_0.id=bvf1_0.project_id 
+    where
+        p1_0.id=? 
+    order by
+        bvf1_0.created_at desc
+Hibernate: 
+    update
+        users 
+    set
+        created_at=?,
+        email=?,
+        full_name=?,
+        is_verified=?,
+        password_hash=?,
+        phone=?,
+        role=?,
+        updated_at=? 
+    where
+        id=?
+2026-08-12T17:03:32.580+05:30  INFO 196844 --- [demo] [nio-8081-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-08-12T17:03:32.580+05:30  INFO 196844 --- [demo] [nio-8081-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-08-12T17:03:32.582+05:30  INFO 196844 --- [demo] [nio-8081-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 2 ms
+2026-08-12T17:03:32.598+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-1] o.s.security.web.FilterChainProxy        : Securing POST /api/v1/auth/login
+2026-08-12T17:03:32.604+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-1] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2026-08-12T17:03:32.606+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-1] o.s.security.web.FilterChainProxy        : Secured POST /api/v1/auth/login
 Hibernate: 
     select
         u1_0.id,
@@ -154,10 +260,163 @@ Hibernate:
         users u1_0 
     where
         u1_0.email=?
-2026-08-12T15:07:43.404+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-1] o.s.s.a.dao.DaoAuthenticationProvider    : Authenticated user
-2026-08-12T15:07:48.144+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-2] o.s.security.web.FilterChainProxy        : Securing POST /api/v1/auth/login
-2026-08-12T15:07:48.145+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-2] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
-2026-08-12T15:07:48.145+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-2] o.s.security.web.FilterChainProxy        : Secured POST /api/v1/auth/login
+2026-08-12T17:03:33.095+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-1] o.s.s.a.dao.DaoAuthenticationProvider    : Authenticated user
+2026-08-12T17:03:38.200+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-2] o.s.security.web.FilterChainProxy        : Securing GET /api/v1/public/dashboard/stats
+2026-08-12T17:03:38.201+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-2] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2026-08-12T17:03:38.201+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-2] o.s.security.web.FilterChainProxy        : Secured GET /api/v1/public/dashboard/stats
+Hibernate: 
+    select
+        p1_0.id,
+        p1_0.created_at,
+        p1_0.description,
+        p1_0.expected_beneficiaries,
+        p1_0.funder_id,
+        p1_0.geography,
+        p1_0.impact_kpi,
+        p1_0.latitude,
+        p1_0.longitude,
+        p1_0.ngo_id,
+        p1_0.project_duration,
+        p1_0.sdg_goal,
+        p1_0.sdg_target,
+        p1_0.status,
+        p1_0.title,
+        p1_0.total_budget 
+    from
+        projects p1_0
+Hibernate: 
+    select
+        m1_0.id,
+        m1_0.additional_allocated_amount,
+        m1_0.amount_allocated,
+        m1_0.current_version_id,
+        m1_0.description,
+        m1_0.due_date,
+        m1_0.project_id,
+        m1_0.released_amount,
+        m1_0.required_evidence,
+        m1_0.sequence_number,
+        m1_0.status,
+        m1_0.title,
+        m1_0.verification_requirements 
+    from
+        milestones m1_0
+Hibernate: 
+    select
+        ps1_0.id,
+        ps1_0.file_type,
+        ps1_0.file_url,
+        ps1_0.metadata,
+        ps1_0.milestone_id,
+        ps1_0.milestone_task_id,
+        ps1_0.status,
+        ps1_0.submitted_at 
+    from
+        proof_submissions ps1_0
+Hibernate: 
+    select
+        ea1_0.id,
+        ea1_0.analysis_details,
+        ea1_0.created_at,
+        ea1_0.document_quality_score,
+        ea1_0.duplicate_score,
+        ea1_0.fraud_score,
+        ea1_0.gstin,
+        ea1_0.invoice_amount,
+        ea1_0.invoice_date,
+        ea1_0.invoice_number,
+        ea1_0.ocr_confidence,
+        ea1_0.price_anomaly_score,
+        ea1_0.evidence_id,
+        ea1_0.raw_ocr_text,
+        ea1_0.result,
+        ea1_0.tax_amount,
+        ea1_0.updated_at,
+        ea1_0.vendor_name,
+        ea1_0.vendor_risk_score 
+    from
+        evidence_analysis ea1_0 
+    where
+        ea1_0.evidence_id=?
+Hibernate: 
+    select
+        ea1_0.id,
+        ea1_0.analysis_details,
+        ea1_0.created_at,
+        ea1_0.document_quality_score,
+        ea1_0.duplicate_score,
+        ea1_0.fraud_score,
+        ea1_0.gstin,
+        ea1_0.invoice_amount,
+        ea1_0.invoice_date,
+        ea1_0.invoice_number,
+        ea1_0.ocr_confidence,
+        ea1_0.price_anomaly_score,
+        ea1_0.evidence_id,
+        ea1_0.raw_ocr_text,
+        ea1_0.result,
+        ea1_0.tax_amount,
+        ea1_0.updated_at,
+        ea1_0.vendor_name,
+        ea1_0.vendor_risk_score 
+    from
+        evidence_analysis ea1_0 
+    where
+        ea1_0.evidence_id=?
+Hibernate: 
+    select
+        ea1_0.id,
+        ea1_0.analysis_details,
+        ea1_0.created_at,
+        ea1_0.document_quality_score,
+        ea1_0.duplicate_score,
+        ea1_0.fraud_score,
+        ea1_0.gstin,
+        ea1_0.invoice_amount,
+        ea1_0.invoice_date,
+        ea1_0.invoice_number,
+        ea1_0.ocr_confidence,
+        ea1_0.price_anomaly_score,
+        ea1_0.evidence_id,
+        ea1_0.raw_ocr_text,
+        ea1_0.result,
+        ea1_0.tax_amount,
+        ea1_0.updated_at,
+        ea1_0.vendor_name,
+        ea1_0.vendor_risk_score 
+    from
+        evidence_analysis ea1_0 
+    where
+        ea1_0.evidence_id=?
+Hibernate: 
+    select
+        bfr1_0.id,
+        bfr1_0.feedback,
+        bfr1_0.form_id,
+        bfr1_0.overall_response,
+        bfr1_0.rating,
+        bfr1_0.response_token,
+        bfr1_0.status,
+        bfr1_0.submitted_at 
+    from
+        beneficiary_form_responses bfr1_0
+2026-08-12T17:03:38.296+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-4] o.s.security.web.FilterChainProxy        : Securing GET /api/v1/public/blockchain-ledger
+2026-08-12T17:03:38.297+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-4] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2026-08-12T17:03:38.297+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-4] o.s.security.web.FilterChainProxy        : Secured GET /api/v1/public/blockchain-ledger
+Hibernate: 
+    select
+        al1_0.id,
+        al1_0.current_hash,
+        al1_0.entity_id,
+        al1_0.entity_type,
+        al1_0.payload,
+        al1_0.previous_hash,
+        al1_0.timestamp 
+    from
+        audit_logs al1_0
+2026-08-12T17:03:41.367+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-5] o.s.security.web.FilterChainProxy        : Securing POST /api/v1/auth/login
+2026-08-12T17:03:41.367+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-5] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2026-08-12T17:03:41.368+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-5] o.s.security.web.FilterChainProxy        : Secured POST /api/v1/auth/login
 Hibernate: 
     select
         u1_0.id,
@@ -173,10 +432,10 @@ Hibernate:
         users u1_0 
     where
         u1_0.email=?
-2026-08-12T15:07:48.291+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-2] o.s.s.a.dao.DaoAuthenticationProvider    : Authenticated user
-2026-08-12T15:07:48.441+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-4] o.s.security.web.FilterChainProxy        : Securing POST /api/v1/auth/login
-2026-08-12T15:07:48.442+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-4] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
-2026-08-12T15:07:48.442+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-4] o.s.security.web.FilterChainProxy        : Secured POST /api/v1/auth/login
+2026-08-12T17:03:41.517+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-5] o.s.s.a.dao.DaoAuthenticationProvider    : Authenticated user
+2026-08-12T17:03:41.714+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-6] o.s.security.web.FilterChainProxy        : Securing POST /api/v1/auth/login
+2026-08-12T17:03:41.715+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-6] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2026-08-12T17:03:41.716+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-6] o.s.security.web.FilterChainProxy        : Secured POST /api/v1/auth/login
 Hibernate: 
     select
         u1_0.id,
@@ -192,10 +451,10 @@ Hibernate:
         users u1_0 
     where
         u1_0.email=?
-2026-08-12T15:07:48.586+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-4] o.s.s.a.dao.DaoAuthenticationProvider    : Authenticated user
-2026-08-12T15:07:48.678+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-6] o.s.security.web.FilterChainProxy        : Securing POST /api/v1/auth/login
-2026-08-12T15:07:48.679+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-6] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
-2026-08-12T15:07:48.679+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-6] o.s.security.web.FilterChainProxy        : Secured POST /api/v1/auth/login
+2026-08-12T17:03:41.921+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-6] o.s.s.a.dao.DaoAuthenticationProvider    : Authenticated user
+2026-08-12T17:03:42.091+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-8] o.s.security.web.FilterChainProxy        : Securing POST /api/v1/auth/login
+2026-08-12T17:03:42.092+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-8] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2026-08-12T17:03:42.092+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-8] o.s.security.web.FilterChainProxy        : Secured POST /api/v1/auth/login
 Hibernate: 
     select
         u1_0.id,
@@ -211,14 +470,14 @@ Hibernate:
         users u1_0 
     where
         u1_0.email=?
-2026-08-12T15:07:48.836+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-6] o.s.s.a.dao.DaoAuthenticationProvider    : Authenticated user
-2026-08-12T15:07:48.923+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-8] o.s.security.web.FilterChainProxy        : Securing GET /api/org/projects
-2026-08-12T15:07:48.923+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-8] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
-2026-08-12T15:07:48.925+05:30 ERROR 157260 --- [demo] [nio-8081-exec-8] c.t.backend.security.AuthEntryPointJwt   : Unauthorized error: Full authentication is required to access this resource
-2026-08-12T15:07:48.935+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-8] o.s.security.web.FilterChainProxy        : Securing GET /error
-2026-08-12T15:07:48.935+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-8] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
-2026-08-12T15:07:48.935+05:30 ERROR 157260 --- [demo] [nio-8081-exec-8] c.t.backend.security.AuthEntryPointJwt   : Unauthorized error: Full authentication is required to access this resource
-2026-08-12T15:07:48.955+05:30 DEBUG 157260 --- [demo] [io-8081-exec-10] o.s.security.web.FilterChainProxy        : Securing GET /api/org/projects
+2026-08-12T17:03:42.300+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-8] o.s.s.a.dao.DaoAuthenticationProvider    : Authenticated user
+2026-08-12T17:03:42.415+05:30 DEBUG 196844 --- [demo] [io-8081-exec-10] o.s.security.web.FilterChainProxy        : Securing GET /api/org/projects
+2026-08-12T17:03:42.416+05:30 DEBUG 196844 --- [demo] [io-8081-exec-10] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2026-08-12T17:03:42.418+05:30 ERROR 196844 --- [demo] [io-8081-exec-10] c.t.backend.security.AuthEntryPointJwt   : Unauthorized error: Full authentication is required to access this resource
+2026-08-12T17:03:42.443+05:30 DEBUG 196844 --- [demo] [io-8081-exec-10] o.s.security.web.FilterChainProxy        : Securing GET /error
+2026-08-12T17:03:42.444+05:30 DEBUG 196844 --- [demo] [io-8081-exec-10] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2026-08-12T17:03:42.444+05:30 ERROR 196844 --- [demo] [io-8081-exec-10] c.t.backend.security.AuthEntryPointJwt   : Unauthorized error: Full authentication is required to access this resource
+2026-08-12T17:03:42.478+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-2] o.s.security.web.FilterChainProxy        : Securing GET /api/org/projects
 Hibernate: 
     select
         u1_0.id,
@@ -234,14 +493,14 @@ Hibernate:
         users u1_0 
     where
         u1_0.email=?
-2026-08-12T15:07:48.988+05:30 DEBUG 157260 --- [demo] [io-8081-exec-10] o.s.security.web.FilterChainProxy        : Secured GET /api/org/projects
-2026-08-12T15:07:48.994+05:30 DEBUG 157260 --- [demo] [io-8081-exec-10] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgProjectController.browseProjects(com.transparencychain.backend.model.Project$SdgGoal,java.lang.String,java.math.BigDecimal,java.math.BigDecimal); target is of class [com.transparencychain.backend.controller.OrgProjectController]
-2026-08-12T15:07:49.028+05:30 DEBUG 157260 --- [demo] [io-8081-exec-10] horizationManagerBeforeMethodInterceptor : Failed to authorize ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgProjectController.browseProjects(com.transparencychain.backend.model.Project$SdgGoal,java.lang.String,java.math.BigDecimal,java.math.BigDecimal); target is of class [com.transparencychain.backend.controller.OrgProjectController] with authorization manager org.springframework.security.config.annotation.method.configuration.DeferringObservationAuthorizationManager@c250455 and decision ExpressionAuthorizationDecision [granted=false, expressionAttribute=hasRole('FUNDER')]
-2026-08-12T15:07:49.031+05:30 DEBUG 157260 --- [demo] [io-8081-exec-10] o.s.s.w.access.AccessDeniedHandlerImpl   : Responding with 403 status code
-2026-08-12T15:07:49.032+05:30 DEBUG 157260 --- [demo] [io-8081-exec-10] o.s.security.web.FilterChainProxy        : Securing GET /error
-2026-08-12T15:07:49.033+05:30 DEBUG 157260 --- [demo] [io-8081-exec-10] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
-2026-08-12T15:07:49.033+05:30 ERROR 157260 --- [demo] [io-8081-exec-10] c.t.backend.security.AuthEntryPointJwt   : Unauthorized error: Full authentication is required to access this resource
-2026-08-12T15:07:49.050+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-2] o.s.security.web.FilterChainProxy        : Securing GET /api/org/projects
+2026-08-12T17:03:42.520+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-2] o.s.security.web.FilterChainProxy        : Secured GET /api/org/projects
+2026-08-12T17:03:42.525+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-2] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgProjectController.browseProjects(com.transparencychain.backend.model.Project$SdgGoal,java.lang.String,java.math.BigDecimal,java.math.BigDecimal); target is of class [com.transparencychain.backend.controller.OrgProjectController]
+2026-08-12T17:03:42.558+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-2] horizationManagerBeforeMethodInterceptor : Failed to authorize ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgProjectController.browseProjects(com.transparencychain.backend.model.Project$SdgGoal,java.lang.String,java.math.BigDecimal,java.math.BigDecimal); target is of class [com.transparencychain.backend.controller.OrgProjectController] with authorization manager org.springframework.security.config.annotation.method.configuration.DeferringObservationAuthorizationManager@5f592adf and decision ExpressionAuthorizationDecision [granted=false, expressionAttribute=hasRole('FUNDER')]
+2026-08-12T17:03:42.561+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-2] o.s.s.w.access.AccessDeniedHandlerImpl   : Responding with 403 status code
+2026-08-12T17:03:42.562+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-2] o.s.security.web.FilterChainProxy        : Securing GET /error
+2026-08-12T17:03:42.563+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-2] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2026-08-12T17:03:42.563+05:30 ERROR 196844 --- [demo] [nio-8081-exec-2] c.t.backend.security.AuthEntryPointJwt   : Unauthorized error: Full authentication is required to access this resource
+2026-08-12T17:03:42.583+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-4] o.s.security.web.FilterChainProxy        : Securing GET /api/org/projects
 Hibernate: 
     select
         u1_0.id,
@@ -257,9 +516,9 @@ Hibernate:
         users u1_0 
     where
         u1_0.email=?
-2026-08-12T15:07:49.058+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-2] o.s.security.web.FilterChainProxy        : Secured GET /api/org/projects
-2026-08-12T15:07:49.059+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-2] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgProjectController.browseProjects(com.transparencychain.backend.model.Project$SdgGoal,java.lang.String,java.math.BigDecimal,java.math.BigDecimal); target is of class [com.transparencychain.backend.controller.OrgProjectController]
-2026-08-12T15:07:49.060+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-2] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgProjectController.browseProjects(com.transparencychain.backend.model.Project$SdgGoal,java.lang.String,java.math.BigDecimal,java.math.BigDecimal); target is of class [com.transparencychain.backend.controller.OrgProjectController]
+2026-08-12T17:03:42.595+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-4] o.s.security.web.FilterChainProxy        : Secured GET /api/org/projects
+2026-08-12T17:03:42.597+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-4] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgProjectController.browseProjects(com.transparencychain.backend.model.Project$SdgGoal,java.lang.String,java.math.BigDecimal,java.math.BigDecimal); target is of class [com.transparencychain.backend.controller.OrgProjectController]
+2026-08-12T17:03:42.598+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-4] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgProjectController.browseProjects(com.transparencychain.backend.model.Project$SdgGoal,java.lang.String,java.math.BigDecimal,java.math.BigDecimal); target is of class [com.transparencychain.backend.controller.OrgProjectController]
 Hibernate: 
     select
         fp1_0.id,
@@ -368,7 +627,7 @@ Hibernate:
         ngo_profiles np1_0 
     where
         np1_0.id=?
-2026-08-12T15:07:49.124+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-4] o.s.security.web.FilterChainProxy        : Securing GET /api/org/projects
+2026-08-12T17:03:42.697+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-6] o.s.security.web.FilterChainProxy        : Securing GET /api/org/projects
 Hibernate: 
     select
         u1_0.id,
@@ -384,9 +643,9 @@ Hibernate:
         users u1_0 
     where
         u1_0.email=?
-2026-08-12T15:07:49.132+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-4] o.s.security.web.FilterChainProxy        : Secured GET /api/org/projects
-2026-08-12T15:07:49.133+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-4] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgProjectController.browseProjects(com.transparencychain.backend.model.Project$SdgGoal,java.lang.String,java.math.BigDecimal,java.math.BigDecimal); target is of class [com.transparencychain.backend.controller.OrgProjectController]
-2026-08-12T15:07:49.133+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-4] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgProjectController.browseProjects(com.transparencychain.backend.model.Project$SdgGoal,java.lang.String,java.math.BigDecimal,java.math.BigDecimal); target is of class [com.transparencychain.backend.controller.OrgProjectController]
+2026-08-12T17:03:42.712+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-6] o.s.security.web.FilterChainProxy        : Secured GET /api/org/projects
+2026-08-12T17:03:42.714+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-6] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgProjectController.browseProjects(com.transparencychain.backend.model.Project$SdgGoal,java.lang.String,java.math.BigDecimal,java.math.BigDecimal); target is of class [com.transparencychain.backend.controller.OrgProjectController]
+2026-08-12T17:03:42.715+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-6] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgProjectController.browseProjects(com.transparencychain.backend.model.Project$SdgGoal,java.lang.String,java.math.BigDecimal,java.math.BigDecimal); target is of class [com.transparencychain.backend.controller.OrgProjectController]
 Hibernate: 
     select
         fp1_0.id,
@@ -495,7 +754,7 @@ Hibernate:
         ngo_profiles np1_0 
     where
         np1_0.id=?
-2026-08-12T15:07:49.173+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-6] o.s.security.web.FilterChainProxy        : Securing GET /api/org/projects?sdgGoal=SDG3
+2026-08-12T17:03:42.780+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-8] o.s.security.web.FilterChainProxy        : Securing GET /api/org/projects?sdgGoal=SDG3
 Hibernate: 
     select
         u1_0.id,
@@ -511,9 +770,9 @@ Hibernate:
         users u1_0 
     where
         u1_0.email=?
-2026-08-12T15:07:49.182+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-6] o.s.security.web.FilterChainProxy        : Secured GET /api/org/projects?sdgGoal=SDG3
-2026-08-12T15:07:49.186+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-6] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgProjectController.browseProjects(com.transparencychain.backend.model.Project$SdgGoal,java.lang.String,java.math.BigDecimal,java.math.BigDecimal); target is of class [com.transparencychain.backend.controller.OrgProjectController]
-2026-08-12T15:07:49.186+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-6] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgProjectController.browseProjects(com.transparencychain.backend.model.Project$SdgGoal,java.lang.String,java.math.BigDecimal,java.math.BigDecimal); target is of class [com.transparencychain.backend.controller.OrgProjectController]
+2026-08-12T17:03:42.793+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-8] o.s.security.web.FilterChainProxy        : Secured GET /api/org/projects?sdgGoal=SDG3
+2026-08-12T17:03:42.795+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-8] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgProjectController.browseProjects(com.transparencychain.backend.model.Project$SdgGoal,java.lang.String,java.math.BigDecimal,java.math.BigDecimal); target is of class [com.transparencychain.backend.controller.OrgProjectController]
+2026-08-12T17:03:42.795+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-8] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgProjectController.browseProjects(com.transparencychain.backend.model.Project$SdgGoal,java.lang.String,java.math.BigDecimal,java.math.BigDecimal); target is of class [com.transparencychain.backend.controller.OrgProjectController]
 Hibernate: 
     select
         fp1_0.id,
@@ -622,7 +881,7 @@ Hibernate:
         ngo_profiles np1_0 
     where
         np1_0.id=?
-2026-08-12T15:07:49.220+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-8] o.s.security.web.FilterChainProxy        : Securing GET /api/org/projects?sdgGoal=SDG17
+2026-08-12T17:03:42.828+05:30 DEBUG 196844 --- [demo] [io-8081-exec-10] o.s.security.web.FilterChainProxy        : Securing GET /api/org/projects?sdgGoal=SDG17
 Hibernate: 
     select
         u1_0.id,
@@ -638,9 +897,9 @@ Hibernate:
         users u1_0 
     where
         u1_0.email=?
-2026-08-12T15:07:49.227+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-8] o.s.security.web.FilterChainProxy        : Secured GET /api/org/projects?sdgGoal=SDG17
-2026-08-12T15:07:49.229+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-8] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgProjectController.browseProjects(com.transparencychain.backend.model.Project$SdgGoal,java.lang.String,java.math.BigDecimal,java.math.BigDecimal); target is of class [com.transparencychain.backend.controller.OrgProjectController]
-2026-08-12T15:07:49.229+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-8] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgProjectController.browseProjects(com.transparencychain.backend.model.Project$SdgGoal,java.lang.String,java.math.BigDecimal,java.math.BigDecimal); target is of class [com.transparencychain.backend.controller.OrgProjectController]
+2026-08-12T17:03:42.835+05:30 DEBUG 196844 --- [demo] [io-8081-exec-10] o.s.security.web.FilterChainProxy        : Secured GET /api/org/projects?sdgGoal=SDG17
+2026-08-12T17:03:42.836+05:30 DEBUG 196844 --- [demo] [io-8081-exec-10] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgProjectController.browseProjects(com.transparencychain.backend.model.Project$SdgGoal,java.lang.String,java.math.BigDecimal,java.math.BigDecimal); target is of class [com.transparencychain.backend.controller.OrgProjectController]
+2026-08-12T17:03:42.836+05:30 DEBUG 196844 --- [demo] [io-8081-exec-10] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgProjectController.browseProjects(com.transparencychain.backend.model.Project$SdgGoal,java.lang.String,java.math.BigDecimal,java.math.BigDecimal); target is of class [com.transparencychain.backend.controller.OrgProjectController]
 Hibernate: 
     select
         fp1_0.id,
@@ -711,7 +970,7 @@ Hibernate:
             on f1_0.id=ope1_0.funder_id 
     where
         f1_0.id=?
-2026-08-12T15:07:49.298+05:30 DEBUG 157260 --- [demo] [io-8081-exec-10] o.s.security.web.FilterChainProxy        : Securing GET /api/org/projects?budgetMin=500000&budgetMax=1000000
+2026-08-12T17:03:42.963+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-2] o.s.security.web.FilterChainProxy        : Securing GET /api/org/projects?budgetMin=500000&budgetMax=1000000
 Hibernate: 
     select
         u1_0.id,
@@ -727,9 +986,9 @@ Hibernate:
         users u1_0 
     where
         u1_0.email=?
-2026-08-12T15:07:49.305+05:30 DEBUG 157260 --- [demo] [io-8081-exec-10] o.s.security.web.FilterChainProxy        : Secured GET /api/org/projects?budgetMin=500000&budgetMax=1000000
-2026-08-12T15:07:49.306+05:30 DEBUG 157260 --- [demo] [io-8081-exec-10] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgProjectController.browseProjects(com.transparencychain.backend.model.Project$SdgGoal,java.lang.String,java.math.BigDecimal,java.math.BigDecimal); target is of class [com.transparencychain.backend.controller.OrgProjectController]
-2026-08-12T15:07:49.307+05:30 DEBUG 157260 --- [demo] [io-8081-exec-10] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgProjectController.browseProjects(com.transparencychain.backend.model.Project$SdgGoal,java.lang.String,java.math.BigDecimal,java.math.BigDecimal); target is of class [com.transparencychain.backend.controller.OrgProjectController]
+2026-08-12T17:03:42.977+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-2] o.s.security.web.FilterChainProxy        : Secured GET /api/org/projects?budgetMin=500000&budgetMax=1000000
+2026-08-12T17:03:42.979+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-2] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgProjectController.browseProjects(com.transparencychain.backend.model.Project$SdgGoal,java.lang.String,java.math.BigDecimal,java.math.BigDecimal); target is of class [com.transparencychain.backend.controller.OrgProjectController]
+2026-08-12T17:03:42.980+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-2] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgProjectController.browseProjects(com.transparencychain.backend.model.Project$SdgGoal,java.lang.String,java.math.BigDecimal,java.math.BigDecimal); target is of class [com.transparencychain.backend.controller.OrgProjectController]
 Hibernate: 
     select
         fp1_0.id,
@@ -838,7 +1097,7 @@ Hibernate:
         ngo_profiles np1_0 
     where
         np1_0.id=?
-2026-08-12T15:07:49.338+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-2] o.s.security.web.FilterChainProxy        : Securing GET /api/org/projects?budgetMax=100
+2026-08-12T17:03:43.035+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-3] o.s.security.web.FilterChainProxy        : Securing GET /api/org/projects?budgetMax=100
 Hibernate: 
     select
         u1_0.id,
@@ -854,9 +1113,9 @@ Hibernate:
         users u1_0 
     where
         u1_0.email=?
-2026-08-12T15:07:49.345+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-2] o.s.security.web.FilterChainProxy        : Secured GET /api/org/projects?budgetMax=100
-2026-08-12T15:07:49.347+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-2] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgProjectController.browseProjects(com.transparencychain.backend.model.Project$SdgGoal,java.lang.String,java.math.BigDecimal,java.math.BigDecimal); target is of class [com.transparencychain.backend.controller.OrgProjectController]
-2026-08-12T15:07:49.347+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-2] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgProjectController.browseProjects(com.transparencychain.backend.model.Project$SdgGoal,java.lang.String,java.math.BigDecimal,java.math.BigDecimal); target is of class [com.transparencychain.backend.controller.OrgProjectController]
+2026-08-12T17:03:43.050+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-3] o.s.security.web.FilterChainProxy        : Secured GET /api/org/projects?budgetMax=100
+2026-08-12T17:03:43.052+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-3] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgProjectController.browseProjects(com.transparencychain.backend.model.Project$SdgGoal,java.lang.String,java.math.BigDecimal,java.math.BigDecimal); target is of class [com.transparencychain.backend.controller.OrgProjectController]
+2026-08-12T17:03:43.052+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-3] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgProjectController.browseProjects(com.transparencychain.backend.model.Project$SdgGoal,java.lang.String,java.math.BigDecimal,java.math.BigDecimal); target is of class [com.transparencychain.backend.controller.OrgProjectController]
 Hibernate: 
     select
         fp1_0.id,
@@ -927,7 +1186,7 @@ Hibernate:
             on f1_0.id=ope1_0.funder_id 
     where
         f1_0.id=?
-2026-08-12T15:07:49.461+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-3] o.s.security.web.FilterChainProxy        : Securing GET /api/org/projects/ab5fac0c-9601-11f1-8b56-a987a7b38995
+2026-08-12T17:03:43.223+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-5] o.s.security.web.FilterChainProxy        : Securing GET /api/org/projects/ab5fac0c-9601-11f1-8b56-a987a7b38995
 Hibernate: 
     select
         u1_0.id,
@@ -943,9 +1202,9 @@ Hibernate:
         users u1_0 
     where
         u1_0.email=?
-2026-08-12T15:07:49.468+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-3] o.s.security.web.FilterChainProxy        : Secured GET /api/org/projects/ab5fac0c-9601-11f1-8b56-a987a7b38995
-2026-08-12T15:07:49.470+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-3] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgProjectController.getProjectDetail(java.util.UUID); target is of class [com.transparencychain.backend.controller.OrgProjectController]
-2026-08-12T15:07:49.470+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-3] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgProjectController.getProjectDetail(java.util.UUID); target is of class [com.transparencychain.backend.controller.OrgProjectController]
+2026-08-12T17:03:43.236+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-5] o.s.security.web.FilterChainProxy        : Secured GET /api/org/projects/ab5fac0c-9601-11f1-8b56-a987a7b38995
+2026-08-12T17:03:43.239+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-5] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgProjectController.getProjectDetail(java.util.UUID); target is of class [com.transparencychain.backend.controller.OrgProjectController]
+2026-08-12T17:03:43.240+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-5] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgProjectController.getProjectDetail(java.util.UUID); target is of class [com.transparencychain.backend.controller.OrgProjectController]
 Hibernate: 
     select
         fp1_0.id,
@@ -1020,11 +1279,13 @@ Hibernate:
 Hibernate: 
     select
         m1_0.id,
+        m1_0.additional_allocated_amount,
         m1_0.amount_allocated,
         m1_0.current_version_id,
         m1_0.description,
         m1_0.due_date,
         m1_0.project_id,
+        m1_0.released_amount,
         m1_0.required_evidence,
         m1_0.sequence_number,
         m1_0.status,
@@ -1089,7 +1350,7 @@ Hibernate:
         (current_hash, entity_id, entity_type, payload, previous_hash, timestamp, id) 
     values
         (?, ?, ?, ?, ?, ?, ?)
-2026-08-12T15:07:49.727+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-5] o.s.security.web.FilterChainProxy        : Securing POST /api/org/projects/ab5fac0c-9601-11f1-8b56-a987a7b38995/review
+2026-08-12T17:03:43.552+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-7] o.s.security.web.FilterChainProxy        : Securing POST /api/org/projects/ab5fac0c-9601-11f1-8b56-a987a7b38995/review
 Hibernate: 
     select
         u1_0.id,
@@ -1105,9 +1366,9 @@ Hibernate:
         users u1_0 
     where
         u1_0.email=?
-2026-08-12T15:07:49.736+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-5] o.s.security.web.FilterChainProxy        : Secured POST /api/org/projects/ab5fac0c-9601-11f1-8b56-a987a7b38995/review
-2026-08-12T15:07:49.738+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-5] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgProjectController.markProjectUnderReview(java.util.UUID); target is of class [com.transparencychain.backend.controller.OrgProjectController]
-2026-08-12T15:07:49.739+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-5] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgProjectController.markProjectUnderReview(java.util.UUID); target is of class [com.transparencychain.backend.controller.OrgProjectController]
+2026-08-12T17:03:43.563+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-7] o.s.security.web.FilterChainProxy        : Secured POST /api/org/projects/ab5fac0c-9601-11f1-8b56-a987a7b38995/review
+2026-08-12T17:03:43.565+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-7] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgProjectController.markProjectUnderReview(java.util.UUID); target is of class [com.transparencychain.backend.controller.OrgProjectController]
+2026-08-12T17:03:43.565+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-7] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgProjectController.markProjectUnderReview(java.util.UUID); target is of class [com.transparencychain.backend.controller.OrgProjectController]
 Hibernate: 
     select
         fp1_0.id,
@@ -1219,11 +1480,13 @@ Hibernate:
 Hibernate: 
     select
         m1_0.id,
+        m1_0.additional_allocated_amount,
         m1_0.amount_allocated,
         m1_0.current_version_id,
         m1_0.description,
         m1_0.due_date,
         m1_0.project_id,
+        m1_0.released_amount,
         m1_0.required_evidence,
         m1_0.sequence_number,
         m1_0.status,
@@ -1274,7 +1537,7 @@ Hibernate:
         ngo_profiles np1_0 
     where
         np1_0.id=?
-2026-08-12T15:07:49.852+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-6] o.s.security.web.FilterChainProxy        : Securing POST /api/org/projects/ab5fac0c-9601-11f1-8b56-a987a7b38995/review
+2026-08-12T17:03:43.668+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-9] o.s.security.web.FilterChainProxy        : Securing POST /api/org/projects/ab5fac0c-9601-11f1-8b56-a987a7b38995/review
 Hibernate: 
     select
         u1_0.id,
@@ -1290,9 +1553,9 @@ Hibernate:
         users u1_0 
     where
         u1_0.email=?
-2026-08-12T15:07:49.859+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-6] o.s.security.web.FilterChainProxy        : Secured POST /api/org/projects/ab5fac0c-9601-11f1-8b56-a987a7b38995/review
-2026-08-12T15:07:49.861+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-6] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgProjectController.markProjectUnderReview(java.util.UUID); target is of class [com.transparencychain.backend.controller.OrgProjectController]
-2026-08-12T15:07:49.861+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-6] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgProjectController.markProjectUnderReview(java.util.UUID); target is of class [com.transparencychain.backend.controller.OrgProjectController]
+2026-08-12T17:03:43.678+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-9] o.s.security.web.FilterChainProxy        : Secured POST /api/org/projects/ab5fac0c-9601-11f1-8b56-a987a7b38995/review
+2026-08-12T17:03:43.679+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-9] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgProjectController.markProjectUnderReview(java.util.UUID); target is of class [com.transparencychain.backend.controller.OrgProjectController]
+2026-08-12T17:03:43.680+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-9] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgProjectController.markProjectUnderReview(java.util.UUID); target is of class [com.transparencychain.backend.controller.OrgProjectController]
 Hibernate: 
     select
         fp1_0.id,
@@ -1327,7 +1590,7 @@ Hibernate:
     where
         f1_0.id=? 
         and p1_0.id=?
-2026-08-12T15:07:49.961+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-7] o.s.security.web.FilterChainProxy        : Securing POST /api/org/projects/ab5fac0c-9601-11f1-8b56-a987a7b38995/milestones/ab69bb22-9601-11f1-8b56-a987a7b38995/change-request
+2026-08-12T17:03:43.762+05:30 DEBUG 196844 --- [demo] [io-8081-exec-10] o.s.security.web.FilterChainProxy        : Securing POST /api/org/projects/ab5fac0c-9601-11f1-8b56-a987a7b38995/milestones/ab69bb22-9601-11f1-8b56-a987a7b38995/change-request
 Hibernate: 
     select
         u1_0.id,
@@ -1343,9 +1606,9 @@ Hibernate:
         users u1_0 
     where
         u1_0.email=?
-2026-08-12T15:07:49.991+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-7] o.s.security.web.FilterChainProxy        : Secured POST /api/org/projects/ab5fac0c-9601-11f1-8b56-a987a7b38995/milestones/ab69bb22-9601-11f1-8b56-a987a7b38995/change-request
-2026-08-12T15:07:50.005+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-7] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgNegotiationController.raiseChangeRequest(java.util.UUID,java.util.UUID,com.transparencychain.backend.dto.ChangeRequestBody); target is of class [com.transparencychain.backend.controller.OrgNegotiationController]
-2026-08-12T15:07:50.006+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-7] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgNegotiationController.raiseChangeRequest(java.util.UUID,java.util.UUID,com.transparencychain.backend.dto.ChangeRequestBody); target is of class [com.transparencychain.backend.controller.OrgNegotiationController]
+2026-08-12T17:03:43.770+05:30 DEBUG 196844 --- [demo] [io-8081-exec-10] o.s.security.web.FilterChainProxy        : Secured POST /api/org/projects/ab5fac0c-9601-11f1-8b56-a987a7b38995/milestones/ab69bb22-9601-11f1-8b56-a987a7b38995/change-request
+2026-08-12T17:03:43.775+05:30 DEBUG 196844 --- [demo] [io-8081-exec-10] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgNegotiationController.raiseChangeRequest(java.util.UUID,java.util.UUID,com.transparencychain.backend.dto.ChangeRequestBody); target is of class [com.transparencychain.backend.controller.OrgNegotiationController]
+2026-08-12T17:03:43.776+05:30 DEBUG 196844 --- [demo] [io-8081-exec-10] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgNegotiationController.raiseChangeRequest(java.util.UUID,java.util.UUID,com.transparencychain.backend.dto.ChangeRequestBody); target is of class [com.transparencychain.backend.controller.OrgNegotiationController]
 Hibernate: 
     select
         fp1_0.id,
@@ -1364,11 +1627,13 @@ Hibernate:
 Hibernate: 
     select
         m1_0.id,
+        m1_0.additional_allocated_amount,
         m1_0.amount_allocated,
         m1_0.current_version_id,
         m1_0.description,
         m1_0.due_date,
         m1_0.project_id,
+        m1_0.released_amount,
         m1_0.required_evidence,
         m1_0.sequence_number,
         m1_0.status,
@@ -1426,11 +1691,13 @@ Hibernate:
     update
         milestones 
     set
+        additional_allocated_amount=?,
         amount_allocated=?,
         current_version_id=?,
         description=?,
         due_date=?,
         project_id=?,
+        released_amount=?,
         required_evidence=?,
         sequence_number=?,
         status=?,
@@ -1521,11 +1788,13 @@ Hibernate:
     update
         milestones 
     set
+        additional_allocated_amount=?,
         amount_allocated=?,
         current_version_id=?,
         description=?,
         due_date=?,
         project_id=?,
+        released_amount=?,
         required_evidence=?,
         sequence_number=?,
         status=?,
@@ -1544,7 +1813,7 @@ Hibernate:
         viewed_at=? 
     where
         id=?
-2026-08-12T15:07:50.319+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-9] o.s.security.web.FilterChainProxy        : Securing POST /api/org/projects/ab5fac0c-9601-11f1-8b56-a987a7b38995/milestones/ab69bb22-9601-11f1-8b56-a987a7b38995/change-request
+2026-08-12T17:03:44.103+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-1] o.s.security.web.FilterChainProxy        : Securing POST /api/org/projects/ab5fac0c-9601-11f1-8b56-a987a7b38995/milestones/ab69bb22-9601-11f1-8b56-a987a7b38995/change-request
 Hibernate: 
     select
         u1_0.id,
@@ -1560,9 +1829,9 @@ Hibernate:
         users u1_0 
     where
         u1_0.email=?
-2026-08-12T15:07:50.328+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-9] o.s.security.web.FilterChainProxy        : Secured POST /api/org/projects/ab5fac0c-9601-11f1-8b56-a987a7b38995/milestones/ab69bb22-9601-11f1-8b56-a987a7b38995/change-request
-2026-08-12T15:07:50.330+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-9] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgNegotiationController.raiseChangeRequest(java.util.UUID,java.util.UUID,com.transparencychain.backend.dto.ChangeRequestBody); target is of class [com.transparencychain.backend.controller.OrgNegotiationController]
-2026-08-12T15:07:50.330+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-9] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgNegotiationController.raiseChangeRequest(java.util.UUID,java.util.UUID,com.transparencychain.backend.dto.ChangeRequestBody); target is of class [com.transparencychain.backend.controller.OrgNegotiationController]
+2026-08-12T17:03:44.113+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-1] o.s.security.web.FilterChainProxy        : Secured POST /api/org/projects/ab5fac0c-9601-11f1-8b56-a987a7b38995/milestones/ab69bb22-9601-11f1-8b56-a987a7b38995/change-request
+2026-08-12T17:03:44.117+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-1] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgNegotiationController.raiseChangeRequest(java.util.UUID,java.util.UUID,com.transparencychain.backend.dto.ChangeRequestBody); target is of class [com.transparencychain.backend.controller.OrgNegotiationController]
+2026-08-12T17:03:44.118+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-1] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgNegotiationController.raiseChangeRequest(java.util.UUID,java.util.UUID,com.transparencychain.backend.dto.ChangeRequestBody); target is of class [com.transparencychain.backend.controller.OrgNegotiationController]
 Hibernate: 
     select
         fp1_0.id,
@@ -1581,11 +1850,13 @@ Hibernate:
 Hibernate: 
     select
         m1_0.id,
+        m1_0.additional_allocated_amount,
         m1_0.amount_allocated,
         m1_0.current_version_id,
         m1_0.description,
         m1_0.due_date,
         m1_0.project_id,
+        m1_0.released_amount,
         m1_0.required_evidence,
         m1_0.sequence_number,
         m1_0.status,
@@ -1608,7 +1879,7 @@ Hibernate:
         and mcr1_0.status=? 
     limit
         ?
-2026-08-12T15:07:50.371+05:30 DEBUG 157260 --- [demo] [io-8081-exec-10] o.s.security.web.FilterChainProxy        : Securing GET /api/org/change-requests/1e82873e-01c0-4394-8349-d051e8c39386
+2026-08-12T17:03:44.177+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-2] o.s.security.web.FilterChainProxy        : Securing GET /api/org/change-requests/d4540409-2c23-471d-8dac-b34180e14386
 Hibernate: 
     select
         u1_0.id,
@@ -1624,9 +1895,9 @@ Hibernate:
         users u1_0 
     where
         u1_0.email=?
-2026-08-12T15:07:50.380+05:30 DEBUG 157260 --- [demo] [io-8081-exec-10] o.s.security.web.FilterChainProxy        : Secured GET /api/org/change-requests/1e82873e-01c0-4394-8349-d051e8c39386
-2026-08-12T15:07:50.382+05:30 DEBUG 157260 --- [demo] [io-8081-exec-10] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgNegotiationController.getChangeRequest(java.util.UUID); target is of class [com.transparencychain.backend.controller.OrgNegotiationController]
-2026-08-12T15:07:50.383+05:30 DEBUG 157260 --- [demo] [io-8081-exec-10] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgNegotiationController.getChangeRequest(java.util.UUID); target is of class [com.transparencychain.backend.controller.OrgNegotiationController]
+2026-08-12T17:03:44.184+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-2] o.s.security.web.FilterChainProxy        : Secured GET /api/org/change-requests/d4540409-2c23-471d-8dac-b34180e14386
+2026-08-12T17:03:44.185+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-2] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgNegotiationController.getChangeRequest(java.util.UUID); target is of class [com.transparencychain.backend.controller.OrgNegotiationController]
+2026-08-12T17:03:44.186+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-2] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgNegotiationController.getChangeRequest(java.util.UUID); target is of class [com.transparencychain.backend.controller.OrgNegotiationController]
 Hibernate: 
     select
         mcr1_0.id,
@@ -1645,11 +1916,13 @@ Hibernate:
 Hibernate: 
     select
         m1_0.id,
+        m1_0.additional_allocated_amount,
         m1_0.amount_allocated,
         m1_0.current_version_id,
         m1_0.description,
         m1_0.due_date,
         m1_0.project_id,
+        m1_0.released_amount,
         m1_0.required_evidence,
         m1_0.sequence_number,
         m1_0.status,
@@ -1705,7 +1978,7 @@ Hibernate:
         milestone_versions mv1_0 
     where
         mv1_0.id=?
-2026-08-12T15:07:50.426+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-2] o.s.security.web.FilterChainProxy        : Securing GET /api/ngo/change-requests?status=PENDING
+2026-08-12T17:03:44.228+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-3] o.s.security.web.FilterChainProxy        : Securing GET /api/ngo/change-requests?status=PENDING
 Hibernate: 
     select
         u1_0.id,
@@ -1721,9 +1994,9 @@ Hibernate:
         users u1_0 
     where
         u1_0.email=?
-2026-08-12T15:07:50.434+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-2] o.s.security.web.FilterChainProxy        : Secured GET /api/ngo/change-requests?status=PENDING
-2026-08-12T15:07:50.442+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-2] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.NgoNegotiationController.getPendingChangeRequests(java.lang.String); target is of class [com.transparencychain.backend.controller.NgoNegotiationController]
-2026-08-12T15:07:50.443+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-2] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.NgoNegotiationController.getPendingChangeRequests(java.lang.String); target is of class [com.transparencychain.backend.controller.NgoNegotiationController]
+2026-08-12T17:03:44.237+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-3] o.s.security.web.FilterChainProxy        : Secured GET /api/ngo/change-requests?status=PENDING
+2026-08-12T17:03:44.247+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-3] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.NgoNegotiationController.getPendingChangeRequests(java.lang.String); target is of class [com.transparencychain.backend.controller.NgoNegotiationController]
+2026-08-12T17:03:44.248+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-3] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.NgoNegotiationController.getPendingChangeRequests(java.lang.String); target is of class [com.transparencychain.backend.controller.NgoNegotiationController]
 Hibernate: 
     select
         np1_0.id,
@@ -1837,11 +2110,13 @@ Hibernate:
 Hibernate: 
     select
         m1_0.id,
+        m1_0.additional_allocated_amount,
         m1_0.amount_allocated,
         m1_0.current_version_id,
         m1_0.description,
         m1_0.due_date,
         m1_0.project_id,
+        m1_0.released_amount,
         m1_0.required_evidence,
         m1_0.sequence_number,
         m1_0.status,
@@ -1919,7 +2194,7 @@ Hibernate:
     where
         p1_0.id=? 
         and mcr1_0.status=?
-2026-08-12T15:07:50.495+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-3] o.s.security.web.FilterChainProxy        : Securing POST /api/ngo/change-requests/1e82873e-01c0-4394-8349-d051e8c39386/respond
+2026-08-12T17:03:44.298+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-5] o.s.security.web.FilterChainProxy        : Securing POST /api/ngo/change-requests/d4540409-2c23-471d-8dac-b34180e14386/respond
 Hibernate: 
     select
         u1_0.id,
@@ -1935,9 +2210,9 @@ Hibernate:
         users u1_0 
     where
         u1_0.email=?
-2026-08-12T15:07:50.502+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-3] o.s.security.web.FilterChainProxy        : Secured POST /api/ngo/change-requests/1e82873e-01c0-4394-8349-d051e8c39386/respond
-2026-08-12T15:07:50.510+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-3] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.NgoNegotiationController.respondToChangeRequest(java.util.UUID,com.transparencychain.backend.dto.NgoChangeRequestResponseBody); target is of class [com.transparencychain.backend.controller.NgoNegotiationController]
-2026-08-12T15:07:50.510+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-3] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.NgoNegotiationController.respondToChangeRequest(java.util.UUID,com.transparencychain.backend.dto.NgoChangeRequestResponseBody); target is of class [com.transparencychain.backend.controller.NgoNegotiationController]
+2026-08-12T17:03:44.305+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-5] o.s.security.web.FilterChainProxy        : Secured POST /api/ngo/change-requests/d4540409-2c23-471d-8dac-b34180e14386/respond
+2026-08-12T17:03:44.313+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-5] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.NgoNegotiationController.respondToChangeRequest(java.util.UUID,com.transparencychain.backend.dto.NgoChangeRequestResponseBody); target is of class [com.transparencychain.backend.controller.NgoNegotiationController]
+2026-08-12T17:03:44.314+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-5] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.NgoNegotiationController.respondToChangeRequest(java.util.UUID,com.transparencychain.backend.dto.NgoChangeRequestResponseBody); target is of class [com.transparencychain.backend.controller.NgoNegotiationController]
 Hibernate: 
     select
         mcr1_0.id,
@@ -1997,11 +2272,13 @@ Hibernate:
 Hibernate: 
     select
         m1_0.id,
+        m1_0.additional_allocated_amount,
         m1_0.amount_allocated,
         m1_0.current_version_id,
         m1_0.description,
         m1_0.due_date,
         m1_0.project_id,
+        m1_0.released_amount,
         m1_0.required_evidence,
         m1_0.sequence_number,
         m1_0.status,
@@ -2169,7 +2446,7 @@ Hibernate:
         (current_hash, entity_id, entity_type, payload, previous_hash, timestamp, id) 
     values
         (?, ?, ?, ?, ?, ?, ?)
-2026-08-12T15:07:50.569+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-5] o.s.security.web.FilterChainProxy        : Securing GET /api/ngo/change-requests?status=PENDING
+2026-08-12T17:03:44.373+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-6] o.s.security.web.FilterChainProxy        : Securing GET /api/ngo/change-requests?status=PENDING
 Hibernate: 
     select
         u1_0.id,
@@ -2185,9 +2462,9 @@ Hibernate:
         users u1_0 
     where
         u1_0.email=?
-2026-08-12T15:07:50.577+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-5] o.s.security.web.FilterChainProxy        : Secured GET /api/ngo/change-requests?status=PENDING
-2026-08-12T15:07:50.578+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-5] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.NgoNegotiationController.getPendingChangeRequests(java.lang.String); target is of class [com.transparencychain.backend.controller.NgoNegotiationController]
-2026-08-12T15:07:50.578+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-5] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.NgoNegotiationController.getPendingChangeRequests(java.lang.String); target is of class [com.transparencychain.backend.controller.NgoNegotiationController]
+2026-08-12T17:03:44.379+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-6] o.s.security.web.FilterChainProxy        : Secured GET /api/ngo/change-requests?status=PENDING
+2026-08-12T17:03:44.380+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-6] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.NgoNegotiationController.getPendingChangeRequests(java.lang.String); target is of class [com.transparencychain.backend.controller.NgoNegotiationController]
+2026-08-12T17:03:44.380+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-6] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.NgoNegotiationController.getPendingChangeRequests(java.lang.String); target is of class [com.transparencychain.backend.controller.NgoNegotiationController]
 Hibernate: 
     select
         np1_0.id,
@@ -2301,11 +2578,13 @@ Hibernate:
 Hibernate: 
     select
         m1_0.id,
+        m1_0.additional_allocated_amount,
         m1_0.amount_allocated,
         m1_0.current_version_id,
         m1_0.description,
         m1_0.due_date,
         m1_0.project_id,
+        m1_0.released_amount,
         m1_0.required_evidence,
         m1_0.sequence_number,
         m1_0.status,
@@ -2383,7 +2662,7 @@ Hibernate:
     where
         p1_0.id=? 
         and mcr1_0.status=?
-2026-08-12T15:07:50.663+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-6] o.s.security.web.FilterChainProxy        : Securing POST /api/ngo/change-requests/7c64121d-3f73-4a50-9496-9e91261efb41/respond
+2026-08-12T17:03:44.459+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-7] o.s.security.web.FilterChainProxy        : Securing POST /api/ngo/change-requests/f88cbdd1-b025-4d99-aaf2-ecbc7850974e/respond
 Hibernate: 
     select
         u1_0.id,
@@ -2399,9 +2678,9 @@ Hibernate:
         users u1_0 
     where
         u1_0.email=?
-2026-08-12T15:07:50.670+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-6] o.s.security.web.FilterChainProxy        : Secured POST /api/ngo/change-requests/7c64121d-3f73-4a50-9496-9e91261efb41/respond
-2026-08-12T15:07:50.672+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-6] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.NgoNegotiationController.respondToChangeRequest(java.util.UUID,com.transparencychain.backend.dto.NgoChangeRequestResponseBody); target is of class [com.transparencychain.backend.controller.NgoNegotiationController]
-2026-08-12T15:07:50.672+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-6] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.NgoNegotiationController.respondToChangeRequest(java.util.UUID,com.transparencychain.backend.dto.NgoChangeRequestResponseBody); target is of class [com.transparencychain.backend.controller.NgoNegotiationController]
+2026-08-12T17:03:44.466+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-7] o.s.security.web.FilterChainProxy        : Secured POST /api/ngo/change-requests/f88cbdd1-b025-4d99-aaf2-ecbc7850974e/respond
+2026-08-12T17:03:44.467+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-7] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.NgoNegotiationController.respondToChangeRequest(java.util.UUID,com.transparencychain.backend.dto.NgoChangeRequestResponseBody); target is of class [com.transparencychain.backend.controller.NgoNegotiationController]
+2026-08-12T17:03:44.468+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-7] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.NgoNegotiationController.respondToChangeRequest(java.util.UUID,com.transparencychain.backend.dto.NgoChangeRequestResponseBody); target is of class [com.transparencychain.backend.controller.NgoNegotiationController]
 Hibernate: 
     select
         mcr1_0.id,
@@ -2461,11 +2740,13 @@ Hibernate:
 Hibernate: 
     select
         m1_0.id,
+        m1_0.additional_allocated_amount,
         m1_0.amount_allocated,
         m1_0.current_version_id,
         m1_0.description,
         m1_0.due_date,
         m1_0.project_id,
+        m1_0.released_amount,
         m1_0.required_evidence,
         m1_0.sequence_number,
         m1_0.status,
@@ -2583,11 +2864,13 @@ Hibernate:
     update
         milestones 
     set
+        additional_allocated_amount=?,
         amount_allocated=?,
         current_version_id=?,
         description=?,
         due_date=?,
         project_id=?,
+        released_amount=?,
         required_evidence=?,
         sequence_number=?,
         status=?,
@@ -2611,7 +2894,7 @@ Hibernate:
         version_number=? 
     where
         id=?
-2026-08-12T15:07:50.770+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-8] o.s.security.web.FilterChainProxy        : Securing GET /api/org/projects/ab5fac0c-9601-11f1-8b56-a987a7b38995
+2026-08-12T17:03:44.571+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-9] o.s.security.web.FilterChainProxy        : Securing GET /api/org/projects/ab5fac0c-9601-11f1-8b56-a987a7b38995
 Hibernate: 
     select
         u1_0.id,
@@ -2627,9 +2910,9 @@ Hibernate:
         users u1_0 
     where
         u1_0.email=?
-2026-08-12T15:07:50.778+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-8] o.s.security.web.FilterChainProxy        : Secured GET /api/org/projects/ab5fac0c-9601-11f1-8b56-a987a7b38995
-2026-08-12T15:07:50.779+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-8] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgProjectController.getProjectDetail(java.util.UUID); target is of class [com.transparencychain.backend.controller.OrgProjectController]
-2026-08-12T15:07:50.780+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-8] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgProjectController.getProjectDetail(java.util.UUID); target is of class [com.transparencychain.backend.controller.OrgProjectController]
+2026-08-12T17:03:44.578+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-9] o.s.security.web.FilterChainProxy        : Secured GET /api/org/projects/ab5fac0c-9601-11f1-8b56-a987a7b38995
+2026-08-12T17:03:44.579+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-9] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgProjectController.getProjectDetail(java.util.UUID); target is of class [com.transparencychain.backend.controller.OrgProjectController]
+2026-08-12T17:03:44.579+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-9] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgProjectController.getProjectDetail(java.util.UUID); target is of class [com.transparencychain.backend.controller.OrgProjectController]
 Hibernate: 
     select
         fp1_0.id,
@@ -2689,11 +2972,13 @@ Hibernate:
 Hibernate: 
     select
         m1_0.id,
+        m1_0.additional_allocated_amount,
         m1_0.amount_allocated,
         m1_0.current_version_id,
         m1_0.description,
         m1_0.due_date,
         m1_0.project_id,
+        m1_0.released_amount,
         m1_0.required_evidence,
         m1_0.sequence_number,
         m1_0.status,
@@ -2761,7 +3046,7 @@ Hibernate:
         milestone_versions mv1_0 
     where
         mv1_0.id=?
-2026-08-12T15:07:50.864+05:30 DEBUG 157260 --- [demo] [io-8081-exec-10] o.s.security.web.FilterChainProxy        : Securing POST /api/org/projects/ab5fac0c-9601-11f1-8b56-a987a7b38995/milestones/ab69ba54-9601-11f1-8b56-a987a7b38995/change-request
+2026-08-12T17:03:44.662+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-1] o.s.security.web.FilterChainProxy        : Securing POST /api/org/projects/ab5fac0c-9601-11f1-8b56-a987a7b38995/milestones/ab69ba54-9601-11f1-8b56-a987a7b38995/change-request
 Hibernate: 
     select
         u1_0.id,
@@ -2777,9 +3062,9 @@ Hibernate:
         users u1_0 
     where
         u1_0.email=?
-2026-08-12T15:07:50.873+05:30 DEBUG 157260 --- [demo] [io-8081-exec-10] o.s.security.web.FilterChainProxy        : Secured POST /api/org/projects/ab5fac0c-9601-11f1-8b56-a987a7b38995/milestones/ab69ba54-9601-11f1-8b56-a987a7b38995/change-request
-2026-08-12T15:07:50.875+05:30 DEBUG 157260 --- [demo] [io-8081-exec-10] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgNegotiationController.raiseChangeRequest(java.util.UUID,java.util.UUID,com.transparencychain.backend.dto.ChangeRequestBody); target is of class [com.transparencychain.backend.controller.OrgNegotiationController]
-2026-08-12T15:07:50.875+05:30 DEBUG 157260 --- [demo] [io-8081-exec-10] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgNegotiationController.raiseChangeRequest(java.util.UUID,java.util.UUID,com.transparencychain.backend.dto.ChangeRequestBody); target is of class [com.transparencychain.backend.controller.OrgNegotiationController]
+2026-08-12T17:03:44.674+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-1] o.s.security.web.FilterChainProxy        : Secured POST /api/org/projects/ab5fac0c-9601-11f1-8b56-a987a7b38995/milestones/ab69ba54-9601-11f1-8b56-a987a7b38995/change-request
+2026-08-12T17:03:44.678+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-1] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgNegotiationController.raiseChangeRequest(java.util.UUID,java.util.UUID,com.transparencychain.backend.dto.ChangeRequestBody); target is of class [com.transparencychain.backend.controller.OrgNegotiationController]
+2026-08-12T17:03:44.679+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-1] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgNegotiationController.raiseChangeRequest(java.util.UUID,java.util.UUID,com.transparencychain.backend.dto.ChangeRequestBody); target is of class [com.transparencychain.backend.controller.OrgNegotiationController]
 Hibernate: 
     select
         fp1_0.id,
@@ -2798,11 +3083,13 @@ Hibernate:
 Hibernate: 
     select
         m1_0.id,
+        m1_0.additional_allocated_amount,
         m1_0.amount_allocated,
         m1_0.current_version_id,
         m1_0.description,
         m1_0.due_date,
         m1_0.project_id,
+        m1_0.released_amount,
         m1_0.required_evidence,
         m1_0.sequence_number,
         m1_0.status,
@@ -2860,11 +3147,13 @@ Hibernate:
     update
         milestones 
     set
+        additional_allocated_amount=?,
         amount_allocated=?,
         current_version_id=?,
         description=?,
         due_date=?,
         project_id=?,
+        released_amount=?,
         required_evidence=?,
         sequence_number=?,
         status=?,
@@ -2955,11 +3244,13 @@ Hibernate:
     update
         milestones 
     set
+        additional_allocated_amount=?,
         amount_allocated=?,
         current_version_id=?,
         description=?,
         due_date=?,
         project_id=?,
+        released_amount=?,
         required_evidence=?,
         sequence_number=?,
         status=?,
@@ -2967,7 +3258,7 @@ Hibernate:
         verification_requirements=? 
     where
         id=?
-2026-08-12T15:07:50.974+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-2] o.s.security.web.FilterChainProxy        : Securing POST /api/org/change-requests/d91b9154-ad5a-452a-b9a9-0428b1dd7fe3/withdraw
+2026-08-12T17:03:44.811+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-2] o.s.security.web.FilterChainProxy        : Securing POST /api/org/change-requests/cfcb7164-6e3d-4217-bc7f-ed5c0aca9f00/withdraw
 Hibernate: 
     select
         u1_0.id,
@@ -2983,9 +3274,9 @@ Hibernate:
         users u1_0 
     where
         u1_0.email=?
-2026-08-12T15:07:50.984+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-2] o.s.security.web.FilterChainProxy        : Secured POST /api/org/change-requests/d91b9154-ad5a-452a-b9a9-0428b1dd7fe3/withdraw
-2026-08-12T15:07:50.985+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-2] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgNegotiationController.withdrawChangeRequest(java.util.UUID); target is of class [com.transparencychain.backend.controller.OrgNegotiationController]
-2026-08-12T15:07:50.986+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-2] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgNegotiationController.withdrawChangeRequest(java.util.UUID); target is of class [com.transparencychain.backend.controller.OrgNegotiationController]
+2026-08-12T17:03:44.826+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-2] o.s.security.web.FilterChainProxy        : Secured POST /api/org/change-requests/cfcb7164-6e3d-4217-bc7f-ed5c0aca9f00/withdraw
+2026-08-12T17:03:44.828+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-2] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgNegotiationController.withdrawChangeRequest(java.util.UUID); target is of class [com.transparencychain.backend.controller.OrgNegotiationController]
+2026-08-12T17:03:44.829+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-2] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgNegotiationController.withdrawChangeRequest(java.util.UUID); target is of class [com.transparencychain.backend.controller.OrgNegotiationController]
 Hibernate: 
     select
         fp1_0.id,
@@ -3036,11 +3327,13 @@ Hibernate:
 Hibernate: 
     select
         m1_0.id,
+        m1_0.additional_allocated_amount,
         m1_0.amount_allocated,
         m1_0.current_version_id,
         m1_0.description,
         m1_0.due_date,
         m1_0.project_id,
+        m1_0.released_amount,
         m1_0.required_evidence,
         m1_0.sequence_number,
         m1_0.status,
@@ -3123,11 +3416,13 @@ Hibernate:
     update
         milestones 
     set
+        additional_allocated_amount=?,
         amount_allocated=?,
         current_version_id=?,
         description=?,
         due_date=?,
         project_id=?,
+        released_amount=?,
         required_evidence=?,
         sequence_number=?,
         status=?,
@@ -3135,7 +3430,7 @@ Hibernate:
         verification_requirements=? 
     where
         id=?
-2026-08-12T15:07:51.032+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-3] o.s.security.web.FilterChainProxy        : Securing POST /api/org/change-requests/d91b9154-ad5a-452a-b9a9-0428b1dd7fe3/withdraw
+2026-08-12T17:03:44.911+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-4] o.s.security.web.FilterChainProxy        : Securing POST /api/org/change-requests/cfcb7164-6e3d-4217-bc7f-ed5c0aca9f00/withdraw
 Hibernate: 
     select
         u1_0.id,
@@ -3151,9 +3446,9 @@ Hibernate:
         users u1_0 
     where
         u1_0.email=?
-2026-08-12T15:07:51.040+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-3] o.s.security.web.FilterChainProxy        : Secured POST /api/org/change-requests/d91b9154-ad5a-452a-b9a9-0428b1dd7fe3/withdraw
-2026-08-12T15:07:51.041+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-3] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgNegotiationController.withdrawChangeRequest(java.util.UUID); target is of class [com.transparencychain.backend.controller.OrgNegotiationController]
-2026-08-12T15:07:51.041+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-3] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgNegotiationController.withdrawChangeRequest(java.util.UUID); target is of class [com.transparencychain.backend.controller.OrgNegotiationController]
+2026-08-12T17:03:44.921+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-4] o.s.security.web.FilterChainProxy        : Secured POST /api/org/change-requests/cfcb7164-6e3d-4217-bc7f-ed5c0aca9f00/withdraw
+2026-08-12T17:03:44.923+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-4] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgNegotiationController.withdrawChangeRequest(java.util.UUID); target is of class [com.transparencychain.backend.controller.OrgNegotiationController]
+2026-08-12T17:03:44.924+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-4] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgNegotiationController.withdrawChangeRequest(java.util.UUID); target is of class [com.transparencychain.backend.controller.OrgNegotiationController]
 Hibernate: 
     select
         fp1_0.id,
@@ -3184,7 +3479,7 @@ Hibernate:
         milestone_change_requests mcr1_0 
     where
         mcr1_0.id=?
-2026-08-12T15:07:51.115+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-4] o.s.security.web.FilterChainProxy        : Securing POST /api/org/projects/ab5fac0c-9601-11f1-8b56-a987a7b38995/commit
+2026-08-12T17:03:45.034+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-5] o.s.security.web.FilterChainProxy        : Securing POST /api/org/projects/ab5fac0c-9601-11f1-8b56-a987a7b38995/commit
 Hibernate: 
     select
         u1_0.id,
@@ -3200,9 +3495,9 @@ Hibernate:
         users u1_0 
     where
         u1_0.email=?
-2026-08-12T15:07:51.124+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-4] o.s.security.web.FilterChainProxy        : Secured POST /api/org/projects/ab5fac0c-9601-11f1-8b56-a987a7b38995/commit
-2026-08-12T15:07:51.141+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-4] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgCommitmentController.createCommitment(java.util.UUID,com.transparencychain.backend.dto.CommitRequest); target is of class [com.transparencychain.backend.controller.OrgCommitmentController]
-2026-08-12T15:07:51.142+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-4] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgCommitmentController.createCommitment(java.util.UUID,com.transparencychain.backend.dto.CommitRequest); target is of class [com.transparencychain.backend.controller.OrgCommitmentController]
+2026-08-12T17:03:45.040+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-5] o.s.security.web.FilterChainProxy        : Secured POST /api/org/projects/ab5fac0c-9601-11f1-8b56-a987a7b38995/commit
+2026-08-12T17:03:45.048+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-5] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgCommitmentController.createCommitment(java.util.UUID,com.transparencychain.backend.dto.CommitRequest); target is of class [com.transparencychain.backend.controller.OrgCommitmentController]
+2026-08-12T17:03:45.049+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-5] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgCommitmentController.createCommitment(java.util.UUID,com.transparencychain.backend.dto.CommitRequest); target is of class [com.transparencychain.backend.controller.OrgCommitmentController]
 Hibernate: 
     select
         fp1_0.id,
@@ -3262,11 +3557,13 @@ Hibernate:
 Hibernate: 
     select
         m1_0.id,
+        m1_0.additional_allocated_amount,
         m1_0.amount_allocated,
         m1_0.current_version_id,
         m1_0.description,
         m1_0.due_date,
         m1_0.project_id,
+        m1_0.released_amount,
         m1_0.required_evidence,
         m1_0.sequence_number,
         m1_0.status,
@@ -3313,7 +3610,7 @@ Hibernate:
         milestone_versions mv1_0 
     where
         mv1_0.id=?
-2026-08-12T15:07:51.187+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-5] o.s.security.web.FilterChainProxy        : Securing POST /api/org/projects/ab5fac0c-9601-11f1-8b56-a987a7b38995/commit
+2026-08-12T17:03:45.115+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-6] o.s.security.web.FilterChainProxy        : Securing POST /api/org/projects/ab5fac0c-9601-11f1-8b56-a987a7b38995/commit
 Hibernate: 
     select
         u1_0.id,
@@ -3329,9 +3626,9 @@ Hibernate:
         users u1_0 
     where
         u1_0.email=?
-2026-08-12T15:07:51.194+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-5] o.s.security.web.FilterChainProxy        : Secured POST /api/org/projects/ab5fac0c-9601-11f1-8b56-a987a7b38995/commit
-2026-08-12T15:07:51.197+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-5] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgCommitmentController.createCommitment(java.util.UUID,com.transparencychain.backend.dto.CommitRequest); target is of class [com.transparencychain.backend.controller.OrgCommitmentController]
-2026-08-12T15:07:51.197+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-5] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgCommitmentController.createCommitment(java.util.UUID,com.transparencychain.backend.dto.CommitRequest); target is of class [com.transparencychain.backend.controller.OrgCommitmentController]
+2026-08-12T17:03:45.127+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-6] o.s.security.web.FilterChainProxy        : Secured POST /api/org/projects/ab5fac0c-9601-11f1-8b56-a987a7b38995/commit
+2026-08-12T17:03:45.129+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-6] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgCommitmentController.createCommitment(java.util.UUID,com.transparencychain.backend.dto.CommitRequest); target is of class [com.transparencychain.backend.controller.OrgCommitmentController]
+2026-08-12T17:03:45.130+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-6] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgCommitmentController.createCommitment(java.util.UUID,com.transparencychain.backend.dto.CommitRequest); target is of class [com.transparencychain.backend.controller.OrgCommitmentController]
 Hibernate: 
     select
         fp1_0.id,
@@ -3391,11 +3688,13 @@ Hibernate:
 Hibernate: 
     select
         m1_0.id,
+        m1_0.additional_allocated_amount,
         m1_0.amount_allocated,
         m1_0.current_version_id,
         m1_0.description,
         m1_0.due_date,
         m1_0.project_id,
+        m1_0.released_amount,
         m1_0.required_evidence,
         m1_0.sequence_number,
         m1_0.status,
@@ -3507,11 +3806,13 @@ Hibernate:
     update
         milestones 
     set
+        additional_allocated_amount=?,
         amount_allocated=?,
         current_version_id=?,
         description=?,
         due_date=?,
         project_id=?,
+        released_amount=?,
         required_evidence=?,
         sequence_number=?,
         status=?,
@@ -3523,11 +3824,13 @@ Hibernate:
     update
         milestones 
     set
+        additional_allocated_amount=?,
         amount_allocated=?,
         current_version_id=?,
         description=?,
         due_date=?,
         project_id=?,
+        released_amount=?,
         required_evidence=?,
         sequence_number=?,
         status=?,
@@ -3556,7 +3859,7 @@ Hibernate:
         funding_commitment_id=? 
     where
         id=?
-2026-08-12T15:07:51.334+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-7] o.s.security.web.FilterChainProxy        : Securing GET /api/org/commitments/f18f04a0-ebd0-42ea-bece-b79e35f83578
+2026-08-12T17:03:45.317+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-8] o.s.security.web.FilterChainProxy        : Securing GET /api/org/commitments/e30e3753-0fa0-4d42-8e91-97b2622c5d43
 Hibernate: 
     select
         u1_0.id,
@@ -3572,9 +3875,9 @@ Hibernate:
         users u1_0 
     where
         u1_0.email=?
-2026-08-12T15:07:51.341+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-7] o.s.security.web.FilterChainProxy        : Secured GET /api/org/commitments/f18f04a0-ebd0-42ea-bece-b79e35f83578
-2026-08-12T15:07:51.343+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-7] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgCommitmentController.getCommitment(java.util.UUID); target is of class [com.transparencychain.backend.controller.OrgCommitmentController]
-2026-08-12T15:07:51.343+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-7] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgCommitmentController.getCommitment(java.util.UUID); target is of class [com.transparencychain.backend.controller.OrgCommitmentController]
+2026-08-12T17:03:45.324+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-8] o.s.security.web.FilterChainProxy        : Secured GET /api/org/commitments/e30e3753-0fa0-4d42-8e91-97b2622c5d43
+2026-08-12T17:03:45.325+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-8] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgCommitmentController.getCommitment(java.util.UUID); target is of class [com.transparencychain.backend.controller.OrgCommitmentController]
+2026-08-12T17:03:45.325+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-8] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgCommitmentController.getCommitment(java.util.UUID); target is of class [com.transparencychain.backend.controller.OrgCommitmentController]
 Hibernate: 
     select
         fp1_0.id,
@@ -3632,7 +3935,7 @@ Hibernate:
         projects p1_0 
     where
         p1_0.id=?
-2026-08-12T15:07:51.392+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-9] o.s.security.web.FilterChainProxy        : Securing POST /api/org/commitments/f18f04a0-ebd0-42ea-bece-b79e35f83578/activate
+2026-08-12T17:03:45.387+05:30 DEBUG 196844 --- [demo] [io-8081-exec-10] o.s.security.web.FilterChainProxy        : Securing POST /api/org/commitments/e30e3753-0fa0-4d42-8e91-97b2622c5d43/activate
 Hibernate: 
     select
         u1_0.id,
@@ -3648,9 +3951,9 @@ Hibernate:
         users u1_0 
     where
         u1_0.email=?
-2026-08-12T15:07:51.398+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-9] o.s.security.web.FilterChainProxy        : Secured POST /api/org/commitments/f18f04a0-ebd0-42ea-bece-b79e35f83578/activate
-2026-08-12T15:07:51.400+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-9] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgCommitmentController.activateCommitment(java.util.UUID); target is of class [com.transparencychain.backend.controller.OrgCommitmentController]
-2026-08-12T15:07:51.400+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-9] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgCommitmentController.activateCommitment(java.util.UUID); target is of class [com.transparencychain.backend.controller.OrgCommitmentController]
+2026-08-12T17:03:45.397+05:30 DEBUG 196844 --- [demo] [io-8081-exec-10] o.s.security.web.FilterChainProxy        : Secured POST /api/org/commitments/e30e3753-0fa0-4d42-8e91-97b2622c5d43/activate
+2026-08-12T17:03:45.399+05:30 DEBUG 196844 --- [demo] [io-8081-exec-10] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgCommitmentController.activateCommitment(java.util.UUID); target is of class [com.transparencychain.backend.controller.OrgCommitmentController]
+2026-08-12T17:03:45.400+05:30 DEBUG 196844 --- [demo] [io-8081-exec-10] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgCommitmentController.activateCommitment(java.util.UUID); target is of class [com.transparencychain.backend.controller.OrgCommitmentController]
 Hibernate: 
     select
         fp1_0.id,
@@ -3742,11 +4045,13 @@ Hibernate:
 Hibernate: 
     select
         m1_0.id,
+        m1_0.additional_allocated_amount,
         m1_0.amount_allocated,
         m1_0.current_version_id,
         m1_0.description,
         m1_0.due_date,
         m1_0.project_id,
+        m1_0.released_amount,
         m1_0.required_evidence,
         m1_0.sequence_number,
         m1_0.status,
@@ -3798,11 +4103,13 @@ Hibernate:
     update
         milestones 
     set
+        additional_allocated_amount=?,
         amount_allocated=?,
         current_version_id=?,
         description=?,
         due_date=?,
         project_id=?,
+        released_amount=?,
         required_evidence=?,
         sequence_number=?,
         status=?,
@@ -3814,11 +4121,13 @@ Hibernate:
     update
         milestones 
     set
+        additional_allocated_amount=?,
         amount_allocated=?,
         current_version_id=?,
         description=?,
         due_date=?,
         project_id=?,
+        released_amount=?,
         required_evidence=?,
         sequence_number=?,
         status=?,
@@ -3830,11 +4139,13 @@ Hibernate:
     update
         milestones 
     set
+        additional_allocated_amount=?,
         amount_allocated=?,
         current_version_id=?,
         description=?,
         due_date=?,
         project_id=?,
+        released_amount=?,
         required_evidence=?,
         sequence_number=?,
         status=?,
@@ -3906,7 +4217,7 @@ Hibernate:
         viewed_at=? 
     where
         id=?
-2026-08-12T15:07:51.476+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-1] o.s.security.web.FilterChainProxy        : Securing POST /api/org/projects/ab5fac0c-9601-11f1-8b56-a987a7b38995/commit
+2026-08-12T17:03:45.470+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-1] o.s.security.web.FilterChainProxy        : Securing POST /api/org/projects/ab5fac0c-9601-11f1-8b56-a987a7b38995/commit
 Hibernate: 
     select
         u1_0.id,
@@ -3922,9 +4233,9 @@ Hibernate:
         users u1_0 
     where
         u1_0.email=?
-2026-08-12T15:07:51.483+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-1] o.s.security.web.FilterChainProxy        : Secured POST /api/org/projects/ab5fac0c-9601-11f1-8b56-a987a7b38995/commit
-2026-08-12T15:07:51.484+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-1] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgCommitmentController.createCommitment(java.util.UUID,com.transparencychain.backend.dto.CommitRequest); target is of class [com.transparencychain.backend.controller.OrgCommitmentController]
-2026-08-12T15:07:51.485+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-1] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgCommitmentController.createCommitment(java.util.UUID,com.transparencychain.backend.dto.CommitRequest); target is of class [com.transparencychain.backend.controller.OrgCommitmentController]
+2026-08-12T17:03:45.479+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-1] o.s.security.web.FilterChainProxy        : Secured POST /api/org/projects/ab5fac0c-9601-11f1-8b56-a987a7b38995/commit
+2026-08-12T17:03:45.482+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-1] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgCommitmentController.createCommitment(java.util.UUID,com.transparencychain.backend.dto.CommitRequest); target is of class [com.transparencychain.backend.controller.OrgCommitmentController]
+2026-08-12T17:03:45.483+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-1] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgCommitmentController.createCommitment(java.util.UUID,com.transparencychain.backend.dto.CommitRequest); target is of class [com.transparencychain.backend.controller.OrgCommitmentController]
 Hibernate: 
     select
         fp1_0.id,
@@ -3962,7 +4273,7 @@ Hibernate:
         projects p1_0 
     where
         p1_0.id=?
-2026-08-12T15:07:51.516+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-2] o.s.security.web.FilterChainProxy        : Securing POST /api/ngo/milestones/ab69b76a-9601-11f1-8b56-a987a7b38995/tickets
+2026-08-12T17:03:45.511+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-2] o.s.security.web.FilterChainProxy        : Securing POST /api/ngo/milestones/ab69b76a-9601-11f1-8b56-a987a7b38995/tickets
 Hibernate: 
     select
         u1_0.id,
@@ -3978,17 +4289,19 @@ Hibernate:
         users u1_0 
     where
         u1_0.email=?
-2026-08-12T15:07:51.522+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-2] o.s.security.web.FilterChainProxy        : Secured POST /api/ngo/milestones/ab69b76a-9601-11f1-8b56-a987a7b38995/tickets
-2026-08-12T15:07:51.523+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-2] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.NgoTicketController.raiseTicket(java.util.UUID); target is of class [com.transparencychain.backend.controller.NgoTicketController]
-2026-08-12T15:07:51.524+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-2] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.NgoTicketController.raiseTicket(java.util.UUID); target is of class [com.transparencychain.backend.controller.NgoTicketController]
+2026-08-12T17:03:45.518+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-2] o.s.security.web.FilterChainProxy        : Secured POST /api/ngo/milestones/ab69b76a-9601-11f1-8b56-a987a7b38995/tickets
+2026-08-12T17:03:45.520+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-2] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.NgoTicketController.raiseTicket(java.util.UUID); target is of class [com.transparencychain.backend.controller.NgoTicketController]
+2026-08-12T17:03:45.521+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-2] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.NgoTicketController.raiseTicket(java.util.UUID); target is of class [com.transparencychain.backend.controller.NgoTicketController]
 Hibernate: 
     select
         m1_0.id,
+        m1_0.additional_allocated_amount,
         m1_0.amount_allocated,
         m1_0.current_version_id,
         m1_0.description,
         m1_0.due_date,
         m1_0.project_id,
+        m1_0.released_amount,
         m1_0.required_evidence,
         m1_0.sequence_number,
         m1_0.status,
@@ -4020,6 +4333,7 @@ Hibernate:
         ps1_0.file_url,
         ps1_0.metadata,
         ps1_0.milestone_id,
+        ps1_0.milestone_task_id,
         ps1_0.status,
         ps1_0.submitted_at 
     from
@@ -4029,7 +4343,7 @@ Hibernate:
             on m1_0.id=ps1_0.milestone_id 
     where
         m1_0.id=?
-2026-08-12T15:07:51.566+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-3] o.s.security.web.FilterChainProxy        : Securing POST /api/v1/milestones/ab69b76a-9601-11f1-8b56-a987a7b38995/proofs
+2026-08-12T17:03:45.567+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-3] o.s.security.web.FilterChainProxy        : Securing POST /api/v1/milestones/ab69b76a-9601-11f1-8b56-a987a7b38995/proofs
 Hibernate: 
     select
         u1_0.id,
@@ -4045,17 +4359,19 @@ Hibernate:
         users u1_0 
     where
         u1_0.email=?
-2026-08-12T15:07:51.572+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-3] o.s.security.web.FilterChainProxy        : Secured POST /api/v1/milestones/ab69b76a-9601-11f1-8b56-a987a7b38995/proofs
-2026-08-12T15:07:51.593+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-3] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.ProofController.submitProof(java.util.UUID,org.springframework.web.multipart.MultipartFile,java.lang.String,java.lang.String); target is of class [com.transparencychain.backend.controller.ProofController]
-2026-08-12T15:07:51.594+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-3] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.ProofController.submitProof(java.util.UUID,org.springframework.web.multipart.MultipartFile,java.lang.String,java.lang.String); target is of class [com.transparencychain.backend.controller.ProofController]
+2026-08-12T17:03:45.576+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-3] o.s.security.web.FilterChainProxy        : Secured POST /api/v1/milestones/ab69b76a-9601-11f1-8b56-a987a7b38995/proofs
+2026-08-12T17:03:45.607+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-3] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.ProofController.submitProof(java.util.UUID,org.springframework.web.multipart.MultipartFile,java.lang.String,java.lang.String); target is of class [com.transparencychain.backend.controller.ProofController]
+2026-08-12T17:03:45.608+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-3] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.ProofController.submitProof(java.util.UUID,org.springframework.web.multipart.MultipartFile,java.lang.String,java.lang.String); target is of class [com.transparencychain.backend.controller.ProofController]
 Hibernate: 
     select
         m1_0.id,
+        m1_0.additional_allocated_amount,
         m1_0.amount_allocated,
         m1_0.current_version_id,
         m1_0.description,
         m1_0.due_date,
         m1_0.project_id,
+        m1_0.released_amount,
         m1_0.required_evidence,
         m1_0.sequence_number,
         m1_0.status,
@@ -4069,18 +4385,20 @@ Hibernate:
     insert 
     into
         proof_submissions
-        (file_type, file_url, metadata, milestone_id, status, submitted_at, id) 
+        (file_type, file_url, metadata, milestone_id, milestone_task_id, status, submitted_at, id) 
     values
-        (?, ?, ?, ?, ?, ?, ?)
+        (?, ?, ?, ?, ?, ?, ?, ?)
 Hibernate: 
     update
         milestones 
     set
+        additional_allocated_amount=?,
         amount_allocated=?,
         current_version_id=?,
         description=?,
         due_date=?,
         project_id=?,
+        released_amount=?,
         required_evidence=?,
         sequence_number=?,
         status=?,
@@ -4119,8 +4437,9 @@ java.io.IOException: Error: End-of-File, expected line at offset 35
 	at org.apache.pdfbox.pdmodel.PDDocument.load(PDDocument.java:1133)
 	at com.transparencychain.backend.service.OcrExtractionService.extractInvoice(OcrExtractionService.java:163)
 	at com.transparencychain.backend.service.AiFraudDetectionService.analyzeProof(AiFraudDetectionService.java:47)
-	at com.transparencychain.backend.controller.ProofController.lambda$submitProof$0(ProofController.java:59)
+	at com.transparencychain.backend.controller.ProofController.lambda$submitProof$0(ProofController.java:62)
 	at java.base/java.lang.Thread.run(Thread.java:1474)
+2026-08-12T17:03:45.754+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-4] o.s.security.web.FilterChainProxy        : Securing POST /api/ngo/milestones/ab69b76a-9601-11f1-8b56-a987a7b38995/tickets
 Hibernate: 
     select
         ps1_0.id,
@@ -4147,6 +4466,7 @@ Hibernate:
         ps1_0.file_url,
         ps1_0.metadata,
         ps1_0.milestone_id,
+        ps1_0.milestone_task_id,
         ps1_0.status,
         ps1_0.submitted_at 
     from
@@ -4164,33 +4484,11 @@ Hibernate:
         file_url=?,
         metadata=?,
         milestone_id=?,
+        milestone_task_id=?,
         status=?,
         submitted_at=? 
     where
         id=?
-Hibernate: 
-    select
-        al1_0.id,
-        al1_0.current_hash,
-        al1_0.entity_id,
-        al1_0.entity_type,
-        al1_0.payload,
-        al1_0.previous_hash,
-        al1_0.timestamp 
-    from
-        audit_logs al1_0 
-    order by
-        al1_0.timestamp desc 
-    limit
-        ?
-Hibernate: 
-    insert 
-    into
-        audit_logs
-        (current_hash, entity_id, entity_type, payload, previous_hash, timestamp, id) 
-    values
-        (?, ?, ?, ?, ?, ?, ?)
-2026-08-12T15:07:51.696+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-4] o.s.security.web.FilterChainProxy        : Securing POST /api/ngo/milestones/ab69b76a-9601-11f1-8b56-a987a7b38995/tickets
 Hibernate: 
     select
         u1_0.id,
@@ -4206,17 +4504,19 @@ Hibernate:
         users u1_0 
     where
         u1_0.email=?
-2026-08-12T15:07:51.703+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-4] o.s.security.web.FilterChainProxy        : Secured POST /api/ngo/milestones/ab69b76a-9601-11f1-8b56-a987a7b38995/tickets
-2026-08-12T15:07:51.703+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-4] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.NgoTicketController.raiseTicket(java.util.UUID); target is of class [com.transparencychain.backend.controller.NgoTicketController]
-2026-08-12T15:07:51.704+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-4] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.NgoTicketController.raiseTicket(java.util.UUID); target is of class [com.transparencychain.backend.controller.NgoTicketController]
+2026-08-12T17:03:45.773+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-4] o.s.security.web.FilterChainProxy        : Secured POST /api/ngo/milestones/ab69b76a-9601-11f1-8b56-a987a7b38995/tickets
+2026-08-12T17:03:45.775+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-4] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.NgoTicketController.raiseTicket(java.util.UUID); target is of class [com.transparencychain.backend.controller.NgoTicketController]
+2026-08-12T17:03:45.776+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-4] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.NgoTicketController.raiseTicket(java.util.UUID); target is of class [com.transparencychain.backend.controller.NgoTicketController]
 Hibernate: 
     select
         m1_0.id,
+        m1_0.additional_allocated_amount,
         m1_0.amount_allocated,
         m1_0.current_version_id,
         m1_0.description,
         m1_0.due_date,
         m1_0.project_id,
+        m1_0.released_amount,
         m1_0.required_evidence,
         m1_0.sequence_number,
         m1_0.status,
@@ -4248,6 +4548,7 @@ Hibernate:
         ps1_0.file_url,
         ps1_0.metadata,
         ps1_0.milestone_id,
+        ps1_0.milestone_task_id,
         ps1_0.status,
         ps1_0.submitted_at 
     from
@@ -4298,6 +4599,28 @@ Hibernate:
     limit
         ?
 Hibernate: 
+    select
+        al1_0.id,
+        al1_0.current_hash,
+        al1_0.entity_id,
+        al1_0.entity_type,
+        al1_0.payload,
+        al1_0.previous_hash,
+        al1_0.timestamp 
+    from
+        audit_logs al1_0 
+    order by
+        al1_0.timestamp desc 
+    limit
+        ?
+Hibernate: 
+    insert 
+    into
+        audit_logs
+        (current_hash, entity_id, entity_type, payload, previous_hash, timestamp, id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?)
+Hibernate: 
     insert 
     into
         tickets
@@ -4315,11 +4638,13 @@ Hibernate:
     update
         milestones 
     set
+        additional_allocated_amount=?,
         amount_allocated=?,
         current_version_id=?,
         description=?,
         due_date=?,
         project_id=?,
+        released_amount=?,
         required_evidence=?,
         sequence_number=?,
         status=?,
@@ -4327,7 +4652,7 @@ Hibernate:
         verification_requirements=? 
     where
         id=?
-2026-08-12T15:07:51.792+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-6] o.s.security.web.FilterChainProxy        : Securing GET /api/org/tickets
+2026-08-12T17:03:46.005+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-6] o.s.security.web.FilterChainProxy        : Securing GET /api/org/tickets
 Hibernate: 
     select
         u1_0.id,
@@ -4343,9 +4668,9 @@ Hibernate:
         users u1_0 
     where
         u1_0.email=?
-2026-08-12T15:07:51.797+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-6] o.s.security.web.FilterChainProxy        : Secured GET /api/org/tickets
-2026-08-12T15:07:51.799+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-6] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgTicketController.getTickets(java.lang.String); target is of class [com.transparencychain.backend.controller.OrgTicketController]
-2026-08-12T15:07:51.800+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-6] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgTicketController.getTickets(java.lang.String); target is of class [com.transparencychain.backend.controller.OrgTicketController]
+2026-08-12T17:03:46.017+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-6] o.s.security.web.FilterChainProxy        : Secured GET /api/org/tickets
+2026-08-12T17:03:46.019+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-6] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgTicketController.getTickets(java.lang.String); target is of class [com.transparencychain.backend.controller.OrgTicketController]
+2026-08-12T17:03:46.021+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-6] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgTicketController.getTickets(java.lang.String); target is of class [com.transparencychain.backend.controller.OrgTicketController]
 Hibernate: 
     select
         ope1_0.id,
@@ -4388,6 +4713,7 @@ Hibernate:
         ps1_0.file_url,
         ps1_0.metadata,
         ps1_0.milestone_id,
+        ps1_0.milestone_task_id,
         ps1_0.status,
         ps1_0.submitted_at 
     from
@@ -4422,11 +4748,13 @@ Hibernate:
 Hibernate: 
     select
         m1_0.id,
+        m1_0.additional_allocated_amount,
         m1_0.amount_allocated,
         m1_0.current_version_id,
         m1_0.description,
         m1_0.due_date,
         m1_0.project_id,
+        m1_0.released_amount,
         m1_0.required_evidence,
         m1_0.sequence_number,
         m1_0.status,
@@ -4451,7 +4779,7 @@ Hibernate:
         users u1_0 
     where
         u1_0.id=?
-2026-08-12T15:07:51.840+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-8] o.s.security.web.FilterChainProxy        : Securing GET /api/org/tickets/f115b17e-6e52-4c6d-8821-244e05d6852c
+2026-08-12T17:03:46.096+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-8] o.s.security.web.FilterChainProxy        : Securing GET /api/org/tickets/d79ff645-686a-4040-beb3-96821d1e6c7d
 Hibernate: 
     select
         u1_0.id,
@@ -4467,9 +4795,9 @@ Hibernate:
         users u1_0 
     where
         u1_0.email=?
-2026-08-12T15:07:51.846+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-8] o.s.security.web.FilterChainProxy        : Secured GET /api/org/tickets/f115b17e-6e52-4c6d-8821-244e05d6852c
-2026-08-12T15:07:51.847+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-8] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgTicketController.getTicketDetail(java.util.UUID); target is of class [com.transparencychain.backend.controller.OrgTicketController]
-2026-08-12T15:07:51.847+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-8] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgTicketController.getTicketDetail(java.util.UUID); target is of class [com.transparencychain.backend.controller.OrgTicketController]
+2026-08-12T17:03:46.108+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-8] o.s.security.web.FilterChainProxy        : Secured GET /api/org/tickets/d79ff645-686a-4040-beb3-96821d1e6c7d
+2026-08-12T17:03:46.110+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-8] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgTicketController.getTicketDetail(java.util.UUID); target is of class [com.transparencychain.backend.controller.OrgTicketController]
+2026-08-12T17:03:46.112+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-8] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgTicketController.getTicketDetail(java.util.UUID); target is of class [com.transparencychain.backend.controller.OrgTicketController]
 Hibernate: 
     select
         t1_0.id,
@@ -4479,15 +4807,18 @@ Hibernate:
         e1_0.file_url,
         e1_0.metadata,
         e1_0.milestone_id,
+        e1_0.milestone_task_id,
         e1_0.status,
         e1_0.submitted_at,
         t1_0.milestone_id,
         m2_0.id,
+        m2_0.additional_allocated_amount,
         m2_0.amount_allocated,
         m2_0.current_version_id,
         m2_0.description,
         m2_0.due_date,
         m2_0.project_id,
+        m2_0.released_amount,
         m2_0.required_evidence,
         m2_0.sequence_number,
         m2_0.status,
@@ -4585,7 +4916,7 @@ Hibernate:
         t1_0.id=? 
     order by
         tr1_0.reviewed_at
-2026-08-12T15:07:51.884+05:30 DEBUG 157260 --- [demo] [io-8081-exec-10] o.s.security.web.FilterChainProxy        : Securing POST /api/org/tickets/f115b17e-6e52-4c6d-8821-244e05d6852c/decision
+2026-08-12T17:03:46.157+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-9] o.s.security.web.FilterChainProxy        : Securing POST /api/org/tickets/d79ff645-686a-4040-beb3-96821d1e6c7d/decision
 Hibernate: 
     select
         u1_0.id,
@@ -4601,9 +4932,9 @@ Hibernate:
         users u1_0 
     where
         u1_0.email=?
-2026-08-12T15:07:51.892+05:30 DEBUG 157260 --- [demo] [io-8081-exec-10] o.s.security.web.FilterChainProxy        : Secured POST /api/org/tickets/f115b17e-6e52-4c6d-8821-244e05d6852c/decision
-2026-08-12T15:07:51.896+05:30 DEBUG 157260 --- [demo] [io-8081-exec-10] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgTicketController.submitDecision(java.util.UUID,java.util.Map); target is of class [com.transparencychain.backend.controller.OrgTicketController]
-2026-08-12T15:07:51.896+05:30 DEBUG 157260 --- [demo] [io-8081-exec-10] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgTicketController.submitDecision(java.util.UUID,java.util.Map); target is of class [com.transparencychain.backend.controller.OrgTicketController]
+2026-08-12T17:03:46.163+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-9] o.s.security.web.FilterChainProxy        : Secured POST /api/org/tickets/d79ff645-686a-4040-beb3-96821d1e6c7d/decision
+2026-08-12T17:03:46.168+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-9] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgTicketController.submitDecision(java.util.UUID,java.util.Map); target is of class [com.transparencychain.backend.controller.OrgTicketController]
+2026-08-12T17:03:46.168+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-9] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgTicketController.submitDecision(java.util.UUID,java.util.Map); target is of class [com.transparencychain.backend.controller.OrgTicketController]
 Hibernate: 
     select
         t1_0.id,
@@ -4613,15 +4944,18 @@ Hibernate:
         e1_0.file_url,
         e1_0.metadata,
         e1_0.milestone_id,
+        e1_0.milestone_task_id,
         e1_0.status,
         e1_0.submitted_at,
         t1_0.milestone_id,
         m2_0.id,
+        m2_0.additional_allocated_amount,
         m2_0.amount_allocated,
         m2_0.current_version_id,
         m2_0.description,
         m2_0.due_date,
         m2_0.project_id,
+        m2_0.released_amount,
         m2_0.required_evidence,
         m2_0.sequence_number,
         m2_0.status,
@@ -4745,11 +5079,13 @@ Hibernate:
     update
         milestones 
     set
+        additional_allocated_amount=?,
         amount_allocated=?,
         current_version_id=?,
         description=?,
         due_date=?,
         project_id=?,
+        released_amount=?,
         required_evidence=?,
         sequence_number=?,
         status=?,
@@ -4771,7 +5107,7 @@ Hibernate:
         status=? 
     where
         id=?
-2026-08-12T15:07:51.986+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-2] o.s.security.web.FilterChainProxy        : Securing POST /api/ngo/milestones/ab69b76a-9601-11f1-8b56-a987a7b38995/tickets
+2026-08-12T17:03:46.270+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-1] o.s.security.web.FilterChainProxy        : Securing POST /api/ngo/milestones/ab69b76a-9601-11f1-8b56-a987a7b38995/tickets
 Hibernate: 
     select
         u1_0.id,
@@ -4787,17 +5123,19 @@ Hibernate:
         users u1_0 
     where
         u1_0.email=?
-2026-08-12T15:07:51.992+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-2] o.s.security.web.FilterChainProxy        : Secured POST /api/ngo/milestones/ab69b76a-9601-11f1-8b56-a987a7b38995/tickets
-2026-08-12T15:07:51.993+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-2] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.NgoTicketController.raiseTicket(java.util.UUID); target is of class [com.transparencychain.backend.controller.NgoTicketController]
-2026-08-12T15:07:51.993+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-2] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.NgoTicketController.raiseTicket(java.util.UUID); target is of class [com.transparencychain.backend.controller.NgoTicketController]
+2026-08-12T17:03:46.279+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-1] o.s.security.web.FilterChainProxy        : Secured POST /api/ngo/milestones/ab69b76a-9601-11f1-8b56-a987a7b38995/tickets
+2026-08-12T17:03:46.281+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-1] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.NgoTicketController.raiseTicket(java.util.UUID); target is of class [com.transparencychain.backend.controller.NgoTicketController]
+2026-08-12T17:03:46.281+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-1] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.NgoTicketController.raiseTicket(java.util.UUID); target is of class [com.transparencychain.backend.controller.NgoTicketController]
 Hibernate: 
     select
         m1_0.id,
+        m1_0.additional_allocated_amount,
         m1_0.amount_allocated,
         m1_0.current_version_id,
         m1_0.description,
         m1_0.due_date,
         m1_0.project_id,
+        m1_0.released_amount,
         m1_0.required_evidence,
         m1_0.sequence_number,
         m1_0.status,
@@ -4829,6 +5167,7 @@ Hibernate:
         ps1_0.file_url,
         ps1_0.metadata,
         ps1_0.milestone_id,
+        ps1_0.milestone_task_id,
         ps1_0.status,
         ps1_0.submitted_at 
     from
@@ -4896,11 +5235,13 @@ Hibernate:
     update
         milestones 
     set
+        additional_allocated_amount=?,
         amount_allocated=?,
         current_version_id=?,
         description=?,
         due_date=?,
         project_id=?,
+        released_amount=?,
         required_evidence=?,
         sequence_number=?,
         status=?,
@@ -4908,7 +5249,7 @@ Hibernate:
         verification_requirements=? 
     where
         id=?
-2026-08-12T15:07:52.066+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-3] o.s.security.web.FilterChainProxy        : Securing POST /api/org/tickets/ec0cf601-29dd-484e-b63a-f7200eb95e58/decision
+2026-08-12T17:03:46.369+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-2] o.s.security.web.FilterChainProxy        : Securing POST /api/org/tickets/80db2c45-dac7-4a65-88cb-b77129cce83e/decision
 Hibernate: 
     select
         u1_0.id,
@@ -4924,9 +5265,9 @@ Hibernate:
         users u1_0 
     where
         u1_0.email=?
-2026-08-12T15:07:52.073+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-3] o.s.security.web.FilterChainProxy        : Secured POST /api/org/tickets/ec0cf601-29dd-484e-b63a-f7200eb95e58/decision
-2026-08-12T15:07:52.074+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-3] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgTicketController.submitDecision(java.util.UUID,java.util.Map); target is of class [com.transparencychain.backend.controller.OrgTicketController]
-2026-08-12T15:07:52.074+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-3] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgTicketController.submitDecision(java.util.UUID,java.util.Map); target is of class [com.transparencychain.backend.controller.OrgTicketController]
+2026-08-12T17:03:46.379+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-2] o.s.security.web.FilterChainProxy        : Secured POST /api/org/tickets/80db2c45-dac7-4a65-88cb-b77129cce83e/decision
+2026-08-12T17:03:46.383+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-2] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgTicketController.submitDecision(java.util.UUID,java.util.Map); target is of class [com.transparencychain.backend.controller.OrgTicketController]
+2026-08-12T17:03:46.384+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-2] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgTicketController.submitDecision(java.util.UUID,java.util.Map); target is of class [com.transparencychain.backend.controller.OrgTicketController]
 Hibernate: 
     select
         t1_0.id,
@@ -4936,15 +5277,18 @@ Hibernate:
         e1_0.file_url,
         e1_0.metadata,
         e1_0.milestone_id,
+        e1_0.milestone_task_id,
         e1_0.status,
         e1_0.submitted_at,
         t1_0.milestone_id,
         m2_0.id,
+        m2_0.additional_allocated_amount,
         m2_0.amount_allocated,
         m2_0.current_version_id,
         m2_0.description,
         m2_0.due_date,
         m2_0.project_id,
+        m2_0.released_amount,
         m2_0.required_evidence,
         m2_0.sequence_number,
         m2_0.status,
@@ -5110,11 +5454,13 @@ Hibernate:
     update
         milestones 
     set
+        additional_allocated_amount=?,
         amount_allocated=?,
         current_version_id=?,
         description=?,
         due_date=?,
         project_id=?,
+        released_amount=?,
         required_evidence=?,
         sequence_number=?,
         status=?,
@@ -5149,11 +5495,13 @@ Hibernate:
 Hibernate: 
     select
         m1_0.id,
+        m1_0.additional_allocated_amount,
         m1_0.amount_allocated,
         m1_0.current_version_id,
         m1_0.description,
         m1_0.due_date,
         m1_0.project_id,
+        m1_0.released_amount,
         m1_0.required_evidence,
         m1_0.sequence_number,
         m1_0.status,
@@ -5169,11 +5517,13 @@ Hibernate:
 Hibernate: 
     select
         m1_0.id,
+        m1_0.additional_allocated_amount,
         m1_0.amount_allocated,
         m1_0.current_version_id,
         m1_0.description,
         m1_0.due_date,
         m1_0.project_id,
+        m1_0.released_amount,
         m1_0.required_evidence,
         m1_0.sequence_number,
         m1_0.status,
@@ -5220,7 +5570,7 @@ Hibernate:
         total_committed_amount=? 
     where
         id=?
-2026-08-12T15:07:52.193+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-5] o.s.security.web.FilterChainProxy        : Securing POST /api/v1/milestones/ab69ba54-9601-11f1-8b56-a987a7b38995/proofs
+2026-08-12T17:03:46.612+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-3] o.s.security.web.FilterChainProxy        : Securing POST /api/v1/milestones/ab69ba54-9601-11f1-8b56-a987a7b38995/proofs
 Hibernate: 
     select
         u1_0.id,
@@ -5236,17 +5586,19 @@ Hibernate:
         users u1_0 
     where
         u1_0.email=?
-2026-08-12T15:07:52.200+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-5] o.s.security.web.FilterChainProxy        : Secured POST /api/v1/milestones/ab69ba54-9601-11f1-8b56-a987a7b38995/proofs
-2026-08-12T15:07:52.202+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-5] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.ProofController.submitProof(java.util.UUID,org.springframework.web.multipart.MultipartFile,java.lang.String,java.lang.String); target is of class [com.transparencychain.backend.controller.ProofController]
-2026-08-12T15:07:52.202+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-5] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.ProofController.submitProof(java.util.UUID,org.springframework.web.multipart.MultipartFile,java.lang.String,java.lang.String); target is of class [com.transparencychain.backend.controller.ProofController]
+2026-08-12T17:03:46.623+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-3] o.s.security.web.FilterChainProxy        : Secured POST /api/v1/milestones/ab69ba54-9601-11f1-8b56-a987a7b38995/proofs
+2026-08-12T17:03:46.627+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-3] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.ProofController.submitProof(java.util.UUID,org.springframework.web.multipart.MultipartFile,java.lang.String,java.lang.String); target is of class [com.transparencychain.backend.controller.ProofController]
+2026-08-12T17:03:46.628+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-3] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.ProofController.submitProof(java.util.UUID,org.springframework.web.multipart.MultipartFile,java.lang.String,java.lang.String); target is of class [com.transparencychain.backend.controller.ProofController]
 Hibernate: 
     select
         m1_0.id,
+        m1_0.additional_allocated_amount,
         m1_0.amount_allocated,
         m1_0.current_version_id,
         m1_0.description,
         m1_0.due_date,
         m1_0.project_id,
+        m1_0.released_amount,
         m1_0.required_evidence,
         m1_0.sequence_number,
         m1_0.status,
@@ -5260,18 +5612,20 @@ Hibernate:
     insert 
     into
         proof_submissions
-        (file_type, file_url, metadata, milestone_id, status, submitted_at, id) 
+        (file_type, file_url, metadata, milestone_id, milestone_task_id, status, submitted_at, id) 
     values
-        (?, ?, ?, ?, ?, ?, ?)
+        (?, ?, ?, ?, ?, ?, ?, ?)
 Hibernate: 
     update
         milestones 
     set
+        additional_allocated_amount=?,
         amount_allocated=?,
         current_version_id=?,
         description=?,
         due_date=?,
         project_id=?,
+        released_amount=?,
         required_evidence=?,
         sequence_number=?,
         status=?,
@@ -5310,7 +5664,7 @@ java.io.IOException: Error: End-of-File, expected line at offset 35
 	at org.apache.pdfbox.pdmodel.PDDocument.load(PDDocument.java:1133)
 	at com.transparencychain.backend.service.OcrExtractionService.extractInvoice(OcrExtractionService.java:163)
 	at com.transparencychain.backend.service.AiFraudDetectionService.analyzeProof(AiFraudDetectionService.java:47)
-	at com.transparencychain.backend.controller.ProofController.lambda$submitProof$0(ProofController.java:59)
+	at com.transparencychain.backend.controller.ProofController.lambda$submitProof$0(ProofController.java:62)
 	at java.base/java.lang.Thread.run(Thread.java:1474)
 Hibernate: 
     select
@@ -5338,6 +5692,7 @@ Hibernate:
         ps1_0.file_url,
         ps1_0.metadata,
         ps1_0.milestone_id,
+        ps1_0.milestone_task_id,
         ps1_0.status,
         ps1_0.submitted_at 
     from
@@ -5355,6 +5710,7 @@ Hibernate:
         file_url=?,
         metadata=?,
         milestone_id=?,
+        milestone_task_id=?,
         status=?,
         submitted_at=? 
     where
@@ -5381,7 +5737,7 @@ Hibernate:
         (current_hash, entity_id, entity_type, payload, previous_hash, timestamp, id) 
     values
         (?, ?, ?, ?, ?, ?, ?)
-2026-08-12T15:07:52.240+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-6] o.s.security.web.FilterChainProxy        : Securing POST /api/ngo/milestones/ab69ba54-9601-11f1-8b56-a987a7b38995/tickets
+2026-08-12T17:03:46.697+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-4] o.s.security.web.FilterChainProxy        : Securing POST /api/ngo/milestones/ab69ba54-9601-11f1-8b56-a987a7b38995/tickets
 Hibernate: 
     select
         u1_0.id,
@@ -5397,17 +5753,19 @@ Hibernate:
         users u1_0 
     where
         u1_0.email=?
-2026-08-12T15:07:52.246+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-6] o.s.security.web.FilterChainProxy        : Secured POST /api/ngo/milestones/ab69ba54-9601-11f1-8b56-a987a7b38995/tickets
-2026-08-12T15:07:52.247+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-6] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.NgoTicketController.raiseTicket(java.util.UUID); target is of class [com.transparencychain.backend.controller.NgoTicketController]
-2026-08-12T15:07:52.248+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-6] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.NgoTicketController.raiseTicket(java.util.UUID); target is of class [com.transparencychain.backend.controller.NgoTicketController]
+2026-08-12T17:03:46.704+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-4] o.s.security.web.FilterChainProxy        : Secured POST /api/ngo/milestones/ab69ba54-9601-11f1-8b56-a987a7b38995/tickets
+2026-08-12T17:03:46.705+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-4] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.NgoTicketController.raiseTicket(java.util.UUID); target is of class [com.transparencychain.backend.controller.NgoTicketController]
+2026-08-12T17:03:46.706+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-4] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.NgoTicketController.raiseTicket(java.util.UUID); target is of class [com.transparencychain.backend.controller.NgoTicketController]
 Hibernate: 
     select
         m1_0.id,
+        m1_0.additional_allocated_amount,
         m1_0.amount_allocated,
         m1_0.current_version_id,
         m1_0.description,
         m1_0.due_date,
         m1_0.project_id,
+        m1_0.released_amount,
         m1_0.required_evidence,
         m1_0.sequence_number,
         m1_0.status,
@@ -5439,6 +5797,7 @@ Hibernate:
         ps1_0.file_url,
         ps1_0.metadata,
         ps1_0.milestone_id,
+        ps1_0.milestone_task_id,
         ps1_0.status,
         ps1_0.submitted_at 
     from
@@ -5506,11 +5865,13 @@ Hibernate:
     update
         milestones 
     set
+        additional_allocated_amount=?,
         amount_allocated=?,
         current_version_id=?,
         description=?,
         due_date=?,
         project_id=?,
+        released_amount=?,
         required_evidence=?,
         sequence_number=?,
         status=?,
@@ -5518,7 +5879,7 @@ Hibernate:
         verification_requirements=? 
     where
         id=?
-2026-08-12T15:07:52.366+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-8] o.s.security.web.FilterChainProxy        : Securing POST /api/org/tickets/c426c0a9-fafe-48d2-9fa8-9783f6a49447/decision
+2026-08-12T17:03:46.835+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-5] o.s.security.web.FilterChainProxy        : Securing POST /api/org/tickets/2644d579-d7b1-46ec-85aa-1d0a9f3ad00b/decision
 Hibernate: 
     select
         u1_0.id,
@@ -5534,9 +5895,9 @@ Hibernate:
         users u1_0 
     where
         u1_0.email=?
-2026-08-12T15:07:52.372+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-8] o.s.security.web.FilterChainProxy        : Secured POST /api/org/tickets/c426c0a9-fafe-48d2-9fa8-9783f6a49447/decision
-2026-08-12T15:07:52.373+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-8] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgTicketController.submitDecision(java.util.UUID,java.util.Map); target is of class [com.transparencychain.backend.controller.OrgTicketController]
-2026-08-12T15:07:52.374+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-8] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgTicketController.submitDecision(java.util.UUID,java.util.Map); target is of class [com.transparencychain.backend.controller.OrgTicketController]
+2026-08-12T17:03:46.843+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-5] o.s.security.web.FilterChainProxy        : Secured POST /api/org/tickets/2644d579-d7b1-46ec-85aa-1d0a9f3ad00b/decision
+2026-08-12T17:03:46.844+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-5] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgTicketController.submitDecision(java.util.UUID,java.util.Map); target is of class [com.transparencychain.backend.controller.OrgTicketController]
+2026-08-12T17:03:46.845+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-5] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgTicketController.submitDecision(java.util.UUID,java.util.Map); target is of class [com.transparencychain.backend.controller.OrgTicketController]
 Hibernate: 
     select
         t1_0.id,
@@ -5546,15 +5907,18 @@ Hibernate:
         e1_0.file_url,
         e1_0.metadata,
         e1_0.milestone_id,
+        e1_0.milestone_task_id,
         e1_0.status,
         e1_0.submitted_at,
         t1_0.milestone_id,
         m2_0.id,
+        m2_0.additional_allocated_amount,
         m2_0.amount_allocated,
         m2_0.current_version_id,
         m2_0.description,
         m2_0.due_date,
         m2_0.project_id,
+        m2_0.released_amount,
         m2_0.required_evidence,
         m2_0.sequence_number,
         m2_0.status,
@@ -5688,9 +6052,9 @@ Hibernate:
         status=? 
     where
         id=?
-2026-08-12T15:07:52.411+05:30 DEBUG 157260 --- [demo] [io-8081-exec-10] o.s.security.web.FilterChainProxy        : Securing POST /api/v1/auth/register
-2026-08-12T15:07:52.412+05:30 DEBUG 157260 --- [demo] [io-8081-exec-10] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
-2026-08-12T15:07:52.412+05:30 DEBUG 157260 --- [demo] [io-8081-exec-10] o.s.security.web.FilterChainProxy        : Secured POST /api/v1/auth/register
+2026-08-12T17:03:46.907+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-6] o.s.security.web.FilterChainProxy        : Securing POST /api/v1/auth/register
+2026-08-12T17:03:46.908+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-6] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2026-08-12T17:03:46.908+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-6] o.s.security.web.FilterChainProxy        : Secured POST /api/v1/auth/register
 Hibernate: 
     select
         u1_0.id,
@@ -5720,9 +6084,9 @@ Hibernate:
         (cin_number, org_name, org_type, total_donated, user_id, id) 
     values
         (?, ?, ?, ?, ?, ?)
-2026-08-12T15:07:52.623+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-1] o.s.security.web.FilterChainProxy        : Securing POST /api/v1/auth/login
-2026-08-12T15:07:52.624+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-1] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
-2026-08-12T15:07:52.624+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-1] o.s.security.web.FilterChainProxy        : Secured POST /api/v1/auth/login
+2026-08-12T17:03:47.188+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-8] o.s.security.web.FilterChainProxy        : Securing POST /api/v1/auth/login
+2026-08-12T17:03:47.189+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-8] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2026-08-12T17:03:47.189+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-8] o.s.security.web.FilterChainProxy        : Secured POST /api/v1/auth/login
 Hibernate: 
     select
         u1_0.id,
@@ -5738,8 +6102,8 @@ Hibernate:
         users u1_0 
     where
         u1_0.email=?
-2026-08-12T15:07:52.762+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-1] o.s.s.a.dao.DaoAuthenticationProvider    : Authenticated user
-2026-08-12T15:07:52.814+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-3] o.s.security.web.FilterChainProxy        : Securing POST /api/org/tickets/c426c0a9-fafe-48d2-9fa8-9783f6a49447/decision
+2026-08-12T17:03:47.337+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-8] o.s.s.a.dao.DaoAuthenticationProvider    : Authenticated user
+2026-08-12T17:03:47.391+05:30 DEBUG 196844 --- [demo] [io-8081-exec-10] o.s.security.web.FilterChainProxy        : Securing POST /api/org/tickets/2644d579-d7b1-46ec-85aa-1d0a9f3ad00b/decision
 Hibernate: 
     select
         u1_0.id,
@@ -5755,9 +6119,9 @@ Hibernate:
         users u1_0 
     where
         u1_0.email=?
-2026-08-12T15:07:52.819+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-3] o.s.security.web.FilterChainProxy        : Secured POST /api/org/tickets/c426c0a9-fafe-48d2-9fa8-9783f6a49447/decision
-2026-08-12T15:07:52.821+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-3] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgTicketController.submitDecision(java.util.UUID,java.util.Map); target is of class [com.transparencychain.backend.controller.OrgTicketController]
-2026-08-12T15:07:52.821+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-3] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgTicketController.submitDecision(java.util.UUID,java.util.Map); target is of class [com.transparencychain.backend.controller.OrgTicketController]
+2026-08-12T17:03:47.401+05:30 DEBUG 196844 --- [demo] [io-8081-exec-10] o.s.security.web.FilterChainProxy        : Secured POST /api/org/tickets/2644d579-d7b1-46ec-85aa-1d0a9f3ad00b/decision
+2026-08-12T17:03:47.404+05:30 DEBUG 196844 --- [demo] [io-8081-exec-10] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgTicketController.submitDecision(java.util.UUID,java.util.Map); target is of class [com.transparencychain.backend.controller.OrgTicketController]
+2026-08-12T17:03:47.405+05:30 DEBUG 196844 --- [demo] [io-8081-exec-10] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgTicketController.submitDecision(java.util.UUID,java.util.Map); target is of class [com.transparencychain.backend.controller.OrgTicketController]
 Hibernate: 
     select
         t1_0.id,
@@ -5767,15 +6131,18 @@ Hibernate:
         e1_0.file_url,
         e1_0.metadata,
         e1_0.milestone_id,
+        e1_0.milestone_task_id,
         e1_0.status,
         e1_0.submitted_at,
         t1_0.milestone_id,
         m2_0.id,
+        m2_0.additional_allocated_amount,
         m2_0.amount_allocated,
         m2_0.current_version_id,
         m2_0.description,
         m2_0.due_date,
         m2_0.project_id,
+        m2_0.released_amount,
         m2_0.required_evidence,
         m2_0.sequence_number,
         m2_0.status,
@@ -5956,11 +6323,13 @@ Hibernate:
     update
         milestones 
     set
+        additional_allocated_amount=?,
         amount_allocated=?,
         current_version_id=?,
         description=?,
         due_date=?,
         project_id=?,
+        released_amount=?,
         required_evidence=?,
         sequence_number=?,
         status=?,
@@ -5995,11 +6364,13 @@ Hibernate:
 Hibernate: 
     select
         m1_0.id,
+        m1_0.additional_allocated_amount,
         m1_0.amount_allocated,
         m1_0.current_version_id,
         m1_0.description,
         m1_0.due_date,
         m1_0.project_id,
+        m1_0.released_amount,
         m1_0.required_evidence,
         m1_0.sequence_number,
         m1_0.status,
@@ -6015,11 +6386,13 @@ Hibernate:
 Hibernate: 
     select
         m1_0.id,
+        m1_0.additional_allocated_amount,
         m1_0.amount_allocated,
         m1_0.current_version_id,
         m1_0.description,
         m1_0.due_date,
         m1_0.project_id,
+        m1_0.released_amount,
         m1_0.required_evidence,
         m1_0.sequence_number,
         m1_0.status,
@@ -6054,7 +6427,7 @@ Hibernate:
         (current_hash, entity_id, entity_type, payload, previous_hash, timestamp, id) 
     values
         (?, ?, ?, ?, ?, ?, ?)
-2026-08-12T15:07:52.891+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-5] o.s.security.web.FilterChainProxy        : Securing GET /api/org/projects/ab5fac0c-9601-11f1-8b56-a987a7b38995/escrow
+2026-08-12T17:03:47.522+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-2] o.s.security.web.FilterChainProxy        : Securing GET /api/org/projects/ab5fac0c-9601-11f1-8b56-a987a7b38995/escrow
 Hibernate: 
     select
         u1_0.id,
@@ -6070,9 +6443,9 @@ Hibernate:
         users u1_0 
     where
         u1_0.email=?
-2026-08-12T15:07:52.898+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-5] o.s.security.web.FilterChainProxy        : Secured GET /api/org/projects/ab5fac0c-9601-11f1-8b56-a987a7b38995/escrow
-2026-08-12T15:07:52.899+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-5] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgCommitmentController.getEscrowByProject(java.util.UUID); target is of class [com.transparencychain.backend.controller.OrgCommitmentController]
-2026-08-12T15:07:52.899+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-5] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgCommitmentController.getEscrowByProject(java.util.UUID); target is of class [com.transparencychain.backend.controller.OrgCommitmentController]
+2026-08-12T17:03:47.534+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-2] o.s.security.web.FilterChainProxy        : Secured GET /api/org/projects/ab5fac0c-9601-11f1-8b56-a987a7b38995/escrow
+2026-08-12T17:03:47.536+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-2] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgCommitmentController.getEscrowByProject(java.util.UUID); target is of class [com.transparencychain.backend.controller.OrgCommitmentController]
+2026-08-12T17:03:47.537+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-2] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgCommitmentController.getEscrowByProject(java.util.UUID); target is of class [com.transparencychain.backend.controller.OrgCommitmentController]
 Hibernate: 
     select
         ea1_0.id,
@@ -6109,7 +6482,7 @@ Hibernate:
         projects p1_0 
     where
         p1_0.id=?
-2026-08-12T15:07:52.932+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-7] o.s.security.web.FilterChainProxy        : Securing GET /api/org/projects/ab5fac0c-9601-11f1-8b56-a987a7b38995/commitment
+2026-08-12T17:03:47.599+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-4] o.s.security.web.FilterChainProxy        : Securing GET /api/org/projects/ab5fac0c-9601-11f1-8b56-a987a7b38995/commitment
 Hibernate: 
     select
         u1_0.id,
@@ -6125,9 +6498,9 @@ Hibernate:
         users u1_0 
     where
         u1_0.email=?
-2026-08-12T15:07:52.939+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-7] o.s.security.web.FilterChainProxy        : Secured GET /api/org/projects/ab5fac0c-9601-11f1-8b56-a987a7b38995/commitment
-2026-08-12T15:07:52.940+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-7] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgCommitmentController.getCommitmentByProject(java.util.UUID); target is of class [com.transparencychain.backend.controller.OrgCommitmentController]
-2026-08-12T15:07:52.940+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-7] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgCommitmentController.getCommitmentByProject(java.util.UUID); target is of class [com.transparencychain.backend.controller.OrgCommitmentController]
+2026-08-12T17:03:47.607+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-4] o.s.security.web.FilterChainProxy        : Secured GET /api/org/projects/ab5fac0c-9601-11f1-8b56-a987a7b38995/commitment
+2026-08-12T17:03:47.609+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-4] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgCommitmentController.getCommitmentByProject(java.util.UUID); target is of class [com.transparencychain.backend.controller.OrgCommitmentController]
+2026-08-12T17:03:47.610+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-4] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgCommitmentController.getCommitmentByProject(java.util.UUID); target is of class [com.transparencychain.backend.controller.OrgCommitmentController]
 Hibernate: 
     select
         fp1_0.id,
@@ -6191,7 +6564,7 @@ Hibernate:
         projects p1_0 
     where
         p1_0.id=?
-2026-08-12T15:07:52.970+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-8] o.s.security.web.FilterChainProxy        : Securing POST /api/v1/milestones/ab69bb22-9601-11f1-8b56-a987a7b38995/proofs
+2026-08-12T17:03:47.664+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-6] o.s.security.web.FilterChainProxy        : Securing POST /api/v1/milestones/ab69bb22-9601-11f1-8b56-a987a7b38995/proofs
 Hibernate: 
     select
         u1_0.id,
@@ -6207,17 +6580,19 @@ Hibernate:
         users u1_0 
     where
         u1_0.email=?
-2026-08-12T15:07:52.976+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-8] o.s.security.web.FilterChainProxy        : Secured POST /api/v1/milestones/ab69bb22-9601-11f1-8b56-a987a7b38995/proofs
-2026-08-12T15:07:52.979+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-8] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.ProofController.submitProof(java.util.UUID,org.springframework.web.multipart.MultipartFile,java.lang.String,java.lang.String); target is of class [com.transparencychain.backend.controller.ProofController]
-2026-08-12T15:07:52.979+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-8] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.ProofController.submitProof(java.util.UUID,org.springframework.web.multipart.MultipartFile,java.lang.String,java.lang.String); target is of class [com.transparencychain.backend.controller.ProofController]
+2026-08-12T17:03:47.674+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-6] o.s.security.web.FilterChainProxy        : Secured POST /api/v1/milestones/ab69bb22-9601-11f1-8b56-a987a7b38995/proofs
+2026-08-12T17:03:47.679+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-6] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.ProofController.submitProof(java.util.UUID,org.springframework.web.multipart.MultipartFile,java.lang.String,java.lang.String); target is of class [com.transparencychain.backend.controller.ProofController]
+2026-08-12T17:03:47.680+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-6] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.ProofController.submitProof(java.util.UUID,org.springframework.web.multipart.MultipartFile,java.lang.String,java.lang.String); target is of class [com.transparencychain.backend.controller.ProofController]
 Hibernate: 
     select
         m1_0.id,
+        m1_0.additional_allocated_amount,
         m1_0.amount_allocated,
         m1_0.current_version_id,
         m1_0.description,
         m1_0.due_date,
         m1_0.project_id,
+        m1_0.released_amount,
         m1_0.required_evidence,
         m1_0.sequence_number,
         m1_0.status,
@@ -6231,18 +6606,20 @@ Hibernate:
     insert 
     into
         proof_submissions
-        (file_type, file_url, metadata, milestone_id, status, submitted_at, id) 
+        (file_type, file_url, metadata, milestone_id, milestone_task_id, status, submitted_at, id) 
     values
-        (?, ?, ?, ?, ?, ?, ?)
+        (?, ?, ?, ?, ?, ?, ?, ?)
 Hibernate: 
     update
         milestones 
     set
+        additional_allocated_amount=?,
         amount_allocated=?,
         current_version_id=?,
         description=?,
         due_date=?,
         project_id=?,
+        released_amount=?,
         required_evidence=?,
         sequence_number=?,
         status=?,
@@ -6281,7 +6658,7 @@ java.io.IOException: Error: End-of-File, expected line at offset 33
 	at org.apache.pdfbox.pdmodel.PDDocument.load(PDDocument.java:1133)
 	at com.transparencychain.backend.service.OcrExtractionService.extractInvoice(OcrExtractionService.java:163)
 	at com.transparencychain.backend.service.AiFraudDetectionService.analyzeProof(AiFraudDetectionService.java:47)
-	at com.transparencychain.backend.controller.ProofController.lambda$submitProof$0(ProofController.java:59)
+	at com.transparencychain.backend.controller.ProofController.lambda$submitProof$0(ProofController.java:62)
 	at java.base/java.lang.Thread.run(Thread.java:1474)
 Hibernate: 
     select
@@ -6309,6 +6686,7 @@ Hibernate:
         ps1_0.file_url,
         ps1_0.metadata,
         ps1_0.milestone_id,
+        ps1_0.milestone_task_id,
         ps1_0.status,
         ps1_0.submitted_at 
     from
@@ -6326,6 +6704,7 @@ Hibernate:
         file_url=?,
         metadata=?,
         milestone_id=?,
+        milestone_task_id=?,
         status=?,
         submitted_at=? 
     where
@@ -6352,7 +6731,7 @@ Hibernate:
         (current_hash, entity_id, entity_type, payload, previous_hash, timestamp, id) 
     values
         (?, ?, ?, ?, ?, ?, ?)
-2026-08-12T15:07:53.021+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-9] o.s.security.web.FilterChainProxy        : Securing POST /api/ngo/milestones/ab69bb22-9601-11f1-8b56-a987a7b38995/tickets
+2026-08-12T17:03:47.739+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-8] o.s.security.web.FilterChainProxy        : Securing POST /api/ngo/milestones/ab69bb22-9601-11f1-8b56-a987a7b38995/tickets
 Hibernate: 
     select
         u1_0.id,
@@ -6368,17 +6747,19 @@ Hibernate:
         users u1_0 
     where
         u1_0.email=?
-2026-08-12T15:07:53.027+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-9] o.s.security.web.FilterChainProxy        : Secured POST /api/ngo/milestones/ab69bb22-9601-11f1-8b56-a987a7b38995/tickets
-2026-08-12T15:07:53.028+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-9] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.NgoTicketController.raiseTicket(java.util.UUID); target is of class [com.transparencychain.backend.controller.NgoTicketController]
-2026-08-12T15:07:53.029+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-9] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.NgoTicketController.raiseTicket(java.util.UUID); target is of class [com.transparencychain.backend.controller.NgoTicketController]
+2026-08-12T17:03:47.751+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-8] o.s.security.web.FilterChainProxy        : Secured POST /api/ngo/milestones/ab69bb22-9601-11f1-8b56-a987a7b38995/tickets
+2026-08-12T17:03:47.752+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-8] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.NgoTicketController.raiseTicket(java.util.UUID); target is of class [com.transparencychain.backend.controller.NgoTicketController]
+2026-08-12T17:03:47.753+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-8] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.NgoTicketController.raiseTicket(java.util.UUID); target is of class [com.transparencychain.backend.controller.NgoTicketController]
 Hibernate: 
     select
         m1_0.id,
+        m1_0.additional_allocated_amount,
         m1_0.amount_allocated,
         m1_0.current_version_id,
         m1_0.description,
         m1_0.due_date,
         m1_0.project_id,
+        m1_0.released_amount,
         m1_0.required_evidence,
         m1_0.sequence_number,
         m1_0.status,
@@ -6410,6 +6791,7 @@ Hibernate:
         ps1_0.file_url,
         ps1_0.metadata,
         ps1_0.milestone_id,
+        ps1_0.milestone_task_id,
         ps1_0.status,
         ps1_0.submitted_at 
     from
@@ -6477,11 +6859,13 @@ Hibernate:
     update
         milestones 
     set
+        additional_allocated_amount=?,
         amount_allocated=?,
         current_version_id=?,
         description=?,
         due_date=?,
         project_id=?,
+        released_amount=?,
         required_evidence=?,
         sequence_number=?,
         status=?,
@@ -6489,7 +6873,7 @@ Hibernate:
         verification_requirements=? 
     where
         id=?
-2026-08-12T15:07:53.094+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-1] o.s.security.web.FilterChainProxy        : Securing POST /api/org/tickets/927097bd-bbd4-4787-a5ac-c8a5b183f9f2/decision
+2026-08-12T17:03:47.876+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-9] o.s.security.web.FilterChainProxy        : Securing POST /api/org/tickets/7dfea4fe-6b73-486f-b376-dfc66b8aeee2/decision
 Hibernate: 
     select
         u1_0.id,
@@ -6505,9 +6889,9 @@ Hibernate:
         users u1_0 
     where
         u1_0.email=?
-2026-08-12T15:07:53.098+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-1] o.s.security.web.FilterChainProxy        : Secured POST /api/org/tickets/927097bd-bbd4-4787-a5ac-c8a5b183f9f2/decision
-2026-08-12T15:07:53.100+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-1] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgTicketController.submitDecision(java.util.UUID,java.util.Map); target is of class [com.transparencychain.backend.controller.OrgTicketController]
-2026-08-12T15:07:53.100+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-1] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgTicketController.submitDecision(java.util.UUID,java.util.Map); target is of class [com.transparencychain.backend.controller.OrgTicketController]
+2026-08-12T17:03:47.887+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-9] o.s.security.web.FilterChainProxy        : Secured POST /api/org/tickets/7dfea4fe-6b73-486f-b376-dfc66b8aeee2/decision
+2026-08-12T17:03:47.891+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-9] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgTicketController.submitDecision(java.util.UUID,java.util.Map); target is of class [com.transparencychain.backend.controller.OrgTicketController]
+2026-08-12T17:03:47.891+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-9] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgTicketController.submitDecision(java.util.UUID,java.util.Map); target is of class [com.transparencychain.backend.controller.OrgTicketController]
 Hibernate: 
     select
         t1_0.id,
@@ -6517,15 +6901,18 @@ Hibernate:
         e1_0.file_url,
         e1_0.metadata,
         e1_0.milestone_id,
+        e1_0.milestone_task_id,
         e1_0.status,
         e1_0.submitted_at,
         t1_0.milestone_id,
         m2_0.id,
+        m2_0.additional_allocated_amount,
         m2_0.amount_allocated,
         m2_0.current_version_id,
         m2_0.description,
         m2_0.due_date,
         m2_0.project_id,
+        m2_0.released_amount,
         m2_0.required_evidence,
         m2_0.sequence_number,
         m2_0.status,
@@ -6691,11 +7078,13 @@ Hibernate:
     update
         milestones 
     set
+        additional_allocated_amount=?,
         amount_allocated=?,
         current_version_id=?,
         description=?,
         due_date=?,
         project_id=?,
+        released_amount=?,
         required_evidence=?,
         sequence_number=?,
         status=?,
@@ -6730,11 +7119,13 @@ Hibernate:
 Hibernate: 
     select
         m1_0.id,
+        m1_0.additional_allocated_amount,
         m1_0.amount_allocated,
         m1_0.current_version_id,
         m1_0.description,
         m1_0.due_date,
         m1_0.project_id,
+        m1_0.released_amount,
         m1_0.required_evidence,
         m1_0.sequence_number,
         m1_0.status,
@@ -6750,11 +7141,13 @@ Hibernate:
 Hibernate: 
     select
         m1_0.id,
+        m1_0.additional_allocated_amount,
         m1_0.amount_allocated,
         m1_0.current_version_id,
         m1_0.description,
         m1_0.due_date,
         m1_0.project_id,
+        m1_0.released_amount,
         m1_0.required_evidence,
         m1_0.sequence_number,
         m1_0.status,
@@ -6903,7 +7296,7 @@ Hibernate:
         (current_hash, entity_id, entity_type, payload, previous_hash, timestamp, id) 
     values
         (?, ?, ?, ?, ?, ?, ?)
-2026-08-12T15:07:53.164+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-3] o.s.security.web.FilterChainProxy        : Securing GET /api/org/projects/ab5fac0c-9601-11f1-8b56-a987a7b38995/escrow
+2026-08-12T17:03:48.025+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-1] o.s.security.web.FilterChainProxy        : Securing GET /api/org/projects/ab5fac0c-9601-11f1-8b56-a987a7b38995/escrow
 Hibernate: 
     select
         u1_0.id,
@@ -6919,9 +7312,9 @@ Hibernate:
         users u1_0 
     where
         u1_0.email=?
-2026-08-12T15:07:53.170+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-3] o.s.security.web.FilterChainProxy        : Secured GET /api/org/projects/ab5fac0c-9601-11f1-8b56-a987a7b38995/escrow
-2026-08-12T15:07:53.172+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-3] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgCommitmentController.getEscrowByProject(java.util.UUID); target is of class [com.transparencychain.backend.controller.OrgCommitmentController]
-2026-08-12T15:07:53.172+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-3] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgCommitmentController.getEscrowByProject(java.util.UUID); target is of class [com.transparencychain.backend.controller.OrgCommitmentController]
+2026-08-12T17:03:48.037+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-1] o.s.security.web.FilterChainProxy        : Secured GET /api/org/projects/ab5fac0c-9601-11f1-8b56-a987a7b38995/escrow
+2026-08-12T17:03:48.039+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-1] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgCommitmentController.getEscrowByProject(java.util.UUID); target is of class [com.transparencychain.backend.controller.OrgCommitmentController]
+2026-08-12T17:03:48.039+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-1] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgCommitmentController.getEscrowByProject(java.util.UUID); target is of class [com.transparencychain.backend.controller.OrgCommitmentController]
 Hibernate: 
     select
         ea1_0.id,
@@ -6958,7 +7351,7 @@ Hibernate:
         projects p1_0 
     where
         p1_0.id=?
-2026-08-12T15:07:53.201+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-5] o.s.security.web.FilterChainProxy        : Securing GET /api/org/projects/ab5fac0c-9601-11f1-8b56-a987a7b38995
+2026-08-12T17:03:48.084+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-2] o.s.security.web.FilterChainProxy        : Securing GET /api/org/projects/ab5fac0c-9601-11f1-8b56-a987a7b38995
 Hibernate: 
     select
         u1_0.id,
@@ -6974,9 +7367,9 @@ Hibernate:
         users u1_0 
     where
         u1_0.email=?
-2026-08-12T15:07:53.206+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-5] o.s.security.web.FilterChainProxy        : Secured GET /api/org/projects/ab5fac0c-9601-11f1-8b56-a987a7b38995
-2026-08-12T15:07:53.207+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-5] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgProjectController.getProjectDetail(java.util.UUID); target is of class [com.transparencychain.backend.controller.OrgProjectController]
-2026-08-12T15:07:53.207+05:30 DEBUG 157260 --- [demo] [nio-8081-exec-5] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgProjectController.getProjectDetail(java.util.UUID); target is of class [com.transparencychain.backend.controller.OrgProjectController]
+2026-08-12T17:03:48.093+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-2] o.s.security.web.FilterChainProxy        : Secured GET /api/org/projects/ab5fac0c-9601-11f1-8b56-a987a7b38995
+2026-08-12T17:03:48.094+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-2] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgProjectController.getProjectDetail(java.util.UUID); target is of class [com.transparencychain.backend.controller.OrgProjectController]
+2026-08-12T17:03:48.095+05:30 DEBUG 196844 --- [demo] [nio-8081-exec-2] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.transparencychain.backend.controller.OrgProjectController.getProjectDetail(java.util.UUID); target is of class [com.transparencychain.backend.controller.OrgProjectController]
 Hibernate: 
     select
         fp1_0.id,
@@ -7036,11 +7429,13 @@ Hibernate:
 Hibernate: 
     select
         m1_0.id,
+        m1_0.additional_allocated_amount,
         m1_0.amount_allocated,
         m1_0.current_version_id,
         m1_0.description,
         m1_0.due_date,
         m1_0.project_id,
+        m1_0.released_amount,
         m1_0.required_evidence,
         m1_0.sequence_number,
         m1_0.status,

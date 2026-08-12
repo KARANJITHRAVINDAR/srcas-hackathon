@@ -87,7 +87,7 @@ mysql -u root -proot transparency_chain 2>/dev/null <<'SQL'
     WHERE TABLE_SCHEMA='transparency_chain' AND TABLE_NAME='projects' AND COLUMN_NAME='status';
   SET @needs_pub = IF(INSTR(@ctype, 'PUBLISHED') = 0, 1, 0);
   SET @sql = IF(@needs_pub,
-    "ALTER TABLE projects MODIFY COLUMN status ENUM('DRAFT','PUBLISHED','ESCROWED','IN_PROGRESS','COMPLETED','FLAGGED','CANCELLED')",
+    "ALTER TABLE projects MODIFY COLUMN status VARCHAR(255) NULL",
     "SELECT 'projects.status already patched'");
   PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 
@@ -96,13 +96,14 @@ mysql -u root -proot transparency_chain 2>/dev/null <<'SQL'
     WHERE TABLE_SCHEMA='transparency_chain' AND TABLE_NAME='milestones' AND COLUMN_NAME='status';
   SET @needs_ms = IF(INSTR(@mtype, 'LOCKED') = 0, 1, 0);
   SET @msql = IF(@needs_ms,
-    "ALTER TABLE milestones MODIFY COLUMN status ENUM('PENDING','IN_REVIEW','VERIFIED','REJECTED','MODIFIED','LOCKED','IN_PROGRESS','EVIDENCE_SUBMITTED','TICKET_RAISED','UNDER_REVIEW','ACCEPTED','DISBURSED','CLOSED') NULL",
+    "ALTER TABLE milestones MODIFY COLUMN status VARCHAR(255) NULL",
     "SELECT 'milestones.status already patched'");
   PREPARE mstmt FROM @msql; EXECUTE mstmt; DEALLOCATE PREPARE mstmt;
 
   -- milestones.funder_id: ensure nullable
-  ALTER TABLE projects MODIFY COLUMN funder_id uuid NULL;
+  SET @sql_funder = 'ALTER TABLE projects MODIFY COLUMN funder_id BINARY(16) NULL';
 SQL
+mysql -u root -proot transparency_chain -e "ALTER TABLE projects MODIFY COLUMN funder_id BINARY(16) NULL;" 2>/dev/null || true
 ok "Schema patches applied"
 
 # ── 3. Start backend ─────────────────────────────────────────────────────────

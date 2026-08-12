@@ -64,7 +64,9 @@ public class TicketService {
             milestone.getStatus() != Milestone.MilestoneStatus.REJECTED &&
             milestone.getStatus() != Milestone.MilestoneStatus.PENDING &&
             milestone.getStatus() != Milestone.MilestoneStatus.IN_PROGRESS &&
-            milestone.getStatus() != Milestone.MilestoneStatus.LOCKED) {
+            milestone.getStatus() != Milestone.MilestoneStatus.LOCKED &&
+            milestone.getStatus() != Milestone.MilestoneStatus.AWAITING_FUNDER_APPROVAL &&
+            milestone.getStatus() != Milestone.MilestoneStatus.READY_FOR_APPROVAL) {
             throw new IllegalStateException("Milestone is not in an evidence-submitted state. Current status: " + milestone.getStatus());
         }
 

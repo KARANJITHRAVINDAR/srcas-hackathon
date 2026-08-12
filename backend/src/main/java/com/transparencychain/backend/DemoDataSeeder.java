@@ -83,7 +83,7 @@ public class DemoDataSeeder implements CommandLineRunner {
         if (userOpt.isPresent()) {
             user = userOpt.get();
             System.out.println("Found user for seeding: " + targetEmail);
-            user.setPasswordHash(passwordEncoder.encode("123456"));
+            user.setPasswordHash(passwordEncoder.encode("password"));
             userRepository.save(user);
             
             NgoProfile ngoProfile = ngoProfileRepository.findByUserId(user.getId())

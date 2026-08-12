@@ -47,8 +47,9 @@ function AppRoutes() {
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
-      <Route path="/marketplace" element={<MarketplacePage />} />
       <Route path="/audit" element={<PublicAuditDashboard />} />
+      <Route path="/public/dashboard" element={<PublicAuditDashboard />} />
+      <Route path="/public-ledger" element={<PublicAuditDashboard />} />
       
       {/* NGO Routes */}
       <Route 

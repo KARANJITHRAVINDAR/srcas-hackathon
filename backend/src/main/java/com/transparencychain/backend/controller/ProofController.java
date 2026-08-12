@@ -51,7 +51,7 @@ public class ProofController {
         proof.setStatus(ProofSubmission.ProofStatus.PENDING_AI_CHECK);
         proofRepository.save(proof);
         
-        milestone.setStatus(Milestone.MilestoneStatus.AWAITING_FUNDER_APPROVAL);
+        milestone.setStatus(Milestone.MilestoneStatus.EVIDENCE_SUBMITTED);
         milestoneRepository.save(milestone);
         
         auditLogService.logAction(milestone.getId(), "MILESTONE", "Evidence submitted. ID: " + proof.getId());
