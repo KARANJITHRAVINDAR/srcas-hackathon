@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
-import { ShieldCheck, Layers, FileCheck, Users, Search, ExternalLink, Activity, Award, CheckCircle2, Lock, ArrowUpRight, Eye, RefreshCw } from 'lucide-react';
+import { 
+  ShieldCheck, Layers, FileCheck, Users, Search, Activity, 
+  CheckCircle2, Lock, Eye, RefreshCw, ArrowRight, ExternalLink, Hash, Clock
+} from 'lucide-react';
 
 interface Stats {
   totalCommittedBudget: number;
@@ -108,130 +111,141 @@ export default function PublicAuditDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans">
-      {/* Header Navigation */}
-      <header className="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-emerald-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-              <ShieldCheck className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold bg-gradient-to-r from-white via-slate-200 to-indigo-300 bg-clip-text text-transparent">
-                Transparency Chain
-              </h1>
-              <p className="text-xs text-emerald-400 font-medium flex items-center gap-1">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                Public Immutable Audit Explorer
-              </p>
-            </div>
-          </div>
+    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-emerald-200">
+      {/* HEADER NAVIGATION */}
+      <nav className="fixed w-full z-50 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm py-3.5">
+        <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
+          <Link to="/" className="flex items-center gap-2">
+            <ShieldCheck className="text-emerald-600 w-8 h-8" />
+            <span className="text-xl font-black tracking-tight text-slate-900">
+              TRANSPARENCY CHAIN
+            </span>
+            <span className="hidden sm:inline-block px-2.5 py-0.5 text-[11px] font-bold rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200 ml-2">
+              Public Ledger Explorer
+            </span>
+          </Link>
           <div className="flex items-center gap-4">
-            <button onClick={fetchData} className="px-3 py-1.5 text-xs rounded-lg border border-slate-700 bg-slate-800 hover:bg-slate-700 transition text-slate-300 flex items-center gap-1.5">
-              <RefreshCw className="w-3.5 h-3.5" /> Refresh Stream
+            <button
+              onClick={fetchData}
+              className="px-3.5 py-2 text-xs font-semibold rounded-lg border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 transition flex items-center gap-1.5 shadow-sm"
+            >
+              <RefreshCw className="w-3.5 h-3.5 text-slate-500" /> Refresh Stream
             </button>
-            <Link to="/login" className="px-4 py-2 text-xs font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-500 transition text-white shadow-lg shadow-indigo-600/30">
-              Org / NGO Portal →
+            <Link
+              to="/marketplace"
+              className="text-xs font-bold bg-slate-900 text-white px-4 py-2.5 rounded-lg shadow-sm hover:bg-slate-800 transition flex items-center gap-1.5"
+            >
+              Marketplace <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
         </div>
-      </header>
+      </nav>
 
-      {/* Main Container */}
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Banner Section */}
-        <div className="relative rounded-2xl bg-gradient-to-r from-indigo-900/50 via-slate-900 to-purple-900/40 p-8 border border-indigo-500/20 mb-8 overflow-hidden">
-          <div className="absolute -right-10 -bottom-10 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
-          <div className="relative z-10 max-w-3xl">
-            <span className="px-3 py-1 text-xs font-semibold uppercase tracking-wider text-indigo-400 bg-indigo-950/80 border border-indigo-800 rounded-full">
-              Zero Trust Architecture
-            </span>
-            <h2 className="text-3xl font-extrabold text-white mt-3 leading-tight">
-              Cryptographically Verified CSR & Public Grant Explorer
-            </h2>
-            <p className="text-slate-400 text-sm mt-2 leading-relaxed">
-              Every rupee committed, milestone completed, AI verification score, and escrow release is recorded on a tamper-proof SHA-256 / Ethereum audit trail.
+      {/* HERO / PLATFORM METRICS */}
+      <section className="pt-28 pb-12 px-6 bg-gradient-to-b from-slate-100 via-emerald-50/30 to-slate-50">
+        <div className="max-w-7xl mx-auto">
+          <div className="max-w-3xl mb-8">
+            <div className="inline-flex items-center gap-2 px-3 py-1 text-xs font-bold text-emerald-800 bg-emerald-100 border border-emerald-200 rounded-full mb-3">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              100% Immutable Public Audit Trail
+            </div>
+            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-slate-900 leading-tight">
+              Cryptographically Verified <br />
+              <span className="text-emerald-600">CSR Payout & Impact Explorer</span>
+            </h1>
+            <p className="text-slate-600 text-base mt-3 leading-relaxed">
+              Every committed grant, evidence milestone, AI fraud inspection score, and escrow release transaction is anchored to an immutable blockchain ledger.
             </p>
           </div>
 
-          {/* Stats Cards */}
+          {/* KEY STATS CARDS */}
           {stats && (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
-              <div className="bg-slate-900/90 border border-slate-800 p-4 rounded-xl">
-                <div className="flex items-center justify-between text-slate-400 text-xs mb-1">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+              <div className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm hover:shadow-md transition">
+                <div className="flex items-center justify-between text-slate-500 text-xs font-semibold mb-2">
                   <span>Committed Capital</span>
-                  <Layers className="w-4 h-4 text-indigo-400" />
+                  <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600"><Layers className="w-4 h-4" /></div>
                 </div>
-                <div className="text-2xl font-bold text-white">{formatCurrency(stats.totalCommittedBudget)}</div>
-                <div className="text-[11px] text-slate-500 mt-1">{stats.activeProjectsCount} Total Projects</div>
+                <div className="text-2xl font-black text-slate-900">{formatCurrency(stats.totalCommittedBudget)}</div>
+                <div className="text-xs font-semibold text-slate-500 mt-1">{stats.activeProjectsCount} Total Projects</div>
               </div>
 
-              <div className="bg-slate-900/90 border border-slate-800 p-4 rounded-xl">
-                <div className="flex items-center justify-between text-slate-400 text-xs mb-1">
+              <div className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm hover:shadow-md transition">
+                <div className="flex items-center justify-between text-slate-500 text-xs font-semibold mb-2">
                   <span>Released Escrow</span>
-                  <Activity className="w-4 h-4 text-emerald-400" />
+                  <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600"><Activity className="w-4 h-4" /></div>
                 </div>
-                <div className="text-2xl font-bold text-emerald-400">{formatCurrency(stats.totalDisbursedAmount)}</div>
-                <div className="text-[11px] text-emerald-500/80 mt-1">100% Automated Triggers</div>
+                <div className="text-2xl font-black text-emerald-600">{formatCurrency(stats.totalDisbursedAmount)}</div>
+                <div className="text-xs font-semibold text-emerald-700/80 mt-1">Smart Contract Escrow Payouts</div>
               </div>
 
-              <div className="bg-slate-900/90 border border-slate-800 p-4 rounded-xl">
-                <div className="flex items-center justify-between text-slate-400 text-xs mb-1">
-                  <span>Verified Proofs</span>
-                  <FileCheck className="w-4 h-4 text-purple-400" />
+              <div className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm hover:shadow-md transition">
+                <div className="flex items-center justify-between text-slate-500 text-xs font-semibold mb-2">
+                  <span>Verified Milestones</span>
+                  <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600"><FileCheck className="w-4 h-4" /></div>
                 </div>
-                <div className="text-2xl font-bold text-white">{stats.verifiedMilestonesCount}</div>
-                <div className="text-[11px] text-purple-400/80 mt-1">{stats.totalEvidenceUploaded} Evidence Uploads</div>
+                <div className="text-2xl font-black text-slate-900">{stats.verifiedMilestonesCount}</div>
+                <div className="text-xs font-semibold text-slate-500 mt-1">{stats.totalEvidenceUploaded} AI Evidence Packages</div>
               </div>
 
-              <div className="bg-slate-900/90 border border-slate-800 p-4 rounded-xl">
-                <div className="flex items-center justify-between text-slate-400 text-xs mb-1">
+              <div className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm hover:shadow-md transition">
+                <div className="flex items-center justify-between text-slate-500 text-xs font-semibold mb-2">
                   <span>Lives Impacted</span>
-                  <Users className="w-4 h-4 text-amber-400" />
+                  <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600"><Users className="w-4 h-4" /></div>
                 </div>
-                <div className="text-2xl font-bold text-amber-400">{(stats.beneficiariesImpacted || 0).toLocaleString()}</div>
-                <div className="text-[11px] text-amber-500/80 mt-1">{stats.publicSurveyResponses} Verified Feedback Submissions</div>
+                <div className="text-2xl font-black text-slate-900">{(stats.beneficiariesImpacted || 0).toLocaleString()}</div>
+                <div className="text-xs font-semibold text-slate-500 mt-1">{stats.publicSurveyResponses} Verified Beneficiaries</div>
               </div>
             </div>
           )}
         </div>
+      </section>
 
-        {/* Tab & Filter Bar */}
+      {/* EXPLORER TABS & CONTROLS */}
+      <section className="py-8 px-6 max-w-7xl mx-auto">
         <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4 mb-6">
-          <div className="flex gap-2 p-1 bg-slate-900 rounded-xl border border-slate-800 self-start">
+          <div className="flex gap-2 p-1.5 bg-slate-200/80 rounded-xl self-start">
             <button
               onClick={() => setSelectedTab('projects')}
-              className={`px-4 py-2 rounded-lg text-xs font-semibold transition ${selectedTab === 'projects' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-white'}`}
+              className={`px-5 py-2 rounded-lg text-xs font-bold transition ${
+                selectedTab === 'projects'
+                  ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
             >
               Public Projects Registry ({filteredProjects.length})
             </button>
             <button
               onClick={() => setSelectedTab('ledger')}
-              className={`px-4 py-2 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 ${selectedTab === 'ledger' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-white'}`}
+              className={`px-5 py-2 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
+                selectedTab === 'ledger'
+                  ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
             >
-              <Lock className="w-3.5 h-3.5" /> Immutable Audit Stream ({ledgerLogs.length})
+              <Lock className="w-3.5 h-3.5" /> Blockchain Audit Stream ({ledgerLogs.length})
             </button>
           </div>
 
           {selectedTab === 'projects' && (
             <div className="flex flex-wrap items-center gap-3">
               <div className="relative">
-                <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
-                  placeholder="Search project, location, SDG..."
+                  placeholder="Search title, location, SDG..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9 pr-4 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 w-64"
+                  className="pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-emerald-500 shadow-sm w-64"
                 />
               </div>
 
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="bg-slate-900 border border-slate-800 rounded-xl text-xs text-slate-300 px-3 py-2 focus:outline-none focus:border-indigo-500"
+                className="bg-white border border-slate-200 rounded-xl text-xs text-slate-700 px-3.5 py-2 focus:outline-none focus:border-emerald-500 shadow-sm font-semibold"
               >
-                <option value="ALL">All Statuses</option>
+                <option value="ALL">All Project Statuses</option>
                 <option value="COMPLETED">Completed</option>
                 <option value="ESCROWED">Escrow Active</option>
                 <option value="IN_PROGRESS">In Progress</option>
@@ -241,98 +255,104 @@ export default function PublicAuditDashboard() {
           )}
         </div>
 
-        {/* Content View */}
+        {/* TAB CONTENT */}
         {loading ? (
           <div className="py-20 text-center text-slate-500">
-            <RefreshCw className="w-8 h-8 animate-spin mx-auto text-indigo-500 mb-3" />
-            <p className="text-sm">Fetching cryptographically signed audit ledger...</p>
+            <RefreshCw className="w-8 h-8 animate-spin mx-auto text-emerald-600 mb-3" />
+            <p className="text-sm font-semibold">Synchronizing with transparent ledger...</p>
           </div>
         ) : selectedTab === 'projects' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {filteredProjects.map((p) => (
-              <div key={p.id} className="bg-slate-900/90 border border-slate-800/80 rounded-2xl p-6 hover:border-indigo-500/40 transition group">
-                <div className="flex justify-between items-start mb-3">
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="px-2.5 py-0.5 text-[10px] font-bold rounded-full bg-indigo-950 text-indigo-400 border border-indigo-800">
-                        {p.sdgGoal || 'SDG Target'}
-                      </span>
-                      <span className="px-2.5 py-0.5 text-[10px] font-bold rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800 flex items-center gap-1">
-                        <CheckCircle2 className="w-3 h-3" /> {p.status}
-                      </span>
+              <div key={p.id} className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition flex flex-col justify-between">
+                <div>
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="px-2.5 py-0.5 text-[10px] font-bold rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+                          {p.sdgGoal || 'SDG Goal'}
+                        </span>
+                        <span className="px-2.5 py-0.5 text-[10px] font-bold rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1">
+                          <CheckCircle2 className="w-3 h-3 text-emerald-600" /> {p.status}
+                        </span>
+                      </div>
+                      <h3 className="text-xl font-bold text-slate-900 leading-snug">{p.title}</h3>
                     </div>
-                    <h3 className="text-lg font-bold text-white group-hover:text-indigo-400 transition">{p.title}</h3>
+                    <div className="text-right pl-3">
+                      <div className="text-lg font-black text-emerald-600">{formatCurrency(p.totalBudget)}</div>
+                      <div className="text-[11px] font-semibold text-slate-400">Total Grant</div>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <div className="text-lg font-extrabold text-emerald-400">{formatCurrency(p.totalBudget)}</div>
-                    <div className="text-[11px] text-slate-500">Grant Escrow</div>
+
+                  <p className="text-xs text-slate-600 leading-relaxed line-clamp-2 mb-4">{p.description}</p>
+
+                  <div className="grid grid-cols-2 gap-3 text-xs bg-slate-50 p-3.5 rounded-xl border border-slate-100 mb-4">
+                    <div>
+                      <span className="text-slate-400 text-[10px] font-bold uppercase tracking-wider block">NGO Implementer</span>
+                      <span className="font-bold text-slate-800">{p.ngo?.orgName || 'Registered NGO'}</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 text-[10px] font-bold uppercase tracking-wider block">CSR Funder</span>
+                      <span className="font-bold text-slate-800">{p.funder?.orgName || 'Corporate Funder'}</span>
+                    </div>
                   </div>
                 </div>
 
-                <p className="text-xs text-slate-400 line-clamp-2 mb-4">{p.description}</p>
-
-                <div className="grid grid-cols-2 gap-2 text-xs bg-slate-950/60 p-3 rounded-xl border border-slate-800/60 mb-4">
-                  <div>
-                    <span className="text-slate-500 text-[10px] block">Implementing NGO</span>
-                    <span className="font-medium text-slate-200">{p.ngo?.orgName || 'Registered NGO'}</span>
-                  </div>
-                  <div>
-                    <span className="text-slate-500 text-[10px] block">Funder Organisation</span>
-                    <span className="font-medium text-slate-200">{p.funder?.orgName || 'CSR Funder'}</span>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between pt-2 border-t border-slate-800/60">
-                  <span className="text-xs text-slate-400 flex items-center gap-1">
+                <div className="flex items-center justify-between pt-3 border-t border-slate-100 mt-2">
+                  <span className="text-xs font-semibold text-slate-500 flex items-center gap-1">
                     📍 {p.geography || 'India'}
                   </span>
                   <button
                     onClick={() => openProofGallery(p)}
-                    className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-indigo-950 hover:bg-indigo-900 border border-indigo-800 text-indigo-300 transition flex items-center gap-1.5"
+                    className="px-4 py-2 text-xs font-bold rounded-lg bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 transition flex items-center gap-1.5 shadow-sm"
                   >
-                    <Eye className="w-3.5 h-3.5" /> View Proofs & Ledger
+                    <Eye className="w-3.5 h-3.5 text-emerald-600" /> Proofs & Ledger →
                   </button>
                 </div>
               </div>
             ))}
 
             {filteredProjects.length === 0 && (
-              <div className="col-span-full py-16 text-center text-slate-500 bg-slate-900/50 rounded-2xl border border-slate-800">
-                No matching projects found.
+              <div className="col-span-full py-16 text-center text-slate-500 bg-white rounded-2xl border border-slate-200 shadow-sm">
+                No matching projects found on the public ledger.
               </div>
             )}
           </div>
         ) : (
-          /* Blockchain Audit Stream Tab */
-          <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6">
-            <div className="flex justify-between items-center mb-4 border-b border-slate-800 pb-4">
+          /* BLOCKCHAIN AUDIT STREAM TAB */
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+            <div className="flex justify-between items-center mb-6 pb-4 border-b border-slate-100">
               <div>
-                <h3 className="text-base font-bold text-white flex items-center gap-2">
-                  <Lock className="w-4 h-4 text-emerald-400" /> Cryptographic Ledger Log Stream
+                <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                  <Lock className="w-5 h-5 text-emerald-600" /> Cryptographic Ledger Log Stream
                 </h3>
-                <p className="text-xs text-slate-400">All state transitions anchored with SHA-256 chain hashes</p>
+                <p className="text-xs text-slate-500 mt-0.5">All state transitions anchored with SHA-256 chain hashes</p>
               </div>
-              <span className="px-2.5 py-1 text-xs rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800 font-mono">
-                Chain Status: SYNCHRONIZED
+              <span className="px-3 py-1 text-xs font-bold rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Synchronized
               </span>
             </div>
 
             <div className="space-y-3 font-mono text-xs max-h-[600px] overflow-y-auto pr-2">
               {ledgerLogs.map((log, idx) => (
-                <div key={log.id || idx} className="bg-slate-950 p-4 rounded-xl border border-slate-800 hover:border-slate-700 transition">
-                  <div className="flex justify-between items-center text-slate-400 text-[11px] mb-2">
-                    <span className="text-indigo-400 font-bold">[{log.entityType || 'SYSTEM_AUDIT'}]</span>
-                    <span>{new Date(log.timestamp).toLocaleString()}</span>
+                <div key={log.id || idx} className="bg-slate-50 p-4 rounded-xl border border-slate-200 hover:border-slate-300 transition">
+                  <div className="flex justify-between items-center text-slate-500 text-[11px] mb-2 font-sans">
+                    <span className="font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded border border-emerald-200">
+                      {log.entityType || 'SYSTEM_AUDIT'}
+                    </span>
+                    <span className="flex items-center gap-1 font-semibold text-slate-400">
+                      <Clock className="w-3 h-3" /> {new Date(log.timestamp).toLocaleString()}
+                    </span>
                   </div>
-                  <p className="text-slate-200 font-sans mb-3 text-xs">{log.payload}</p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-[10px] text-slate-500 bg-slate-900/80 p-2.5 rounded-lg border border-slate-800/80">
+                  <p className="text-slate-800 font-sans font-medium text-xs mb-3">{log.payload}</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-[10px] bg-white p-3 rounded-lg border border-slate-200">
                     <div className="truncate">
-                      <span className="text-slate-400">Current Hash: </span>
-                      <span className="text-emerald-400">{log.currentHash || '0x4a8f921bc89a2731e0f'}</span>
+                      <span className="text-slate-400 font-sans">Current Hash: </span>
+                      <span className="text-emerald-700 font-bold">{log.currentHash || '0x4a8f921bc89a2731e0f'}</span>
                     </div>
                     <div className="truncate">
-                      <span className="text-slate-400">Prev Hash: </span>
-                      <span className="text-slate-400">{log.previousHash || '0x0000000000000000000'}</span>
+                      <span className="text-slate-400 font-sans">Prev Hash: </span>
+                      <span className="text-slate-500 font-semibold">{log.previousHash || '0x0000000000000000000'}</span>
                     </div>
                   </div>
                 </div>
@@ -345,18 +365,18 @@ export default function PublicAuditDashboard() {
           </div>
         )}
 
-        {/* Proof Gallery Modal */}
+        {/* PROOF GALLERY MODAL */}
         {selectedProofProject && (
-          <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-3xl max-h-[85vh] overflow-hidden flex flex-col shadow-2xl">
-              <div className="p-6 border-b border-slate-800 flex justify-between items-center">
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+            <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-3xl max-h-[85vh] overflow-hidden flex flex-col shadow-2xl">
+              <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
                 <div>
-                  <span className="text-xs text-indigo-400 font-semibold uppercase">Verified Proof Gallery</span>
-                  <h3 className="text-lg font-bold text-white">{selectedProofProject.title}</h3>
+                  <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider">Verified Proof Gallery</span>
+                  <h3 className="text-xl font-extrabold text-slate-900">{selectedProofProject.title}</h3>
                 </div>
                 <button
                   onClick={() => setSelectedProofProject(null)}
-                  className="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center text-sm"
+                  className="w-8 h-8 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-700 flex items-center justify-center font-bold text-sm transition"
                 >
                   ✕
                 </button>
@@ -364,36 +384,54 @@ export default function PublicAuditDashboard() {
 
               <div className="p-6 overflow-y-auto space-y-4 flex-1">
                 {loadingProofs ? (
-                  <div className="text-center py-12 text-slate-500">Loading evidence submissions...</div>
+                  <div className="text-center py-12 text-slate-500 font-semibold">Loading evidence submissions...</div>
                 ) : projectProofs.length > 0 ? (
                   projectProofs.map((proof) => (
-                    <div key={proof.id} className="bg-slate-950 p-4 rounded-xl border border-slate-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div key={proof.id} className="bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                       <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-950 text-emerald-400 border border-emerald-800">
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <span className="px-2.5 py-0.5 text-[10px] font-bold rounded bg-emerald-100 text-emerald-800 border border-emerald-200">
                             {proof.status}
                           </span>
-                          <span className="text-xs text-slate-400 font-medium">
+                          <span className="text-xs font-bold text-slate-700">
                             {proof.milestone?.title || 'Milestone Evidence'}
                           </span>
                         </div>
-                        <div className="text-xs font-mono text-indigo-300 mb-1">{proof.fileUrl}</div>
-                        <div className="text-[11px] text-slate-500">{proof.metadata || 'Geotagged & Timestamped Evidence'}</div>
+                        <div className="text-xs font-mono font-semibold text-emerald-700 mb-1">{proof.fileUrl}</div>
+                        <div className="text-[11px] text-slate-500">{proof.metadata || 'Geotagged & Timestamped Digital Evidence'}</div>
                       </div>
                       <div className="text-right">
-                        <span className="text-[10px] text-slate-500 block">Uploaded At</span>
-                        <span className="text-xs text-slate-300 font-mono">{new Date(proof.submittedAt).toLocaleDateString()}</span>
+                        <span className="text-[10px] font-bold text-slate-400 block uppercase">Uploaded At</span>
+                        <span className="text-xs font-bold text-slate-700">{new Date(proof.submittedAt).toLocaleDateString()}</span>
                       </div>
                     </div>
                   ))
                 ) : (
-                  <div className="text-center py-12 text-slate-500">No public evidence submissions for this project yet.</div>
+                  <div className="text-center py-12 text-slate-500 font-semibold">No public evidence submissions recorded for this project yet.</div>
                 )}
               </div>
             </div>
           </div>
         )}
-      </div>
+      </section>
+
+      {/* FOOTER */}
+      <footer className="bg-slate-900 text-slate-400 py-12 px-6 mt-16 border-t border-slate-800">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="text-emerald-500 w-6 h-6" />
+            <span className="text-lg font-black tracking-tight text-white">TRANSPARENCY CHAIN</span>
+          </div>
+          <div className="flex gap-6 text-sm font-semibold">
+            <Link to="/marketplace" className="hover:text-white transition">Projects</Link>
+            <Link to="/audit" className="hover:text-white transition">Public Audit</Link>
+            <Link to="/login" className="hover:text-white transition">Portal Login</Link>
+          </div>
+          <div className="text-xs text-slate-500 font-medium">
+            AI + Blockchain for Transparent CSR Funding & Impact
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
