@@ -6,6 +6,7 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import NgoDashboardPage from './pages/NgoDashboardPage';
 import FunderDashboardPage from './pages/FunderDashboardPage';
+import FunderProjectsPage from './pages/FunderProjectsPage';
 import ProjectCreationPage from './pages/ProjectCreationPage';
 import ProjectDetailPage from './pages/ProjectDetailPage';
 import MarketplacePage from './pages/MarketplacePage';
@@ -18,11 +19,11 @@ import NgoProfilePage from './pages/NgoProfilePage';
 import EvidenceUploadPage from './pages/EvidenceUploadPage';
 import DashboardLayout from './components/DashboardLayout';
 
-const ProtectedRoute = ({ children, role }: { children: JSX.Element, role?: string }) => {
+const ProtectedRoute = ({ children, role }: { children: React.ReactNode, role?: string }) => {
     const { token, user } = useAuth();
     if (!token) return <Navigate to="/login" />;
     // if (role && user?.role !== role) return <Navigate to="/dashboard" />;
-    return children;
+    return children as React.ReactElement;
 };
 
 const DashboardWrapper = ({ children }: { children: React.ReactNode }) => (
@@ -72,6 +73,10 @@ function AppRoutes() {
       <Route 
         path="/funder/dashboard" 
         element={<ProtectedRoute role="FUNDER"><DashboardWrapper><FunderDashboardPage /></DashboardWrapper></ProtectedRoute>} 
+      />
+      <Route 
+        path="/funder/projects" 
+        element={<ProtectedRoute role="FUNDER"><DashboardWrapper><FunderProjectsPage /></DashboardWrapper></ProtectedRoute>} 
       />
       <Route 
         path="/funder/projects/new" 

@@ -7,16 +7,19 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Data
 @Entity
 @Table(name = "projects")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Project {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "funder_id", nullable = false)
+    @JoinColumn(name = "funder_id", nullable = true)
     @JsonIgnore
     private FunderProfile funder;
 
@@ -61,6 +64,6 @@ public class Project {
     }
 
     public enum ProjectStatus {
-        DRAFT, ESCROWED, IN_PROGRESS, COMPLETED, FLAGGED, CANCELLED
+        DRAFT, PUBLISHED, ESCROWED, IN_PROGRESS, COMPLETED, FLAGGED, CANCELLED
     }
 }
