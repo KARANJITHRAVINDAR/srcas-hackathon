@@ -199,7 +199,8 @@ section "4. PHASE 1 — PROJECT DETAIL"
 
 PROJECT_ID=$(parse_body "$MARKET" | python3 -c "
 import sys,json; d=json.load(sys.stdin)
-print(d[0]['projectId'] if d else '')" 2>/dev/null)
+target = next((p['projectId'] for p in d if p['projectId'] == 'ab5fac0c-9601-11f1-8b56-a987a7b38995'), d[0]['projectId'] if d else '')
+print(target)" 2>/dev/null)
 info "Using project: $PROJECT_ID"
 
 DETAIL=$(do_get "$FT" "$BASE/api/org/projects/$PROJECT_ID")

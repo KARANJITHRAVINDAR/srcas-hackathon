@@ -5,14 +5,12 @@
 (!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
   - `__dirname` (vite.config.ts:10:25). Use `import.meta.dirname` instead
 Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+12:50:14 am [vite] (client) Re-optimizing dependencies because vite config has changed
 
-  VITE v8.2.1  ready in 225 ms
+  VITE v8.2.1  ready in 284 ms
 
   ➜  Local:   http://localhost:5173/
   ➜  Network: use --host to expose
-5:16:38 pm [vite] (client) [console.error] Failed to load public audit dashboard data AxiosError: Request failed with status code 401
-    at settle (http://localhost:5173/node_modules/.vite/deps/axios.js?v=7140058a:1934:14)
-    at XMLHttpRequest.onloadend (http://localhost:5173/node_modules/.vite/deps/axios.js?v=7140058a:2367:4)
-    at Axios$1.request (http://localhost:5173/node_modules/.vite/deps/axios.js?v=7140058a:3188:37)
-    at async Promise.all (index 1)
-    at async fetchData (http://localhost:5173/src/pages/PublicAuditDashboard.tsx:26:47)
+12:50:15 am [vite] (client) [console.error] AxiosError: Request failed with status code 401
+    at settle (http://localhost:5173/node_modules/.vite/deps/axios.js?v=e783fb56:1934:14)
+    at XMLHttpRequest.onloadend (http://localhost:5173/node_modules/.vite/deps/axios.js?v=e783fb56:2367:4)

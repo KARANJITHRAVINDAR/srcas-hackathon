@@ -186,7 +186,7 @@ public class ProjectController {
             project.setFunder(funder);
         }
         
-        project.setStatus(Project.ProjectStatus.SUBMITTED);
+        project.setStatus(request.getFunderId() != null ? Project.ProjectStatus.SUBMITTED : Project.ProjectStatus.PUBLISHED);
         project = projectRepository.save(project);
         
         auditLogService.logAction(project.getId(), "PROJECT", "Project PROPOSED by NGO " + ngo.getOrgName());

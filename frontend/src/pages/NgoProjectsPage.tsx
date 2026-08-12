@@ -10,7 +10,7 @@ export default function NgoProjectsPage() {
     const [projects, setProjects] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
-    const [activeTab, setActiveTab] = useState<'CREATED' | 'REQUESTS' | 'APPROVED' | 'COMPLETED'>('APPROVED');
+    const [activeTab, setActiveTab] = useState<'CREATED' | 'REQUESTS' | 'APPROVED' | 'COMPLETED'>('REQUESTS');
 
     useEffect(() => {
         if (user?.id) {
@@ -28,9 +28,9 @@ export default function NgoProjectsPage() {
         
         let matchesTab = false;
         if (activeTab === 'CREATED') {
-            matchesTab = ['DRAFT'].includes(p.status);
+            matchesTab = ['DRAFT', 'PUBLISHED', 'SUBMITTED'].includes(p.status);
         } else if (activeTab === 'REQUESTS') {
-            matchesTab = ['SUBMITTED', 'UNDER_REVIEW', 'CHANGES_REQUESTED', 'REJECTED'].includes(p.status);
+            matchesTab = ['SUBMITTED', 'PUBLISHED', 'UNDER_REVIEW', 'CHANGES_REQUESTED', 'REJECTED'].includes(p.status);
         } else if (activeTab === 'APPROVED') {
             matchesTab = ['APPROVED', 'FUNDED', 'ACTIVE', 'PAUSED'].includes(p.status);
         } else if (activeTab === 'COMPLETED') {
