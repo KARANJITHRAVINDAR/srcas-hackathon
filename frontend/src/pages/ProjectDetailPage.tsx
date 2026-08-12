@@ -106,6 +106,16 @@ export default function ProjectDetailPage() {
         }
     };
 
+    const handleReviewProposal = async (status: string) => {
+        try {
+            await axios.patch(`http://localhost:8081/api/v1/projects/${id}/status`, { status });
+            alert(`Project ${status} successfully!`);
+            window.location.reload();
+        } catch (err: any) {
+            alert(err.response?.data?.message || 'Failed to update project status');
+        }
+    };
+
     if (loading) return <div className="p-8">Loading...</div>;
     if (!project) return <div className="p-8">Project not found.</div>;
 
@@ -117,14 +127,35 @@ export default function ProjectDetailPage() {
                 <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 mb-6">
                     <div className="flex justify-between items-start mb-6">
                         <div>
-                            <span className="text-xs font-bold text-[#059669] bg-green-50 px-2 py-1 rounded mb-2 inline-block">{project.status}</span>
+                            <span className={`text-xs font-bold px-2 py-1 rounded mb-2 inline-block ${
+                                project.status === 'PROPOSED' ? 'bg-amber-100 text-amber-800' :
+                                project.status === 'REJECTED' ? 'bg-red-100 text-red-800' :
+                                project.status === 'CHANGES_REQUESTED' ? 'bg-orange-100 text-orange-800' :
+                                project.status === 'ESCROWED' ? 'bg-emerald-100 text-emerald-800' :
+                                'bg-blue-100 text-blue-800'
+                            }`}>{project.status}</span>
                             <h1 className="text-3xl font-bold font-[Space_Grotesk]">{project.title}</h1>
                         </div>
-                        {user?.role === 'FUNDER' && project.status === 'DRAFT' && (
-                            <button onClick={lockEscrow} className="bg-[#059669] text-white px-6 py-2 rounded-md font-bold shadow-md hover:bg-emerald-600 transition animate-pulse">
-                                Lock Funds in Escrow (₹{project.totalBudget})
-                            </button>
-                        )}
+                        <div className="flex gap-2">
+                            {user?.role === 'FUNDER' && project.status === 'PROPOSED' && (
+                                <>
+                                    <button onClick={() => handleReviewProposal('APPROVED')} className="bg-[#059669] text-white px-4 py-2 rounded-md font-bold shadow-md hover:bg-emerald-600 transition">
+                                        Approve
+                                    </button>
+                                    <button onClick={() => handleReviewProposal('CHANGES_REQUESTED')} className="bg-amber-500 text-white px-4 py-2 rounded-md font-bold shadow-md hover:bg-amber-600 transition">
+                                        Request Changes
+                                    </button>
+                                    <button onClick={() => handleReviewProposal('REJECTED')} className="bg-red-600 text-white px-4 py-2 rounded-md font-bold shadow-md hover:bg-red-700 transition">
+                                        Reject
+                                    </button>
+                                </>
+                            )}
+                            {user?.role === 'FUNDER' && (project.status === 'DRAFT' || project.status === 'APPROVED') && (
+                                <button onClick={lockEscrow} className="bg-[#059669] text-white px-6 py-2 rounded-md font-bold shadow-md hover:bg-emerald-600 transition animate-pulse">
+                                    Lock Funds in Escrow (₹{project.totalBudget})
+                                </button>
+                            )}
+                        </div>
                     </div>
                     
                     <div className="grid grid-cols-2 gap-4 mb-6">

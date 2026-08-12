@@ -12,6 +12,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
+import java.util.Map;
 import java.math.BigDecimal;
 import com.transparencychain.backend.dto.FundRequestDto;
 
@@ -25,6 +26,9 @@ public class MilestoneController {
 
     @Autowired
     ProjectRepository projectRepository;
+    
+    @Autowired
+    com.transparencychain.backend.repository.MilestoneTaskRepository milestoneTaskRepository;
     
     @Autowired
     AuditLogService auditLogService;
@@ -45,16 +49,15 @@ public class MilestoneController {
 
         for (Milestone m : milestones) {
             m.setProject(project);
-            m.setStatus(Milestone.MilestoneStatus.PENDING);
+            m.setStatus(Milestone.MilestoneStatus.AVAILABLE);
         }
         
         milestoneRepository.saveAll(milestones);
         
         auditLogService.logAction(project.getId(), "MILESTONE", milestones.size() + " milestones created");
         
-        // Move project out of escrow to in_progress if milestones are defined
-        if (project.getStatus() == Project.ProjectStatus.ESCROWED) {
-            project.setStatus(Project.ProjectStatus.IN_PROGRESS);
+        if (project.getStatus() == Project.ProjectStatus.FUNDED) {
+            project.setStatus(Project.ProjectStatus.ACTIVE);
             projectRepository.save(project);
         }
 
@@ -66,11 +69,29 @@ public class MilestoneController {
         return ResponseEntity.ok(milestoneRepository.findByProjectId(projectId));
     }
 
+    @GetMapping("/{milestoneId}/progress")
+    public ResponseEntity<?> getMilestoneProgress(@PathVariable UUID projectId, @PathVariable UUID milestoneId) {
+        Milestone milestone = milestoneRepository.findById(milestoneId).orElseThrow();
+        List<com.transparencychain.backend.model.MilestoneTask> tasks = milestoneTaskRepository.findByMilestoneId(milestoneId);
+        
+        int totalTasks = tasks.size();
+        int completedTasks = (int) tasks.stream().filter(t -> t.getStatus() == com.transparencychain.backend.model.MilestoneTask.TaskStatus.COMPLETED).count();
+        int progressPercentage = totalTasks == 0 ? 0 : (completedTasks * 100) / totalTasks;
+        
+        return ResponseEntity.ok(Map.of(
+            "milestoneId", milestone.getId(),
+            "status", milestone.getStatus(),
+            "totalTasks", totalTasks,
+            "completedTasks", completedTasks,
+            "progressPercentage", progressPercentage
+        ));
+    }
+
     @PostMapping("/{milestoneId}/submit")
     @PreAuthorize("hasRole('NGO')")
     public ResponseEntity<?> submitMilestone(@PathVariable UUID projectId, @PathVariable UUID milestoneId) {
         Milestone milestone = milestoneRepository.findById(milestoneId).orElseThrow();
-        milestone.setStatus(Milestone.MilestoneStatus.IN_REVIEW);
+        milestone.setStatus(Milestone.MilestoneStatus.AWAITING_FUNDER_APPROVAL);
         milestoneRepository.save(milestone);
         
         auditLogService.logAction(milestone.getId(), "MILESTONE", "Milestone submitted to Funder for final approval");

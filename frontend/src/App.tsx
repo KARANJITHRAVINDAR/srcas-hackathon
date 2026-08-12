@@ -16,6 +16,13 @@ import PublicAuditDashboard from './pages/PublicAuditDashboard';
 import NgoProjectsPage from './pages/NgoProjectsPage';
 import NgoProfilePage from './pages/NgoProfilePage';
 import EvidenceUploadPage from './pages/EvidenceUploadPage';
+import NgoProjectCreationPage from './pages/NgoProjectCreationPage';
+import NgoProjectWorkspace from './pages/NgoProjectWorkspace';
+import VerificationCenter from './pages/VerificationCenter';
+
+import NgoExpensesPage from './pages/NgoExpensesPage';
+import AddExpensePage from './pages/AddExpensePage';
+import ExpenseDetailPage from './pages/ExpenseDetailPage';
 import DashboardLayout from './components/DashboardLayout';
 
 const ProtectedRoute = ({ children, role }: { children: JSX.Element, role?: string }) => {
@@ -56,6 +63,10 @@ function AppRoutes() {
         element={<ProtectedRoute role="NGO"><DashboardWrapper><NgoProjectsPage /></DashboardWrapper></ProtectedRoute>} 
       />
       <Route 
+        path="/ngo/projects/new" 
+        element={<ProtectedRoute role="NGO"><DashboardWrapper><NgoProjectCreationPage /></DashboardWrapper></ProtectedRoute>} 
+      />
+      <Route 
         path="/ngo/profile" 
         element={<ProtectedRoute role="NGO"><DashboardWrapper><NgoProfilePage /></DashboardWrapper></ProtectedRoute>} 
       />
@@ -67,6 +78,23 @@ function AppRoutes() {
         path="/projects/:id/milestones/new" 
         element={<ProtectedRoute role="NGO"><DashboardWrapper><MilestoneCreationPage /></DashboardWrapper></ProtectedRoute>} 
       />
+      <Route 
+        path="/ngo/projects/:id" 
+        element={<ProtectedRoute role="NGO"><DashboardWrapper><NgoProjectWorkspace /></DashboardWrapper></ProtectedRoute>} 
+      />
+      <Route 
+        path="/ngo/projects/:id/milestones/:milestoneId" 
+        element={<ProtectedRoute role="NGO"><DashboardWrapper><NgoProjectWorkspace /></DashboardWrapper></ProtectedRoute>} 
+      />
+      <Route 
+        path="/ngo/verification" 
+        element={<ProtectedRoute role="NGO"><DashboardWrapper><VerificationCenter /></DashboardWrapper></ProtectedRoute>} 
+      />
+
+      {/* NGO Expenses Routes */}
+      <Route path="/ngo/expenses" element={<ProtectedRoute><DashboardLayout><NgoExpensesPage /></DashboardLayout></ProtectedRoute>} />
+      <Route path="/ngo/expenses/new" element={<ProtectedRoute><DashboardLayout><AddExpensePage /></DashboardLayout></ProtectedRoute>} />
+      <Route path="/ngo/expenses/:id" element={<ProtectedRoute><DashboardLayout><ExpenseDetailPage /></DashboardLayout></ProtectedRoute>} />
 
       {/* Funder Routes */}
       <Route 

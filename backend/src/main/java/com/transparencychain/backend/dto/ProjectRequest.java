@@ -21,5 +21,6 @@ public class ProjectRequest {
     private Integer expectedBeneficiaries;
     
     private java.util.UUID ngoId;
+    private java.util.UUID funderId;
     private java.util.List<MilestoneRequest> milestones;
 }

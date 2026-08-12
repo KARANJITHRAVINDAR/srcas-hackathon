@@ -29,6 +29,7 @@ public class Milestone {
     private BigDecimal amountAllocated;
 
     @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "VARCHAR(255)")
     private MilestoneStatus status;
 
     private java.time.LocalDate dueDate;
@@ -40,6 +41,6 @@ public class Milestone {
     private String verificationRequirements;
 
     public enum MilestoneStatus {
-        PENDING, IN_REVIEW, VERIFIED, REJECTED
+        LOCKED, AVAILABLE, IN_PROGRESS, READY_FOR_APPROVAL, AWAITING_FUNDER_APPROVAL, CHANGES_REQUIRED, COMPLETED, REJECTED
     }
 }
