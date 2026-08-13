@@ -27,17 +27,28 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             delete axios.defaults.headers.common['Authorization'];
         }
 
-        // Add interceptor to handle 401 Unauthorized (expired token)
+        // Add interceptor to handle 401 Unauthorized (expired/invalid token only)
         const interceptor = axios.interceptors.response.use(
             response => response,
             error => {
-                if (error.response?.status === 401) {
-                    // Token expired or invalid
+                const status = error.response?.status;
+                // Only redirect to login for genuine authentication failures (401).
+                // 400 Bad Request, 403 Forbidden, 404 Not Found, 500 Server Error,
+                // and network errors must NOT trigger a login redirect — they should
+                // be handled individually by each call-site's catch block.
+                if (status === 401) {
+                    console.warn('[Auth] 401 received — clearing session and redirecting to login.');
                     setToken(null);
                     setUser(null);
                     localStorage.removeItem('token');
                     localStorage.removeItem('user');
                     navigate('/login');
+                } else if (!status) {
+                    // Network error (no response at all) — do NOT redirect
+                    console.error('[Auth] Network error (no response):', error.message);
+                } else {
+                    // Log non-auth errors for diagnostics but let each page handle them
+                    console.error(`[Auth] API error ${status}:`, error.response?.data?.message || error.message);
                 }
                 return Promise.reject(error);
             }

@@ -103,4 +103,19 @@ public class OrgProjectController {
                     .body(new MessageResponse(e.getMessage()));
         }
     }
+
+    @PostMapping("/projects/{id}/negotiate")
+    public ResponseEntity<?> markProjectNegotiating(@PathVariable UUID id) {
+        UUID funderId = currentFunder().getId();
+        try {
+            ProjectDetailDto detail = orgProjectService.markNegotiating(id, funderId);
+            return ResponseEntity.ok(detail);
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest()
+                    .body(new MessageResponse("Invalid transition: " + e.getMessage()));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest()
+                    .body(new MessageResponse(e.getMessage()));
+        }
+    }
 }

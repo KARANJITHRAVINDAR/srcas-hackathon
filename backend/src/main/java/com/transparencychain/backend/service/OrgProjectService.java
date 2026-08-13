@@ -153,6 +153,34 @@ public class OrgProjectService {
         return getProjectDetail(projectId, funderId);
     }
 
+    /**
+     * Transitions engagement from UNDER_REVIEW -> NEGOTIATING.
+     * Guards against invalid transitions.
+     */
+    @Transactional
+    public ProjectDetailDto markNegotiating(UUID projectId, UUID funderId) {
+        OrgProjectEngagement engagement = engagementRepository
+                .findByFunderIdAndProjectId(funderId, projectId)
+                .orElseThrow(() -> new RuntimeException(
+                        "No engagement found. Open the project detail first to register discovery."));
+
+        if (engagement.getStatus() != OrgProjectEngagement.EngagementStatus.UNDER_REVIEW) {
+            throw new IllegalStateException(
+                    "Engagement is already in status " + engagement.getStatus() +
+                    ". Expected UNDER_REVIEW to transition to NEGOTIATING.");
+        }
+
+        String before = engagement.getStatus().name();
+        engagement.setStatus(OrgProjectEngagement.EngagementStatus.NEGOTIATING);
+        engagementRepository.save(engagement);
+
+        auditLogService.logAction(
+                projectId, "ORG_ENGAGEMENT",
+                "Funder " + funderId + " moved engagement to NEGOTIATING (was: " + before + ")");
+
+        return getProjectDetail(projectId, funderId);
+    }
+
     // -------------------------------------------------------------------------
     // MAPPING HELPERS
     // -------------------------------------------------------------------------
