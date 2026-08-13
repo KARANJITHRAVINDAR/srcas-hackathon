@@ -80,16 +80,21 @@ public class TicketService {
         // Pull risk metrics if AI check completed
         EvidenceAnalysis analysis = latestProof.getEvidenceAnalysis();
         if (analysis != null) {
-            ticket.setRiskScore(BigDecimal.valueOf(analysis.getFraudScore() != null ? analysis.getFraudScore() : 0));
-            int fraud = analysis.getFraudScore() != null ? analysis.getFraudScore() : 0;
-            if (fraud <= 30) {
-                ticket.setRiskLevel(Ticket.RiskLevel.LOW);
-            } else if (fraud <= 60) {
-                ticket.setRiskLevel(Ticket.RiskLevel.MEDIUM);
-            } else if (fraud <= 80) {
-                ticket.setRiskLevel(Ticket.RiskLevel.HIGH);
-            } else {
+            if (analysis.getResult() == EvidenceAnalysisResult.OCR_FAILED) {
+                ticket.setRiskScore(BigDecimal.valueOf(100));
                 ticket.setRiskLevel(Ticket.RiskLevel.CRITICAL);
+            } else {
+                ticket.setRiskScore(BigDecimal.valueOf(analysis.getFraudScore() != null ? analysis.getFraudScore() : 0));
+                int fraud = analysis.getFraudScore() != null ? analysis.getFraudScore() : 0;
+                if (fraud <= 30) {
+                    ticket.setRiskLevel(Ticket.RiskLevel.LOW);
+                } else if (fraud <= 60) {
+                    ticket.setRiskLevel(Ticket.RiskLevel.MEDIUM);
+                } else if (fraud <= 80) {
+                    ticket.setRiskLevel(Ticket.RiskLevel.HIGH);
+                } else {
+                    ticket.setRiskLevel(Ticket.RiskLevel.CRITICAL);
+                }
             }
         } else {
             ticket.setRiskScore(BigDecimal.ZERO);

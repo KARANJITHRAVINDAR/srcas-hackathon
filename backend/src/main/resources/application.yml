@@ -32,3 +32,9 @@ polygon:
     rpc-url: ${POLYGON_AMOY_RPC_URL:https://rpc-amoy.polygon.technology/}
     private-key: ${POLYGON_AMOY_PRIVATE_KEY:}
     contract-address: ${POLYGON_AMOY_CONTRACT_ADDRESS:}
+
+document:
+  ai:
+    project-id: ${DOCUMENT_AI_PROJECT_ID:}
+    location: ${DOCUMENT_AI_LOCATION:us}
+    processor-id: ${DOCUMENT_AI_PROCESSOR_ID:}

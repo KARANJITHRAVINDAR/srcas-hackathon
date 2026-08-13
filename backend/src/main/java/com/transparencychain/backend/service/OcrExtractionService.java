@@ -1,9 +1,12 @@
 package com.transparencychain.backend.service;
 
+import com.google.cloud.documentai.v1.*;
+import com.google.protobuf.ByteString;
 import net.sourceforge.tess4j.ITesseract;
 import net.sourceforge.tess4j.Tesseract;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -19,6 +22,15 @@ import java.util.regex.Pattern;
 @Service
 public class OcrExtractionService {
 
+    @Value("${document.ai.project-id:}")
+    private String projectId;
+
+    @Value("${document.ai.location:us}")
+    private String location;
+
+    @Value("${document.ai.processor-id:}")
+    private String processorId;
+
     public static class OcrResult {
         public String fieldName;
         public String value;
@@ -33,35 +45,71 @@ public class OcrExtractionService {
 
     public List<OcrResult> extractFields(MultipartFile file, String documentType) {
         List<OcrResult> results = new ArrayList<>();
-        
         String extractedText = "";
-        try {
-            BufferedImage image = null;
-            String originalFilename = file.getOriginalFilename() != null ? file.getOriginalFilename().toLowerCase() : "";
-            
-            if (originalFilename.endsWith(".pdf")) {
-                try (InputStream is = file.getInputStream(); PDDocument document = PDDocument.load(is)) {
-                    PDFRenderer pdfRenderer = new PDFRenderer(document);
-                    if (document.getNumberOfPages() > 0) {
-                        image = pdfRenderer.renderImageWithDPI(0, 300); // Render first page at 300 DPI
-                    }
-                }
-            } else {
-                image = ImageIO.read(file.getInputStream());
-            }
 
-            if (image != null) {
-                ITesseract tesseract = new Tesseract();
-                // WARNING: Make sure Tesseract is installed at this exact path
-                tesseract.setDatapath("C:\\Program Files\\Tesseract-OCR\\tessdata");
-                tesseract.setLanguage("eng");
-                
-                extractedText = tesseract.doOCR(image);
-                System.out.println("Tesseract Extracted Text: \n" + extractedText);
+        // File validation
+        String originalFilename = file.getOriginalFilename() != null ? file.getOriginalFilename().toLowerCase() : "";
+        String contentType = file.getContentType();
+        if (contentType == null || contentType.isEmpty()) {
+            if (originalFilename.endsWith(".pdf")) {
+                contentType = "application/pdf";
+            } else if (originalFilename.endsWith(".png")) {
+                contentType = "image/png";
+            } else if (originalFilename.endsWith(".jpg") || originalFilename.endsWith(".jpeg")) {
+                contentType = "image/jpeg";
+            } else if (originalFilename.endsWith(".tiff") || originalFilename.endsWith(".tif")) {
+                contentType = "image/tiff";
+            } else {
+                contentType = "application/octet-stream";
             }
-        } catch (Exception e) {
-            System.err.println("Error during OCR extraction: " + e.getMessage());
-            e.printStackTrace();
+        }
+
+        // Limit size to 20MB
+        if (file.getSize() > 20 * 1024 * 1024) {
+            System.err.println("[DOCUMENT_AI] File size too large: " + file.getSize());
+            return results;
+        }
+
+        // Try Google Document AI if configured
+        if (projectId != null && !projectId.trim().isEmpty() &&
+            processorId != null && !processorId.trim().isEmpty()) {
+            try {
+                System.out.println("[DOCUMENT_AI] Invoking Google Document AI for document type: " + documentType);
+                extractedText = extractRawTextWithDocumentAi(file.getBytes(), contentType);
+            } catch (Exception e) {
+                System.err.println("[DOCUMENT_AI] Document AI call failed. Falling back to local Tesseract OCR. Error: " + e.getMessage());
+            }
+        }
+
+        // Fallback to Tesseract if Document AI text extraction is empty
+        if (extractedText == null || extractedText.trim().isEmpty()) {
+            try {
+                BufferedImage image = null;
+                if (originalFilename.endsWith(".pdf")) {
+                    try (InputStream is = file.getInputStream(); PDDocument document = PDDocument.load(is)) {
+                        PDFRenderer pdfRenderer = new PDFRenderer(document);
+                        if (document.getNumberOfPages() > 0) {
+                            image = pdfRenderer.renderImageWithDPI(0, 300);
+                        }
+                    }
+                } else {
+                    image = ImageIO.read(file.getInputStream());
+                }
+
+                if (image != null) {
+                    ITesseract tesseract = new Tesseract();
+                    tesseract.setDatapath("C:\\Program Files\\Tesseract-OCR\\tessdata");
+                    tesseract.setLanguage("eng");
+                    extractedText = tesseract.doOCR(image);
+                    System.out.println("[TESSERACT] Local OCR Extracted Text: \n" + extractedText);
+                }
+            } catch (Exception e) {
+                System.err.println("[TESSERACT] Local OCR failed: " + e.getMessage());
+            }
+        }
+
+        if (extractedText == null || extractedText.isEmpty()) {
+            return results;
         }
 
         // Apply Regex to the extracted text
@@ -143,22 +191,63 @@ public class OcrExtractionService {
         return results;
     }
 
-    private String extractRegex(String text, String regex) {
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(text);
-        if (matcher.find()) {
-            return matcher.group(matcher.groupCount() > 0 ? 1 : 0).trim();
-        }
-        return null;
-    }
-
     public com.transparencychain.backend.dto.InvoiceExtractionResult extractInvoice(MultipartFile file) {
         com.transparencychain.backend.dto.InvoiceExtractionResult result = new com.transparencychain.backend.dto.InvoiceExtractionResult();
+        
+        // Mime and size validation
+        String originalFilename = file.getOriginalFilename() != null ? file.getOriginalFilename().toLowerCase() : "";
+        String contentType = file.getContentType();
+        if (contentType == null || contentType.isEmpty()) {
+            if (originalFilename.endsWith(".pdf")) {
+                contentType = "application/pdf";
+            } else if (originalFilename.endsWith(".png")) {
+                contentType = "image/png";
+            } else if (originalFilename.endsWith(".jpg") || originalFilename.endsWith(".jpeg")) {
+                contentType = "image/jpeg";
+            } else if (originalFilename.endsWith(".tiff") || originalFilename.endsWith(".tif")) {
+                contentType = "image/tiff";
+            } else {
+                contentType = "application/octet-stream";
+            }
+        }
+
+        if (file.getSize() > 20 * 1024 * 1024) {
+            System.err.println("[DOCUMENT_AI] Rejecting file: size exceeds 20MB limit.");
+            result.setOcrConfidence(0);
+            result.setRawText("File size exceeds 20MB limit.");
+            return result;
+        }
+
+        if (!contentType.equals("application/pdf") &&
+            !contentType.equals("image/png") &&
+            !contentType.equals("image/jpeg") &&
+            !contentType.equals("image/tiff")) {
+            System.err.println("[DOCUMENT_AI] Rejecting file: unsupported MIME type " + contentType);
+            result.setOcrConfidence(0);
+            result.setRawText("Unsupported MIME type: " + contentType);
+            return result;
+        }
+
+        // Try Google Document AI if configured
+        if (projectId != null && !projectId.trim().isEmpty() &&
+            processorId != null && !processorId.trim().isEmpty()) {
+            try {
+                System.out.println("[DOCUMENT_AI] Calling live Google Cloud Document AI for Invoice Extraction...");
+                return processInvoiceWithDocumentAi(file.getBytes(), contentType);
+            } catch (Exception e) {
+                System.err.println("[DOCUMENT_AI] Document AI call failed. Falling back to local OCR. Error: " + e.getMessage());
+                // Set confidence to 0 to trigger the manual verification route, as specified by requirements
+                result.setOcrConfidence(0);
+                result.setRawText("Google Document AI failed: " + e.getMessage());
+                return result;
+            }
+        }
+
+        // Fallback local OCR logic
+        System.out.println("[TESSERACT] Using local fallback Tesseract OCR...");
         String extractedText = "";
         try {
             BufferedImage image = null;
-            String originalFilename = file.getOriginalFilename() != null ? file.getOriginalFilename().toLowerCase() : "";
-            
             if (originalFilename.endsWith(".pdf")) {
                 try (InputStream is = file.getInputStream(); PDDocument document = PDDocument.load(is)) {
                     PDFRenderer pdfRenderer = new PDFRenderer(document);
@@ -176,7 +265,7 @@ public class OcrExtractionService {
                 tesseract.setLanguage("eng");
                 extractedText = tesseract.doOCR(image);
                 result.setRawText(extractedText);
-                result.setOcrConfidence(90); // Hardcoded mock confidence for MVP, Tesseract Java API doesn't easily expose average confidence without complex iteration
+                result.setOcrConfidence(90); // default mock/fallback confidence
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -184,32 +273,29 @@ public class OcrExtractionService {
             result.setOcrConfidence(0);
         }
 
-        if (extractedText.isEmpty()) return result;
+        if (extractedText == null || extractedText.isEmpty()) {
+            return result;
+        }
 
-        // Vendor Name (Usually at the top, simple heuristic)
+        // Parse with local regex-based fallback heuristics
         String[] lines = extractedText.split("\n");
         if (lines.length > 0) {
             result.setVendorName(lines[0].trim());
         }
 
-        // Invoice Number
         String invNo = extractRegex(extractedText, "(?i)Invoice\\s*(?:No|Number|#)[:\\s]*([A-Z0-9-]+)");
         result.setInvoiceNumber(invNo);
 
-        // Date
         String dateStr = extractRegex(extractedText, "(?i)Date[:\\s]*([0-9]{2,4}[-/][0-9]{2}[-/][0-9]{2,4})");
         if (dateStr != null) {
             try {
-                // Simplified date parsing for MVP
                 result.setInvoiceDate(java.time.LocalDate.parse(dateStr.replaceAll("/", "-")));
             } catch (Exception ignored) {}
         }
 
-        // GSTIN
         String gstin = extractRegex(extractedText, "(?i)GSTIN[:\\s]*([0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1})");
         result.setGstin(gstin);
 
-        // Total Amount
         String amountStr = extractRegex(extractedText, "(?i)(?:Total|Amount|Rs\\.?|INR)[\\s:]*([0-9,]+(?:\\.[0-9]{1,2})?)");
         if (amountStr != null) {
             try {
@@ -217,9 +303,7 @@ public class OcrExtractionService {
             } catch (Exception ignored) {}
         }
 
-        // Line Items heuristic
         List<com.transparencychain.backend.dto.InvoiceItem> items = new ArrayList<>();
-        // Look for lines that look like: "Cement Bag 100 400 40000"
         Pattern itemPattern = Pattern.compile("(?i)([^\\n]+?)\\s+([0-9]+(?:\\.[0-9]+)?)\\s+([0-9]+(?:\\.[0-9]+)?)\\s+([0-9,]+(?:\\.[0-9]{1,2})?)\\n");
         Matcher itemMatcher = itemPattern.matcher(extractedText);
         while (itemMatcher.find()) {
@@ -235,5 +319,133 @@ public class OcrExtractionService {
         result.setItems(items);
 
         return result;
+    }
+
+    private String extractRawTextWithDocumentAi(byte[] fileBytes, String contentType) throws Exception {
+        String endpoint = String.format("%s-documentai.googleapis.com:443", location);
+        DocumentProcessorServiceSettings settings = DocumentProcessorServiceSettings.newBuilder()
+                .setEndpoint(endpoint)
+                .build();
+
+        try (DocumentProcessorServiceClient client = DocumentProcessorServiceClient.create(settings)) {
+            String name = ProcessorName.of(projectId, location, processorId).toString();
+
+            RawDocument rawDocument = RawDocument.newBuilder()
+                    .setContent(ByteString.copyFrom(fileBytes))
+                    .setMimeType(contentType)
+                    .build();
+
+            ProcessRequest request = ProcessRequest.newBuilder()
+                    .setName(name)
+                    .setRawDocument(rawDocument)
+                    .build();
+
+            ProcessResponse response = client.processDocument(request);
+            return response.getDocument().getText();
+        }
+    }
+
+    private com.transparencychain.backend.dto.InvoiceExtractionResult processInvoiceWithDocumentAi(
+            byte[] fileBytes, 
+            String contentType
+    ) throws Exception {
+        String endpoint = String.format("%s-documentai.googleapis.com:443", location);
+        DocumentProcessorServiceSettings settings = DocumentProcessorServiceSettings.newBuilder()
+                .setEndpoint(endpoint)
+                .build();
+
+        try (DocumentProcessorServiceClient client = DocumentProcessorServiceClient.create(settings)) {
+            String name = ProcessorName.of(projectId, location, processorId).toString();
+
+            RawDocument rawDocument = RawDocument.newBuilder()
+                    .setContent(ByteString.copyFrom(fileBytes))
+                    .setMimeType(contentType)
+                    .build();
+
+            ProcessRequest request = ProcessRequest.newBuilder()
+                    .setName(name)
+                    .setRawDocument(rawDocument)
+                    .build();
+
+            ProcessResponse response = client.processDocument(request);
+            Document document = response.getDocument();
+
+            com.transparencychain.backend.dto.InvoiceExtractionResult result = new com.transparencychain.backend.dto.InvoiceExtractionResult();
+            result.setRawText(document.getText());
+            result.setOcrConfidence(95); // Indicates API call success confidence
+
+            // Parse structured entities
+            for (Document.Entity entity : document.getEntitiesList()) {
+                String type = entity.getType();
+                String mention = entity.getMentionText();
+                
+                if ("supplier_name".equalsIgnoreCase(type)) {
+                    result.setVendorName(mention);
+                } else if ("invoice_id".equalsIgnoreCase(type) || "invoice_number".equalsIgnoreCase(type)) {
+                    result.setInvoiceNumber(mention);
+                } else if ("invoice_date".equalsIgnoreCase(type)) {
+                    try {
+                        result.setInvoiceDate(java.time.LocalDate.parse(mention));
+                    } catch (Exception e) {
+                        // fallback regex date parser if direct parse fails
+                        String parsedDate = extractRegex(mention, "([0-9]{2,4}[-/][0-9]{2}[-/][0-9]{2,4})");
+                        if (parsedDate != null) {
+                            try {
+                                result.setInvoiceDate(java.time.LocalDate.parse(parsedDate.replaceAll("/", "-")));
+                            } catch (Exception ignored) {}
+                        }
+                    }
+                } else if ("vat_number".equalsIgnoreCase(type) || "gstin".equalsIgnoreCase(type) || type.contains("tax")) {
+                    result.setGstin(mention);
+                } else if ("total_amount".equalsIgnoreCase(type)) {
+                    try {
+                        String cleanAmt = mention.replaceAll("[^0-9.]", "");
+                        result.setTotalAmount(new BigDecimal(cleanAmt));
+                    } catch (Exception ignored) {}
+                }
+            }
+
+            // Extract line items if present
+            List<com.transparencychain.backend.dto.InvoiceItem> lineItems = new ArrayList<>();
+            for (Document.Entity entity : document.getEntitiesList()) {
+                if ("line_item".equalsIgnoreCase(entity.getType())) {
+                    com.transparencychain.backend.dto.InvoiceItem item = new com.transparencychain.backend.dto.InvoiceItem();
+                    for (Document.Entity subEntity : entity.getPropertiesList()) {
+                        String subType = subEntity.getType();
+                        String subMention = subEntity.getMentionText();
+                        
+                        if ("line_item/description".equalsIgnoreCase(subType)) {
+                            item.setDescription(subMention);
+                        } else if ("line_item/quantity".equalsIgnoreCase(subType)) {
+                            try {
+                                item.setQuantity(new BigDecimal(subMention.replaceAll("[^0-9.]", "")));
+                            } catch (Exception ignored) {}
+                        } else if ("line_item/unit_price".equalsIgnoreCase(subType)) {
+                            try {
+                                item.setUnitPrice(new BigDecimal(subMention.replaceAll("[^0-9.]", "")));
+                            } catch (Exception ignored) {}
+                        } else if ("line_item/amount".equalsIgnoreCase(subType)) {
+                            try {
+                                item.setTotal(new BigDecimal(subMention.replaceAll("[^0-9.]", "")));
+                            } catch (Exception ignored) {}
+                        }
+                    }
+                    if (item.getDescription() != null) {
+                        lineItems.add(item);
+                    }
+                }
+            }
+            result.setItems(lineItems);
+            return result;
+        }
+    }
+
+    private String extractRegex(String text, String regex) {
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(text);
+        if (matcher.find()) {
+            return matcher.group(matcher.groupCount() > 0 ? 1 : 0).trim();
+        }
+        return null;
     }
 }
