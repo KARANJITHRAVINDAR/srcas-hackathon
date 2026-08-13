@@ -34,10 +34,15 @@ public class FundingCommitmentService {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new IllegalArgumentException("Project not found: " + projectId));
 
-        if (project.getStatus() != Project.ProjectStatus.PUBLISHED && project.getStatus() != Project.ProjectStatus.DRAFT) {
-            if (project.getStatus() == Project.ProjectStatus.ESCROWED) {
-                throw new IllegalStateException("Funding has already been committed and escrowed for this project.");
-            }
+        List<FundingCommitment.FundingCommitmentStatus> lockedStatuses = List.of(
+                FundingCommitment.FundingCommitmentStatus.PENDING,
+                FundingCommitment.FundingCommitmentStatus.ACTIVE,
+                FundingCommitment.FundingCommitmentStatus.PARTIALLY_RELEASED,
+                FundingCommitment.FundingCommitmentStatus.FULLY_RELEASED
+        );
+        boolean slotLocked = fundingCommitmentRepository.existsByProjectIdAndStatusIn(projectId, lockedStatuses);
+        if (slotLocked) {
+            throw new IllegalStateException("Cannot commit funding: This project slot is already locked by an active commitment.");
         }
 
         // Check if there is an existing ACTIVE or committed engagement/commitment
@@ -200,10 +205,10 @@ public class FundingCommitmentService {
         auditLogService.logAction(project.getId(), "BLOCKCHAIN_ESCROW_DEPLOYED",
                 "Simulated Escrow contract deployed on-chain. Tx Hash: " + txHash);
 
-        // 3. update milestones status to IN_PROGRESS
+        // 3. update milestones status to LOCKED
         List<Milestone> milestones = milestoneRepository.findByProjectId(project.getId());
         for (Milestone milestone : milestones) {
-            milestone.setStatus(Milestone.MilestoneStatus.IN_PROGRESS);
+            milestone.setStatus(Milestone.MilestoneStatus.LOCKED);
             milestoneRepository.save(milestone);
         }
 

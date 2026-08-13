@@ -186,7 +186,7 @@ public class DemoDataSeeder implements CommandLineRunner {
                 p1m1.setTitle("Phase 1: Site Survey & Material Procurement");
                 p1m1.setDescription("Conducting geological survey and procuring borewell materials for 5 villages.");
                 p1m1.setAmountAllocated(BigDecimal.valueOf(250000.0));
-                p1m1.setStatus(Milestone.MilestoneStatus.PENDING);
+                p1m1.setStatus(Milestone.MilestoneStatus.LOCKED);
                 p1m1.setRequiredEvidence("- Geological survey report\n- Material purchase invoices\n- Photos of pipes and drills");
                 p1m1.setVerificationRequirements("AI check for invoice validity and image verification");
                 p1m1.setSequenceNumber(1);

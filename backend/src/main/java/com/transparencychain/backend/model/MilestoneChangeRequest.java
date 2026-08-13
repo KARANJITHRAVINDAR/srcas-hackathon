@@ -6,17 +6,17 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
- * A formal change proposal from an organisation (funder) on a single milestone.
+ * A formal change proposal on a single milestone.
+ * Can be initiated by EITHER an organisation (funder) OR the NGO — supporting
+ * bidirectional negotiation per the master project flow.
  *
  * State machine:
- *   PENDING -> ACCEPTED   (NGO accepts the proposed version as-is)
- *   PENDING -> COUNTERED  (NGO submits a counter-proposal, creating a new MilestoneVersion authored by NGO)
- *   PENDING -> REJECTED   (NGO rejects outright — negotiation ends, original version stands)
+ *   PENDING -> ACCEPTED   (other party accepts the proposed version as-is)
+ *   PENDING -> COUNTERED  (other party submits a counter-proposal)
+ *   PENDING -> REJECTED   (other party rejects outright — original version stands)
+ *   PENDING -> WITHDRAWN  (initiator withdraws before other party responds)
  *
- * Design note (spec §3 key decision):
- *   An org's edit is NEVER a direct write to the milestone.
- *   It is always this record + a MilestoneVersion row.
- *   The milestone's currentVersionId is only updated when this request reaches ACCEPTED.
+ * Invariant: exactly one of requestedByOrg / requestedByNgo is non-null.
  */
 @Data
 @Entity
@@ -31,10 +31,15 @@ public class MilestoneChangeRequest {
     @JoinColumn(name = "milestone_id", nullable = false)
     private Milestone milestone;
 
-    /** The funder organisation that raised this change request. */
+    /** The funder organisation that raised this change request (null if NGO-initiated). */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "requested_by_org_id", nullable = false)
+    @JoinColumn(name = "requested_by_org_id")
     private FunderProfile requestedByOrg;
+
+    /** The NGO that raised this change request (null if funder-initiated). */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "requested_by_ngo_id")
+    private NgoProfile requestedByNgo;
 
     /** Snapshot of what the milestone looked like before this change was proposed. */
     @ManyToOne(fetch = FetchType.LAZY)

@@ -10,4 +10,5 @@ public interface FundingCommitmentRepository extends JpaRepository<FundingCommit
     List<FundingCommitment> findByFunderId(UUID funderId);
     List<FundingCommitment> findByProjectId(UUID projectId);
     Optional<FundingCommitment> findFirstByProjectIdAndStatus(UUID projectId, FundingCommitment.FundingCommitmentStatus status);
+    boolean existsByProjectIdAndStatusIn(UUID projectId, List<FundingCommitment.FundingCommitmentStatus> statuses);
 }

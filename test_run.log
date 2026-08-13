@@ -1,0 +1,158 @@
+[0;36m[1m
+╔══════════════════════════════════════════════════════════════╗
+║       TRANSPARENCY CHAIN — SYSTEM VERIFICATION SUITE        ║
+║                  Phase 1 & Phase 2 Tests                    ║
+╚══════════════════════════════════════════════════════════════╝
+[0m
+
+[0;36m[1m━━━ 0. SERVER REACHABILITY ━━━[0m
+  [0;32m✔ PASS[0m  Backend is reachable at http://localhost:8081 (HTTP 200)
+[1;33mResetting database state for verification...[0m
+[0;32mDatabase reset completed successfully.[0m
+
+[0;36m[1m━━━ 1. AUTHENTICATION ━━━[0m
+  [0;32m✔ PASS[0m  Funder login — token obtained (role=FUNDER)
+  [0;32m✔ PASS[0m  NGO login — token obtained (role=NGO)
+
+[0;36m[1m━━━ 2. ROLE ENFORCEMENT ━━━[0m
+  [0;32m✔ PASS[0m  Unauthenticated request → 401 (status=401)
+  [0;32m✔ PASS[0m  NGO cannot access FUNDER endpoint → 403 (access denied)
+  [0;32m✔ PASS[0m  FUNDER accesses FUNDER endpoint → 200 (status=200)
+
+[0;36m[1m━━━ 3. PHASE 1 — MARKETPLACE BROWSE ━━━[0m
+  [0;32m✔ PASS[0m  GET /api/org/projects → 200 (status=200)
+  [0;32m✔ PASS[0m  Returns PUBLISHED projects
+  [0;32m✔ PASS[0m  NGO trust profile present in card
+  [0;32m✔ PASS[0m  SDG3 filter returns results
+  [0;32m✔ PASS[0m  SDG17 filter returns empty array
+  [0;32m✔ PASS[0m  Budget range filter works
+  [0;32m✔ PASS[0m  Budget filter excludes out-of-range projects
+
+[0;36m[1m━━━ 4. PHASE 1 — PROJECT DETAIL ━━━[0m
+  [2mUsing project: ab5fac0c-9601-11f1-8b56-a987a7b38995[0m
+  [0;32m✔ PASS[0m  GET /api/org/projects/{id} → 200 (status=200)
+  [0;32m✔ PASS[0m  Milestone list present
+  [0;32m✔ PASS[0m  NGO trust profile present
+  [0;32m✔ PASS[0m  Trust dimensions present (registrationAgeScore)
+  [0;32m✔ PASS[0m  Trust dimensions present (documentCompletenessScore)
+  [0;32m✔ PASS[0m  Compliance flags present (has80G)
+  [0;32m✔ PASS[0m  Milestones ordered by sequence
+  [0;32m✔ PASS[0m  Auto-created DISCOVERED engagement
+  [2mEngagement ID: 48ced155-6a6a-4025-904f-35b5be3554fa[0m
+  [2mMilestone 1: ab69b76a-9601-11f1-8b56-a987a7b38995[0m
+
+[0;36m[1m━━━ 5. PHASE 1 — ENGAGEMENT STATE TRANSITION ━━━[0m
+  [2mCurrent engagement status: DISCOVERED[0m
+  [0;32m✔ PASS[0m  POST /review → 200 (status=200)
+  [0;32m✔ PASS[0m  Engagement moved to UNDER_REVIEW
+  [0;32m✔ PASS[0m  Double-review guard rejected
+
+[0;36m[1m━━━ 6. PHASE 2 — RAISE CHANGE REQUEST ━━━[0m
+  [2mRaising CR on milestone: ab69bb22-9601-11f1-8b56-a987a7b38995[0m
+  [0;32m✔ PASS[0m  POST change-request → 200 (status=200)
+  [0;32m✔ PASS[0m  Proposed budget is 180000
+  [0;32m✔ PASS[0m  Original budget is 200000
+  [0;32m✔ PASS[0m  Original version authored by NGO
+  [0;32m✔ PASS[0m  Proposed version authored by FUNDER
+  [2mCR ID: 6bc9fef0-3aa8-49a3-a7e6-778dd4789574[0m
+
+[0;36m[1m━━━ 7. PHASE 2 — DUPLICATE CR GUARD ━━━[0m
+  [0;32m✔ PASS[0m  Duplicate CR → 400 (status=400)
+  [0;32m✔ PASS[0m  Guard message correct
+
+[0;36m[1m━━━ 8. PHASE 2 — GET CHANGE REQUEST (DIFF VIEW) ━━━[0m
+  [0;32m✔ PASS[0m  GET change-request → 200 (status=200)
+  [0;32m✔ PASS[0m  Original snapshot present
+  [0;32m✔ PASS[0m  Proposed snapshot present
+  [0;32m✔ PASS[0m  Requested org name present
+
+[0;36m[1m━━━ 9. PHASE 2 — NGO CHANGE-REQUEST INBOX ━━━[0m
+  [0;32m✔ PASS[0m  GET ngo/change-requests → 200 (status=200)
+  [0;32m✔ PASS[0m  NGO inbox has pending CRs
+
+[0;36m[1m━━━ 10. PHASE 2 — NGO COUNTER-PROPOSAL ━━━[0m
+  [0;32m✔ PASS[0m  NGO COUNTER respond → 200 (status=200)
+  [0;32m✔ PASS[0m  Original CR is now COUNTERED
+  [2mCounter CR ID: 102f908e-f3ed-4625-851c-5497cd4469b8[0m
+  [0;32m✔ PASS[0m  New PENDING counter CR created
+
+[0;36m[1m━━━ 11. PHASE 2 — NGO ACCEPT (LOCK MILESTONE) ━━━[0m
+  [0;32m✔ PASS[0m  NGO ACCEPT respond → 200 (status=200)
+  [0;32m✔ PASS[0m  Counter CR status is ACCEPTED
+  [0;32m✔ PASS[0m  Proposed version status is ACCEPTED
+  [0;32m✔ PASS[0m  Target milestone is now LOCKED
+
+[0;36m[1m━━━ 12. PHASE 2 — WITHDRAW CHANGE REQUEST ━━━[0m
+  [0;32m✔ PASS[0m  Withdraw → 200 (status=200)
+  [0;32m✔ PASS[0m  CR is WITHDRAWN
+  [0;32m✔ PASS[0m  Double-withdraw → 400 (status=400)
+  [0;32m✔ PASS[0m  Guard message for double-withdraw
+
+[0;36m[1m━━━ 13. ENGAGEMENT STATE ━━━[0m
+  [0;32m✔ PASS[0m  Engagement is NEGOTIATING (or beyond)
+
+[0;36m[1m━━━ 13B. PHASE 3 — FUNDING COMMITMENT & SIMULATED ESCROW ━━━[0m
+  [0;32m✔ PASS[0m  Commit with mismatched budget → 400 (status=400)
+  [0;32m✔ PASS[0m  Budget conservation error message
+  [0;32m✔ PASS[0m  POST /projects/{id}/commit → 200 (status=200)
+  [0;32m✔ PASS[0m  Commitment status is PENDING
+  [2mCommitment ID: bc4481e6-9a07-4a45-a552-deed7a19c283[0m
+  [0;32m✔ PASS[0m  GET /commitments/{id} → 200 (status=200)
+  [0;32m✔ PASS[0m  Total committed amount present
+  [0;32m✔ PASS[0m  POST /commitments/{id}/activate → 200 (status=200)
+  [0;32m✔ PASS[0m  Commitment status is ACTIVE
+  [0;32m✔ PASS[0m  Duplicate commitment → 400 (status=400)
+  [0;32m✔ PASS[0m  Active commitment guard
+
+[0;36m[1m━━━ 14. PHASE 4 — TICKET LIFECYCLE & VERIFICATION ENGINE ━━━[0m
+  [0;32m✔ PASS[0m  Raise ticket without proof → 400 (status=400)
+  [0;32m✔ PASS[0m  Proof missing error message
+  [0;32m✔ PASS[0m  NGO uploads proof → 200 (status=200)
+  [2mUploaded proof ID: 7a03a0b3-f2b7-40f1-a59b-8ed167bf8d3a[0m
+  [0;32m✔ PASS[0m  NGO raises ticket → 200 (status=200)
+  [2mRaised ticket ID: e3ca9ab4-12d2-475b-aad9-48b5d08df5f7[0m
+  [0;32m✔ PASS[0m  Ticket status is OPEN
+  [0;32m✔ PASS[0m  Funder GET /tickets → 200 (status=200)
+  [0;32m✔ PASS[0m  Tickets list has OPEN ticket
+  [0;32m✔ PASS[0m  Funder GET /tickets/{id} → 200 (status=200)
+  [0;32m✔ PASS[0m  Ticket details includes ticket field
+  [0;32m✔ PASS[0m  Clarification request → 200 (status=200)
+  [0;32m✔ PASS[0m  Ticket status updated to CLARIFICATION_REQUESTED
+  [2mMilestone status after clarification: IN_PROGRESS[0m
+  [0;32m✔ PASS[0m  Milestone status reverted to IN_PROGRESS
+  [2mRe-raised ticket ID: 73d98524-7a86-4572-aad7-4c2b2a03982e[0m
+  [0;32m✔ PASS[0m  Accept ticket → 200 (status=200)
+  [0;32m✔ PASS[0m  Ticket is ACCEPTED
+  [2mMilestone status after accept: VERIFIED[0m
+  [0;32m✔ PASS[0m  Milestone status is VERIFIED
+
+[0;36m[1m━━━ 15. PHASE 4 — MULTI-REVIEWER GUARD FOR HIGH RISK ━━━[0m
+  [0;32m✔ PASS[0m  NGO uploads proof on M2 → 200 (status=200)
+  [2mM2 Ticket ID: 070c9e03-e9d5-4578-90be-0fd41f66152a[0m
+  [0;32m✔ PASS[0m  Reviewer 1 ACCEPT → 200 (status=200)
+  [0;32m✔ PASS[0m  Ticket status remains UNDER_ORG_REVIEW (needs 2nd reviewer)
+  [0;32m✔ PASS[0m  Reviewer 2 ACCEPT → 200 (status=200)
+  [0;32m✔ PASS[0m  Ticket status becomes ACCEPTED
+
+[0;36m[1m━━━ 15B. PHASE 5 — DISBURSEMENT ENGINE & ESCROW LEDGER INTEGRATION ━━━[0m
+  [0;32m✔ PASS[0m  GET /projects/{id}/escrow → 200 (status=200)
+  [0;32m✔ PASS[0m  Escrow status is PARTIALLY_RELEASED
+  [0;32m✔ PASS[0m  Partial released amount recorded (550000)
+  [0;32m✔ PASS[0m  Commitment status is PARTIALLY_RELEASED
+  [0;32m✔ PASS[0m  Accept M3 ticket → 200 (status=200)
+  [0;32m✔ PASS[0m  Escrow status is FULLY_RELEASED
+  [0;32m✔ PASS[0m  Total released amount (740000)
+  [0;32m✔ PASS[0m  Project status is COMPLETED
+  [2mDISBURSEMENT_EXECUTED audit log entries: 24[0m
+  [0;32m✔ PASS[0m  Audit log has DISBURSEMENT_EXECUTED entries (24 rows)
+
+[0;36m[1m━━━ 16. AUDIT TRAIL ━━━[0m
+  [2mMILESTONE_CR audit log entries: 5[0m
+  [0;32m✔ PASS[0m  Audit log has MILESTONE_CR entries (5 rows)
+
+[1m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m
+[1mRESULTS: [0m[0;32m89 passed[0m  /  [0;31m0 failed[0m  /  89 total
+[1m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m
+[0;32m[1m
+  ✔  ALL TESTS PASSED — Phases 1 & 2 are working correctly!
+[0m

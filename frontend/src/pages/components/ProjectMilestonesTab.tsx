@@ -107,6 +107,14 @@ function MilestoneDetailView({ project, milestoneId, onBack, user }: { project: 
     const [milestone, setMilestone] = useState<any>(null);
     const [tasks, setTasks] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [showProposeModal, setShowProposeModal] = useState(false);
+    const [proposing, setProposing] = useState(false);
+    const [proposalForm, setProposalForm] = useState({
+        name: '',
+        budget: '',
+        dueDate: '',
+        reason: ''
+    });
 
     const loadData = () => {
         setLoading(true);
@@ -123,6 +131,39 @@ function MilestoneDetailView({ project, milestoneId, onBack, user }: { project: 
     useEffect(() => {
         loadData();
     }, [milestoneId]);
+
+    const canPropose = milestone && (milestone.status === 'PENDING' || milestone.status === 'MODIFIED');
+
+    const handlePropose = async () => {
+        if (!proposalForm.reason.trim()) {
+            alert('A reason is required for auditability.');
+            return;
+        }
+        const body: any = { reason: proposalForm.reason };
+        if (proposalForm.name.trim()) body.name = proposalForm.name;
+        if (proposalForm.budget.trim()) body.budget = parseFloat(proposalForm.budget);
+        if (proposalForm.dueDate.trim()) body.dueDate = proposalForm.dueDate;
+
+        if (!body.name && !body.budget && !body.dueDate) {
+            alert('At least one field (name, budget, or due date) must be changed.');
+            return;
+        }
+
+        setProposing(true);
+        try {
+            await axios.post(
+                `http://localhost:8081/api/ngo/projects/${project.id}/milestones/${milestoneId}/change-request`,
+                body
+            );
+            setShowProposeModal(false);
+            setProposalForm({ name: '', budget: '', dueDate: '', reason: '' });
+            loadData();
+        } catch (err: any) {
+            alert(err.response?.data?.message || 'Failed to submit change request');
+        } finally {
+            setProposing(false);
+        }
+    };
 
     if (loading) return <div className="p-12 text-center text-[#52627A] font-bold">Loading milestone details...</div>;
     if (!milestone) return <div className="p-12 text-center text-red-500 font-bold">Milestone not found.</div>;
@@ -143,9 +184,19 @@ function MilestoneDetailView({ project, milestoneId, onBack, user }: { project: 
                         <h2 className="text-2xl font-bold text-[#10172A] mb-2">{milestone.title}</h2>
                         <p className="text-[#52627A] font-medium max-w-3xl">{milestone.description}</p>
                     </div>
-                    <span className="px-4 py-1.5 bg-blue-50 border border-blue-200 text-blue-700 rounded-lg text-sm font-bold tracking-wide">
-                        {milestone.status.replace('_', ' ')}
-                    </span>
+                    <div className="flex items-center gap-3">
+                        {canPropose && (
+                            <button
+                                onClick={() => setShowProposeModal(true)}
+                                className="px-4 py-2 bg-amber-50 border border-amber-200 text-amber-700 rounded-lg text-sm font-bold hover:bg-amber-100 transition-colors flex items-center gap-2"
+                            >
+                                <AlertCircle className="w-4 h-4" /> Propose Changes
+                            </button>
+                        )}
+                        <span className="px-4 py-1.5 bg-blue-50 border border-blue-200 text-blue-700 rounded-lg text-sm font-bold tracking-wide">
+                            {milestone.status.replace('_', ' ')}
+                        </span>
+                    </div>
                 </div>
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6 pt-6 border-t border-[#DDE3EA]">
@@ -200,6 +251,81 @@ function MilestoneDetailView({ project, milestoneId, onBack, user }: { project: 
                     </button>
                 )}
             </div>
+
+            {/* Propose Changes Modal */}
+            {showProposeModal && (
+                <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden">
+                        <div className="p-6 border-b border-[#DDE3EA]">
+                            <h3 className="text-xl font-bold text-[#10172A] flex items-center gap-2">
+                                <AlertCircle className="w-5 h-5 text-amber-500" /> Propose Milestone Changes
+                            </h3>
+                            <p className="text-sm text-[#52627A] mt-1">
+                                Suggest changes to <strong>{milestone.title}</strong>. The funder will review your proposal.
+                            </p>
+                        </div>
+                        <div className="p-6 space-y-4">
+                            <div>
+                                <label className="block text-xs font-bold text-[#52627A] uppercase mb-1">New Title (optional)</label>
+                                <input
+                                    type="text"
+                                    value={proposalForm.name}
+                                    onChange={e => setProposalForm({...proposalForm, name: e.target.value})}
+                                    placeholder={milestone.title}
+                                    className="w-full bg-[#F8FAFC] border border-[#DDE3EA] rounded-lg p-2.5 outline-none focus:border-[#00A875] text-sm"
+                                />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-xs font-bold text-[#52627A] uppercase mb-1">New Budget ₹ (optional)</label>
+                                    <input
+                                        type="number"
+                                        value={proposalForm.budget}
+                                        onChange={e => setProposalForm({...proposalForm, budget: e.target.value})}
+                                        placeholder={String(milestone.amountAllocated)}
+                                        className="w-full bg-[#F8FAFC] border border-[#DDE3EA] rounded-lg p-2.5 outline-none focus:border-[#00A875] text-sm"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-[#52627A] uppercase mb-1">New Due Date (optional)</label>
+                                    <input
+                                        type="date"
+                                        value={proposalForm.dueDate}
+                                        onChange={e => setProposalForm({...proposalForm, dueDate: e.target.value})}
+                                        className="w-full bg-[#F8FAFC] border border-[#DDE3EA] rounded-lg p-2.5 outline-none focus:border-[#00A875] text-sm"
+                                    />
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-[#52627A] uppercase mb-1">Reason for Change <span className="text-red-500">*</span></label>
+                                <textarea
+                                    rows={3}
+                                    value={proposalForm.reason}
+                                    onChange={e => setProposalForm({...proposalForm, reason: e.target.value})}
+                                    placeholder="Explain why this change is needed..."
+                                    className="w-full bg-[#F8FAFC] border border-[#DDE3EA] rounded-lg p-2.5 outline-none focus:border-[#00A875] text-sm resize-none"
+                                    required
+                                />
+                            </div>
+                        </div>
+                        <div className="p-6 border-t border-[#DDE3EA] flex justify-end gap-3">
+                            <button
+                                onClick={() => setShowProposeModal(false)}
+                                className="px-5 py-2 text-[#52627A] font-bold hover:bg-gray-50 rounded-lg transition"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handlePropose}
+                                disabled={proposing}
+                                className="bg-amber-500 hover:bg-amber-600 text-white px-6 py-2 rounded-lg font-bold shadow-sm transition flex items-center gap-2"
+                            >
+                                {proposing ? 'Submitting...' : 'Submit Proposal'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

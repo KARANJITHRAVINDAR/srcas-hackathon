@@ -47,6 +47,12 @@ public class MilestoneController {
             return ResponseEntity.badRequest().body(new MessageResponse("Total milestone allocation exceeds project budget"));
         }
 
+        // Delete any existing auto-generated or older milestones to prevent duplication
+        List<Milestone> existing = milestoneRepository.findByProjectId(projectId);
+        if (existing != null && !existing.isEmpty()) {
+            milestoneRepository.deleteAll(existing);
+        }
+
         for (Milestone m : milestones) {
             m.setProject(project);
             m.setStatus(Milestone.MilestoneStatus.AVAILABLE);
@@ -113,5 +119,18 @@ public class MilestoneController {
         
         // This is a simple implementation for the demo, logging the request to the audit log which the Funder can view.
         return ResponseEntity.ok(new MessageResponse("Fund request submitted successfully"));
+    }
+
+    @PostMapping("/{milestoneId}/activate")
+    @PreAuthorize("hasRole('NGO')")
+    public ResponseEntity<?> activateMilestone(@PathVariable UUID projectId, @PathVariable UUID milestoneId) {
+        Milestone milestone = milestoneRepository.findById(milestoneId).orElseThrow();
+        if (milestone.getStatus() != Milestone.MilestoneStatus.LOCKED) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Only LOCKED milestones can be activated. Current status: " + milestone.getStatus()));
+        }
+        milestone.setStatus(Milestone.MilestoneStatus.IN_PROGRESS);
+        milestoneRepository.save(milestone);
+        auditLogService.logAction(milestone.getId(), "MILESTONE_ACTIVATED", "Milestone activated by NGO");
+        return ResponseEntity.ok(milestone);
     }
 }

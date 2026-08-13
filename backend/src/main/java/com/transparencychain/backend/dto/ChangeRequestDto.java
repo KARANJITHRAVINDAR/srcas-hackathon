@@ -21,9 +21,14 @@ public class ChangeRequestDto {
     private UUID milestoneId;
     private String milestoneTitle;
 
-    // Org that raised it
+    // Who raised it — exactly one pair is populated
     private UUID requestedByOrgId;
     private String requestedByOrgName;
+    private UUID requestedByNgoId;
+    private String requestedByNgoName;
+    
+    /** Convenience field: "FUNDER" or "NGO" — tells the UI who initiated this CR. */
+    private String initiatedBy;
 
     private MilestoneChangeRequest.ChangeRequestStatus status;
     private LocalDateTime createdAt;

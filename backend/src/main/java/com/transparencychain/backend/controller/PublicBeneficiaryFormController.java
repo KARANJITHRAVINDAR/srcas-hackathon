@@ -25,6 +25,12 @@ public class PublicBeneficiaryFormController {
     @Autowired
     private BeneficiaryFormQuestionRepository questionRepository;
 
+    @Autowired
+    private MilestoneRepository milestoneRepository;
+
+    @Autowired
+    private com.transparencychain.backend.service.AuditLogService auditLogService;
+
     @GetMapping("/{secureToken}")
     public ResponseEntity<?> getForm(@PathVariable String secureToken) {
         BeneficiaryVerificationForm form = formRepository.findByShareToken(secureToken).orElse(null);
@@ -97,6 +103,17 @@ public class PublicBeneficiaryFormController {
         response.setRating(rating);
         response.setFeedback(feedback);
         responseRepository.save(response);
+
+        if (!hasNo && form.getMilestone() != null) {
+            Milestone milestone = form.getMilestone();
+            if (milestone.getStatus() == Milestone.MilestoneStatus.IN_PROGRESS ||
+                milestone.getStatus() == Milestone.MilestoneStatus.EVIDENCE_SUBMITTED) {
+                milestone.setStatus(Milestone.MilestoneStatus.IN_REVIEW);
+                milestoneRepository.save(milestone);
+                auditLogService.logAction(milestone.getId(), "MILESTONE_AUTO_COMPLETE",
+                        "Milestone automatically moved to IN_REVIEW due to beneficiary YES confirmation");
+            }
+        }
 
         return ResponseEntity.ok(Map.of("message", "Response submitted successfully"));
     }

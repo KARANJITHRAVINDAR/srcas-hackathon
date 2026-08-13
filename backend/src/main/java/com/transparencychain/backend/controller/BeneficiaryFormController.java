@@ -25,6 +25,9 @@ public class BeneficiaryFormController {
     @Autowired
     private BeneficiaryFormResponseRepository responseRepository;
 
+    @Autowired
+    private MilestoneRepository milestoneRepository;
+
     @GetMapping
     public ResponseEntity<?> getProjectForm(@PathVariable UUID projectId) {
         List<BeneficiaryVerificationForm> forms = formRepository.findByProjectIdOrderByCreatedAtDesc(projectId);
@@ -131,5 +134,41 @@ public class BeneficiaryFormController {
         summary.put("recentResponses", responseDtos);
 
         return ResponseEntity.ok(summary);
+    }
+
+    @GetMapping("/milestones/{milestoneId}")
+    public ResponseEntity<?> getMilestoneForm(@PathVariable UUID projectId, @PathVariable UUID milestoneId) {
+        Optional<BeneficiaryVerificationForm> formOpt = formRepository.findByMilestoneId(milestoneId);
+        if (formOpt.isPresent()) {
+            return ResponseEntity.ok(formOpt.get());
+        }
+        
+        // Auto-generate if it doesn't exist
+        Project project = projectRepository.findById(projectId).orElseThrow();
+        Milestone milestone = milestoneRepository.findById(milestoneId).orElseThrow();
+        
+        BeneficiaryVerificationForm form = new BeneficiaryVerificationForm();
+        form.setProject(project);
+        form.setMilestone(milestone);
+        form.setTitle(milestone.getTitle() + " Verification");
+        form.setDescription("Please help us verify the completion of: " + milestone.getTitle());
+        form.setStatus(BeneficiaryVerificationForm.FormStatus.ACTIVE); // Auto-active for milestones
+        form.setTargetResponses(project.getExpectedBeneficiaries());
+        form.setMinimumResponsePercentage(20);
+        form.setMinimumPositivePercentage(80);
+        
+        List<BeneficiaryFormQuestion> questions = new ArrayList<>();
+        BeneficiaryFormQuestion q = new BeneficiaryFormQuestion();
+        q.setForm(form);
+        q.setQuestionText("Was " + milestone.getTitle() + " completed successfully?");
+        q.setQuestionType(BeneficiaryFormQuestion.QuestionType.YES_NO);
+        q.setRequired(true);
+        q.setDisplayOrder(1);
+        questions.add(q);
+        
+        form.setQuestions(questions);
+        form = formRepository.save(form);
+        
+        return ResponseEntity.ok(form);
     }
 }

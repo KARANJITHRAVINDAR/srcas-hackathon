@@ -9,4 +9,5 @@ import java.util.UUID;
 public interface BeneficiaryVerificationFormRepository extends JpaRepository<BeneficiaryVerificationForm, UUID> {
     List<BeneficiaryVerificationForm> findByProjectIdOrderByCreatedAtDesc(UUID projectId);
     Optional<BeneficiaryVerificationForm> findByShareToken(String shareToken);
+    Optional<BeneficiaryVerificationForm> findByMilestoneId(UUID milestoneId);
 }

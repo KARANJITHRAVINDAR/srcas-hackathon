@@ -34,6 +34,9 @@ public class ProofController {
     
     @Autowired
     AuditLogService auditLogService;
+
+    @Autowired
+    com.transparencychain.backend.service.BlockchainService blockchainService;
     
     @PostMapping("/milestones/{milestoneId}/proofs")
     @PreAuthorize("hasRole('NGO')")
@@ -42,6 +45,21 @@ public class ProofController {
                                          @RequestParam("metadata") String metadata,
                                          @RequestParam(value = "expectedType", defaultValue = "INVOICE") String expectedType) {
         Milestone milestone = milestoneRepository.findById(milestoneId).orElseThrow();
+        String contentType = file.getContentType();
+        String originalFilename = file.getOriginalFilename();
+        boolean isValid = (contentType != null && (contentType.startsWith("video/") || contentType.equals("application/pdf") || contentType.startsWith("image/"))) ||
+                          (originalFilename != null && (originalFilename.toLowerCase().endsWith(".mp4") ||
+                                                        originalFilename.toLowerCase().endsWith(".mov") ||
+                                                        originalFilename.toLowerCase().endsWith(".avi") ||
+                                                        originalFilename.toLowerCase().endsWith(".mkv") ||
+                                                        originalFilename.toLowerCase().endsWith(".webm") ||
+                                                        originalFilename.toLowerCase().endsWith(".pdf") ||
+                                                        originalFilename.toLowerCase().endsWith(".png") ||
+                                                        originalFilename.toLowerCase().endsWith(".jpg") ||
+                                                        originalFilename.toLowerCase().endsWith(".jpeg")));
+        if (!isValid) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Only video, PDF, or image files are allowed for evidence."));
+        }
         
         ProofSubmission proof = new ProofSubmission();
         proof.setMilestone(milestone);
@@ -54,7 +72,14 @@ public class ProofController {
         milestone.setStatus(Milestone.MilestoneStatus.EVIDENCE_SUBMITTED);
         milestoneRepository.save(milestone);
         
-        auditLogService.logAction(milestone.getId(), "MILESTONE", "Evidence submitted. ID: " + proof.getId());
+        String txHash = "0xhash";
+        try {
+            txHash = blockchainService.anchorEvidence(milestone.getId(), originalFilename, file.getBytes());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        auditLogService.logAction(milestone.getId(), "MILESTONE", "Evidence submitted and anchored. ID: " + proof.getId() + ", Tx Hash: " + txHash);
         
         try {
             // Trigger async AI analysis

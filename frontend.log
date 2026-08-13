@@ -5,12 +5,14 @@
 (!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
   - `__dirname` (vite.config.ts:10:25). Use `import.meta.dirname` instead
 Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
-12:50:14 am [vite] (client) Re-optimizing dependencies because vite config has changed
 
-  VITE v8.2.1  ready in 284 ms
+  VITE v8.2.1  ready in 133 ms
 
   ➜  Local:   http://localhost:5173/
   ➜  Network: use --host to expose
-12:50:15 am [vite] (client) [console.error] AxiosError: Request failed with status code 401
-    at settle (http://localhost:5173/node_modules/.vite/deps/axios.js?v=e783fb56:1934:14)
-    at XMLHttpRequest.onloadend (http://localhost:5173/node_modules/.vite/deps/axios.js?v=e783fb56:2367:4)
+10:57:15 pm [vite] (client) [console.error] AxiosError: Request failed with status code 401
+    at settle (http://localhost:5173/node_modules/.vite/deps/axios.js?v=5cbbf83b:1934:14)
+    at XMLHttpRequest.onloadend (http://localhost:5173/node_modules/.vite/deps/axios.js?v=5cbbf83b:2367:4)
+10:57:16 pm [vite] (client) [console.error] Error loading project data AxiosError: Request failed with status code 401
+    at settle (http://localhost:5173/node_modules/.vite/deps/axios.js?v=5cbbf83b:1934:14)
+    at XMLHttpRequest.onloadend (http://localhost:5173/node_modules/.vite/deps/axios.js?v=5cbbf83b:2367:4)

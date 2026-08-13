@@ -44,6 +44,9 @@ public class ProjectController {
     
     @Autowired
     com.transparencychain.backend.service.BlockchainService blockchainService;
+    
+    @Autowired
+    com.transparencychain.backend.service.MilestoneAutoGenerator milestoneAutoGenerator;
 
     @PostMapping
     @PreAuthorize("hasRole('FUNDER')")
@@ -189,9 +192,17 @@ public class ProjectController {
         project.setStatus(request.getFunderId() != null ? Project.ProjectStatus.SUBMITTED : Project.ProjectStatus.PUBLISHED);
         project = projectRepository.save(project);
         
-        auditLogService.logAction(project.getId(), "PROJECT", "Project PROPOSED by NGO " + ngo.getOrgName());
+        // Auto-generate default milestones based on budget/duration
+        java.util.List<com.transparencychain.backend.model.Milestone> autoMilestones = milestoneAutoGenerator.generate(project);
         
-        return ResponseEntity.ok(project);
+        auditLogService.logAction(project.getId(), "PROJECT", "Project PROPOSED by NGO " + ngo.getOrgName()
+                + " with " + autoMilestones.size() + " auto-generated milestones");
+        
+        // Return both project and auto-generated milestones
+        java.util.Map<String, Object> response = new java.util.LinkedHashMap<>();
+        response.put("project", project);
+        response.put("milestones", autoMilestones);
+        return ResponseEntity.ok(response);
     }
     
     @PatchMapping("/{id}/status")

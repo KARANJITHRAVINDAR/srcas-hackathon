@@ -3,6 +3,7 @@ package com.transparencychain.backend.controller;
 import com.transparencychain.backend.dto.ChangeRequestBody;
 import com.transparencychain.backend.dto.ChangeRequestDto;
 import com.transparencychain.backend.dto.MessageResponse;
+import com.transparencychain.backend.dto.OrgChangeRequestResponseBody;
 import com.transparencychain.backend.model.FunderProfile;
 import com.transparencychain.backend.repository.FunderProfileRepository;
 import com.transparencychain.backend.security.UserDetailsImpl;
@@ -96,8 +97,51 @@ public class OrgNegotiationController {
         }
     }
 
+    // -------------------------------------------------------------------------
+    // POST /api/org/change-requests/{id}/respond
+    //
+    // Org responds to a PENDING change request (NGO-initiated).
+    //   ACCEPT  → milestone locked at proposed values, CR closed
+    //   COUNTER → new CR created with Funder's counter-values, ball back to NGO
+    //   REJECT  → proposed version rejected, milestone reverts to PENDING/MODIFIED
+    // -------------------------------------------------------------------------
+    @PostMapping("/change-requests/{id}/respond")
+    public ResponseEntity<?> respondToChangeRequest(
+            @PathVariable UUID id,
+            @RequestBody OrgChangeRequestResponseBody body) {
+
+        UserDetailsImpl userDetails = (UserDetailsImpl)
+                SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        try {
+            ChangeRequestDto dto = negotiationService.funderRespondToChangeRequest(
+                    id, userDetails.getId(), body);
+            return ResponseEntity.ok(dto);
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
+        } catch (SecurityException e) {
+            return ResponseEntity.status(403).body(new MessageResponse(e.getMessage()));
+        }
+    }
+
     @GetMapping("/milestones/{milestoneId}/change-requests")
     public ResponseEntity<?> getChangeRequestsForMilestone(@PathVariable UUID milestoneId) {
         return ResponseEntity.ok(negotiationService.getChangeRequestsForMilestone(milestoneId));
+    }
+
+    @PostMapping("/projects/{projectId}/milestones/{milestoneId}/accept-lock")
+    public ResponseEntity<?> acceptAndLockMilestone(
+            @PathVariable UUID projectId,
+            @PathVariable UUID milestoneId) {
+
+        UserDetailsImpl userDetails = (UserDetailsImpl)
+                SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        try {
+            negotiationService.acceptAndLockMilestone(projectId, milestoneId, userDetails.getId());
+            return ResponseEntity.ok(new MessageResponse("Milestone accepted and locked successfully. Fund release triggered."));
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
+        } catch (SecurityException e) {
+            return ResponseEntity.status(403).body(new MessageResponse(e.getMessage()));
+        }
     }
 }

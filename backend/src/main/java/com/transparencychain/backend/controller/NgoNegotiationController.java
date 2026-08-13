@@ -1,5 +1,6 @@
 package com.transparencychain.backend.controller;
 
+import com.transparencychain.backend.dto.ChangeRequestBody;
 import com.transparencychain.backend.dto.ChangeRequestDto;
 import com.transparencychain.backend.dto.MessageResponse;
 import com.transparencychain.backend.dto.NgoChangeRequestResponseBody;
@@ -17,12 +18,10 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * NGO counterpart endpoints for the change-request loop (Phase 2).
- *
- * Per the spec (§5): these are the NGO-side endpoints needed to close the loop;
- * they are part of this module's build responsibility.
+ * NGO-side endpoints for the bidirectional change-request loop.
  *
  * Endpoints:
+ *   POST   /api/ngo/projects/{id}/milestones/{milestoneId}/change-request — NGO initiates a CR
  *   GET    /api/ngo/change-requests?status=PENDING   — NGO's inbox of pending CRs
  *   POST   /api/ngo/change-requests/{id}/respond     — ACCEPT | COUNTER | REJECT
  *
@@ -75,6 +74,29 @@ public class NgoNegotiationController {
         try {
             ChangeRequestDto dto = negotiationService.ngoRespondToChangeRequest(
                     id, currentNgoUserId(), body);
+            return ResponseEntity.ok(dto);
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
+        } catch (SecurityException e) {
+            return ResponseEntity.status(403).body(new MessageResponse(e.getMessage()));
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // POST /api/ngo/projects/{projectId}/milestones/{milestoneId}/change-request
+    //
+    // NGO initiates a change request (bidirectional negotiation).
+    // This mirrors the org-side endpoint but is authored by the NGO.
+    // -------------------------------------------------------------------------
+    @PostMapping("/projects/{projectId}/milestones/{milestoneId}/change-request")
+    public ResponseEntity<?> raiseNgoChangeRequest(
+            @PathVariable UUID projectId,
+            @PathVariable UUID milestoneId,
+            @RequestBody ChangeRequestBody body) {
+
+        try {
+            ChangeRequestDto dto = negotiationService.raiseNgoChangeRequest(
+                    projectId, milestoneId, currentNgoUserId(), body);
             return ResponseEntity.ok(dto);
         } catch (IllegalArgumentException | IllegalStateException e) {
             return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));

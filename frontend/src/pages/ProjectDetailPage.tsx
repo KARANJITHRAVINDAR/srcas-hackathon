@@ -5,8 +5,10 @@ import { useAuth } from '../context/AuthContext';
 import { 
     CheckCircle2, Circle, AlertCircle, PlusCircle, CheckSquare, 
     History, Sparkles, Coins, Clock, ArrowRight, Lock, Unlock, 
-    ShieldCheck, ShieldAlert, FileText, ChevronDown, ChevronUp, RefreshCw, Send, AlertTriangle
+    ShieldCheck, ShieldAlert, FileText, ChevronDown, ChevronUp, RefreshCw, Send, AlertTriangle,
+    QrCode, Link
 } from 'lucide-react';
+import QRCode from 'react-qr-code';
 
 export default function ProjectDetailPage() {
     const { id } = useParams<{id: string}>();
@@ -41,6 +43,11 @@ export default function ProjectDetailPage() {
     const [counterBudget, setCounterBudget] = useState('');
     const [counterSequence, setCounterSequence] = useState('');
     const [counterDueDate, setCounterDueDate] = useState('');
+
+    // QR Share Modal states
+    const [showQrModal, setShowQrModal] = useState(false);
+    const [qrUrl, setQrUrl] = useState('');
+    const [qrMilestoneTitle, setQrMilestoneTitle] = useState('');
 
     // Commitment Modal
     const [showCommitModal, setShowCommitModal] = useState(false);
@@ -174,7 +181,7 @@ export default function ProjectDetailPage() {
         }
     };
 
-    // NGO Phase 2: Respond to Change Request (Accept, Reject, Counter)
+    // NGO/Funder Phase 2: Respond to Change Request (Accept, Reject, Counter)
     const handleNgoRespond = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
@@ -189,13 +196,27 @@ export default function ProjectDetailPage() {
                 if (counterDueDate) body.counterDueDate = counterDueDate;
             }
 
-            await axios.post(`http://localhost:8081/api/ngo/change-requests/${selectedCR.id}/respond`, body);
+            const endpoint = isFunder
+                ? `http://localhost:8081/api/org/change-requests/${selectedCR.id}/respond`
+                : `http://localhost:8081/api/ngo/change-requests/${selectedCR.id}/respond`;
+
+            await axios.post(endpoint, body);
             alert(`Decision [${decision}] submitted successfully!`);
             setShowRespondModal(false);
             resetRespondForm();
             fetchData();
         } catch (err: any) {
             alert(err.response?.data?.message || "Failed to submit decision");
+        }
+    };
+
+    const handleAcceptLockMilestone = async (milestoneId: string) => {
+        try {
+            await axios.post(`http://localhost:8081/api/org/projects/${id}/milestones/${milestoneId}/accept-lock`);
+            alert("Milestone accepted and locked. Funds released for this milestone.");
+            fetchData();
+        } catch (err: any) {
+            alert(err.response?.data?.message || "Failed to accept and lock milestone");
         }
     };
 
@@ -261,11 +282,11 @@ export default function ProjectDetailPage() {
         }
     };
 
-    // Milestone Evidence Upload (NGO)
+    // Milestone Evidence Upload (NGO) - Strictly Video-only
     const handleUploadProof = (milestoneId: string) => {
         const input = document.createElement('input');
         input.type = 'file';
-        input.accept = 'image/*,application/pdf';
+        input.accept = 'video/*';
         input.onchange = async (e: any) => {
             const file = e.target.files[0];
             if (!file) return;
@@ -278,13 +299,39 @@ export default function ProjectDetailPage() {
                 await axios.post(`http://localhost:8081/api/v1/milestones/${milestoneId}/proofs`, formData, {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 });
-                alert("Proof submitted for AI verification. Smart contract will execute conditionally.");
+                alert("Video proof submitted successfully and anchored to blockchain. AI verification in progress.");
                 fetchData();
             } catch (err: any) {
                 alert(err.response?.data?.message || 'Failed to submit proof');
             }
         };
         input.click();
+    };
+
+    // Activate milestone (NGO)
+    const handleActivateMilestone = async (milestoneId: string) => {
+        try {
+            await axios.post(`http://localhost:8081/api/v1/projects/${id}/milestones/${milestoneId}/activate`);
+            alert("Milestone activated successfully! You can now upload video proof and verify with beneficiaries.");
+            fetchData();
+        } catch (err: any) {
+            alert(err.response?.data?.message || 'Failed to activate milestone');
+        }
+    };
+
+    // Share QR code (NGO)
+    const handleShareQrCode = async (milestoneId: string, milestoneTitle: string) => {
+        try {
+            const res = await axios.get(`http://localhost:8081/api/v1/ngo/projects/${id}/beneficiary-form/milestones/${milestoneId}`);
+            if (res.data) {
+                const url = `${window.location.origin}/verify/${res.data.shareToken}`;
+                setQrUrl(url);
+                setQrMilestoneTitle(milestoneTitle);
+                setShowQrModal(true);
+            }
+        } catch (err: any) {
+            alert("Failed to retrieve or generate beneficiary form QR code.");
+        }
     };
 
     // Submit Milestone for final approval (NGO)
@@ -510,28 +557,67 @@ export default function ProjectDetailPage() {
                                                                         Respond
                                                                     </button>
                                                                 )}
+                                                                {isFunder && pendingCR.proposed?.proposedBy === 'NGO' && (
+                                                                    <button 
+                                                                        onClick={() => { setSelectedCR(pendingCR); setShowRespondModal(true); }}
+                                                                        className="bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-black px-2 py-1 rounded transition"
+                                                                    >
+                                                                        Respond
+                                                                    </button>
+                                                                )}
+                                                                {!isFunder && pendingCR.proposed?.proposedBy === 'NGO' && (
+                                                                    <button 
+                                                                        onClick={() => handleWithdrawCR(pendingCR.id)}
+                                                                        className="text-[10px] font-black text-red-600 hover:underline"
+                                                                    >
+                                                                        Withdraw
+                                                                    </button>
+                                                                )}
                                                             </div>
                                                         </div>
                                                     )}
 
                                                     {/* FUNDER CONTROLS FOR NEGOTIATION */}
                                                     {isFunder && engagement?.status === 'NEGOTIATING' && m.status !== 'LOCKED' && !pendingCR && (
-                                                        <button 
-                                                            onClick={() => { setSelectedMilestone(m); setShowChangeModal(true); }}
-                                                            className="bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-4 py-2 rounded-lg transition"
-                                                        >
-                                                            Propose Changes
-                                                        </button>
+                                                        <div className="flex flex-col gap-1.5">
+                                                            <button 
+                                                                onClick={() => { setSelectedMilestone(m); setShowChangeModal(true); }}
+                                                                className="bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-4 py-2 rounded-lg transition"
+                                                            >
+                                                                Propose Changes
+                                                            </button>
+                                                            <button 
+                                                                onClick={() => handleAcceptLockMilestone(m.id)}
+                                                                className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2 rounded-lg transition"
+                                                            >
+                                                                Accept & Lock
+                                                            </button>
+                                                        </div>
                                                     )}
 
                                                     {/* NGO EVIDENCE CONTROLS */}
+                                                    {!isFunder && m.status === 'LOCKED' && (
+                                                        <button 
+                                                            onClick={() => handleActivateMilestone(m.id)}
+                                                            className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-4 py-2 rounded-lg transition"
+                                                        >
+                                                            Activate Milestone
+                                                        </button>
+                                                    )}
+
                                                     {!isFunder && (m.status === 'IN_PROGRESS' || m.status === 'REJECTED') && (
                                                         <>
                                                             <button 
                                                                 onClick={() => handleUploadProof(m.id)}
                                                                 className="border border-slate-300 hover:border-slate-800 text-slate-800 text-xs font-bold px-4 py-2 rounded-lg transition"
                                                             >
-                                                                {m.status === 'REJECTED' ? 'Re-upload Evidence' : 'Upload Proof'}
+                                                                Upload Video Proof
+                                                            </button>
+                                                            <button 
+                                                                onClick={() => handleShareQrCode(m.id, m.title)}
+                                                                className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded-lg transition flex items-center justify-center gap-1"
+                                                            >
+                                                                <QrCode size={14} /> Share QR Code
                                                             </button>
                                                             <button 
                                                                 onClick={() => requestApproval(m.id)}
@@ -974,6 +1060,50 @@ export default function ProjectDetailPage() {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal: Share QR Code (NGO) */}
+            {showQrModal && (
+                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden border border-slate-200">
+                        <div className="p-6 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+                            <h3 className="text-lg font-black text-slate-950 flex items-center gap-1.5"><QrCode size={20} className="text-blue-600" /> Share Verification Form</h3>
+                            <button onClick={() => setShowQrModal(false)} className="text-slate-400 hover:text-slate-600 text-lg font-bold">✕</button>
+                        </div>
+                        <div className="p-6 space-y-6">
+                            <div className="text-sm font-semibold text-slate-700">
+                                Milestone: <strong className="text-slate-950">{qrMilestoneTitle}</strong>
+                            </div>
+                            <div className="flex justify-center bg-white p-4 rounded-xl border border-slate-200">
+                                <QRCode value={qrUrl} size={200} level="H" />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Secure Public Link</label>
+                                <div className="flex gap-2">
+                                    <input 
+                                        type="text" 
+                                        readOnly 
+                                        value={qrUrl} 
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-sm text-slate-900 outline-none"
+                                    />
+                                    <button 
+                                        onClick={() => {
+                                            navigator.clipboard.writeText(qrUrl);
+                                            alert("Link copied to clipboard!");
+                                        }}
+                                        className="bg-blue-50 text-blue-600 hover:bg-blue-100 p-2.5 rounded-lg transition"
+                                        title="Copy Link"
+                                    >
+                                        <Link className="w-5 h-5" />
+                                    </button>
+                                </div>
+                                <p className="text-xs text-slate-500 font-medium mt-2">
+                                    Scanning this QR code or opening the link lets beneficiaries submit ground-level confirmation feedback for this milestone without any login required.
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}

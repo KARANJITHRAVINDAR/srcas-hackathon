@@ -7,11 +7,7 @@ import RegisterPage from './pages/RegisterPage';
 import NgoDashboardPage from './pages/NgoDashboardPage';
 import FunderDashboardPage from './pages/FunderDashboardPage';
 import FunderProjectsPage from './pages/FunderProjectsPage';
-import ProjectCreationPage from './pages/ProjectCreationPage';
 import ProjectDetailPage from './pages/ProjectDetailPage';
-import MarketplacePage from './pages/MarketplacePage';
-import NgoNeedFormPage from './pages/NgoNeedFormPage';
-import NgoMatchRequestsPage from './pages/NgoMatchRequestsPage';
 import MilestoneCreationPage from './pages/MilestoneCreationPage';
 import PublicAuditDashboard from './pages/PublicAuditDashboard';
 import NgoProjectsPage from './pages/NgoProjectsPage';
@@ -24,6 +20,7 @@ import NgoGlobalFundsPage from './pages/NgoGlobalFundsPage';
 import NgoGlobalImpactPage from './pages/NgoGlobalImpactPage';
 import NgoGlobalBeneficiariesPage from './pages/NgoGlobalBeneficiariesPage';
 import PublicBeneficiaryFormPage from './pages/PublicBeneficiaryFormPage';
+import FunderVerificationPage from './pages/FunderVerificationPage';
 
 import NgoExpensesPage from './pages/NgoExpensesPage';
 import AddExpensePage from './pages/AddExpensePage';
@@ -52,14 +49,6 @@ function AppRoutes() {
       <Route path="/public-ledger" element={<PublicAuditDashboard />} />
       
       {/* NGO Routes */}
-      <Route 
-        path="/ngo/needs/new" 
-        element={<ProtectedRoute role="NGO"><DashboardWrapper><NgoNeedFormPage /></DashboardWrapper></ProtectedRoute>} 
-      />
-      <Route 
-        path="/ngo/match-requests" 
-        element={<ProtectedRoute role="NGO"><DashboardWrapper><NgoMatchRequestsPage /></DashboardWrapper></ProtectedRoute>} 
-      />
       <Route 
         path="/ngo/dashboard" 
         element={<ProtectedRoute role="NGO"><DashboardWrapper><NgoDashboardPage /></DashboardWrapper></ProtectedRoute>} 
@@ -127,8 +116,8 @@ function AppRoutes() {
         element={<ProtectedRoute role="FUNDER"><DashboardWrapper><FunderProjectsPage /></DashboardWrapper></ProtectedRoute>} 
       />
       <Route 
-        path="/funder/projects/new" 
-        element={<ProtectedRoute role="FUNDER"><DashboardWrapper><ProjectCreationPage /></DashboardWrapper></ProtectedRoute>} 
+        path="/funder/verification" 
+        element={<ProtectedRoute role="FUNDER"><DashboardWrapper><FunderVerificationPage /></DashboardWrapper></ProtectedRoute>} 
       />
 
       {/* Shared Authenticated Routes */}
