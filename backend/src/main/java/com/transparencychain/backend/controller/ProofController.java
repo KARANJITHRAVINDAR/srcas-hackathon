@@ -55,6 +55,9 @@ public class ProofController {
 
     @Autowired
     com.transparencychain.backend.service.NotificationService notificationService;
+
+    @Autowired
+    OrgProjectEngagementRepository engagementRepository;
     
     private final String UPLOAD_DIR = "uploads/";
 
@@ -80,6 +83,24 @@ public class ProofController {
         
         if (milestone.getStatus() == Milestone.MilestoneStatus.LOCKED) {
             return ResponseEntity.badRequest().body(new MessageResponse("Cannot submit evidence for a locked milestone. Please complete earlier milestones first."));
+        }
+
+        // Sequential progression guard: Milestone N can only receive evidence if all prior milestones 1..(N-1) are COMPLETED
+        if (milestone.getProject() != null && milestone.getSequenceNumber() > 1) {
+            List<Milestone> projectMilestones = milestoneRepository.findByProjectId(milestone.getProject().getId());
+            for (Milestone m : projectMilestones) {
+                if (m.getSequenceNumber() < milestone.getSequenceNumber() && m.getStatus() != Milestone.MilestoneStatus.COMPLETED) {
+                    return ResponseEntity.badRequest().body(new MessageResponse("Cannot submit evidence for Milestone " + milestone.getSequenceNumber() + ". Previous Milestone " + m.getSequenceNumber() + " ('" + m.getTitle() + "') must be COMPLETED first."));
+                }
+            }
+        }
+
+        if (milestone.getProject() != null) {
+            List<OrgProjectEngagement> engagements = engagementRepository.findByProjectId(milestone.getProject().getId());
+            boolean allWithdrawn = !engagements.isEmpty() && engagements.stream().allMatch(e -> e.getStatus() == OrgProjectEngagement.EngagementStatus.WITHDRAWN);
+            if (allWithdrawn) {
+                return ResponseEntity.badRequest().body(new MessageResponse("Cannot submit evidence for a project with withdrawn funding engagement. Please remodify and republish the project first."));
+            }
         }
         
         String savedFileName;

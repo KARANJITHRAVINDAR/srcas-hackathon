@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle2, Circle, AlertCircle, Lock, ArrowRight, Upload, Clock, ShieldAlert, Check, HelpCircle } from 'lucide-react';
+import { CheckCircle2, Circle, AlertCircle, Lock, ArrowRight, Upload, Clock, ShieldAlert, Check, HelpCircle, Video, MapPin, Award, ExternalLink, Play, XCircle, AlertTriangle } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useAlert } from '../../context/AlertContext';
 
@@ -29,9 +29,23 @@ export default function ProjectMilestonesTab({ project, milestones, onMilestoneC
                     <div className="absolute left-[27px] top-4 bottom-4 w-0.5 bg-[#DDE3EA]"></div>
 
                     <div className="space-y-6">
-                        {[...milestones].sort((a, b) => (a.sequenceNumber || 0) - (b.sequenceNumber || 0)).map((m, idx) => (
-                            <MilestoneTimelineCard key={m.id} milestone={m} index={idx} onClick={() => onMilestoneClick(m.id)} />
-                        ))}
+                        {(() => {
+                            const sorted = [...milestones].sort((a, b) => (a.sequenceNumber || 0) - (b.sequenceNumber || 0));
+                            return sorted.map((m, idx) => {
+                                const prev = idx > 0 ? sorted[idx - 1] : null;
+                                const isSequentialLocked = prev && prev.status !== 'COMPLETED';
+                                return (
+                                    <MilestoneTimelineCard 
+                                        key={m.id} 
+                                        milestone={m} 
+                                        index={idx} 
+                                        isSequentialLocked={Boolean(isSequentialLocked)}
+                                        prevMilestone={prev}
+                                        onClick={() => onMilestoneClick(m.id)} 
+                                    />
+                                );
+                            });
+                        })()}
                     </div>
                 </div>
             )}
@@ -39,10 +53,10 @@ export default function ProjectMilestonesTab({ project, milestones, onMilestoneC
     );
 }
 
-function MilestoneTimelineCard({ milestone, index, onClick }: { milestone: any, index: number, onClick: () => void }) {
+function MilestoneTimelineCard({ milestone, index, isSequentialLocked, prevMilestone, onClick }: { milestone: any, index: number, isSequentialLocked?: boolean, prevMilestone?: any, onClick: () => void }) {
     const isCompleted = milestone.status === 'COMPLETED';
-    const isLocked = milestone.status === 'LOCKED' || milestone.status === 'PENDING';
-    const isInProgress = milestone.status === 'AVAILABLE' || milestone.status === 'IN_PROGRESS';
+    const isLocked = milestone.status === 'LOCKED' || milestone.status === 'PENDING' || isSequentialLocked;
+    const isInProgress = !isLocked && (milestone.status === 'AVAILABLE' || milestone.status === 'IN_PROGRESS');
 
     const getIcon = () => {
         if (isCompleted) return <Check className="w-5 h-5 text-white" />;
@@ -62,19 +76,25 @@ function MilestoneTimelineCard({ milestone, index, onClick }: { milestone: any, 
                 {getIcon()}
             </div>
             
-            <div className={`flex-1 bg-white border ${isLocked ? 'border-[#DDE3EA] opacity-70' : 'border-[#DDE3EA] hover:border-blue-300'} rounded-2xl p-6 shadow-sm transition-all cursor-pointer group`} onClick={onClick}>
+            <div className={`flex-1 bg-white border ${isLocked ? 'border-[#DDE3EA] opacity-80 bg-slate-50/50' : 'border-[#DDE3EA] hover:border-blue-300'} rounded-2xl p-6 shadow-sm transition-all cursor-pointer group`} onClick={onClick}>
                 <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-4">
                     <div>
-                        <h3 className="text-xl font-bold text-[#10172A] group-hover:text-blue-600 transition-colors">M{milestone.sequenceNumber || index + 1} — {milestone.title}</h3>
+                        <div className="flex items-center gap-2">
+                            <h3 className="text-xl font-bold text-[#10172A] group-hover:text-blue-600 transition-colors">M{milestone.sequenceNumber || index + 1} — {milestone.title}</h3>
+                            {milestone.milestoneType === 'CLOSURE' && (
+                                <span className="bg-purple-100 text-purple-800 text-[10px] font-black px-2 py-0.5 rounded uppercase">Final Closure Gate</span>
+                            )}
+                        </div>
                         <p className="text-sm font-semibold text-[#52627A] mt-1 line-clamp-1">{milestone.description}</p>
                     </div>
                     <div className="text-right">
                         <span className={`px-3 py-1 rounded-md text-xs font-bold ${
                             isCompleted ? 'bg-emerald-100 text-emerald-700' :
+                            isSequentialLocked ? 'bg-amber-50 text-amber-800 border border-amber-200' :
                             isLocked ? 'bg-gray-100 text-gray-600' :
                             'bg-blue-100 text-blue-700'
                         }`}>
-                            {milestone.status.replace('_', ' ')}
+                            {isSequentialLocked ? `Locked (Complete M${prevMilestone?.sequenceNumber || index} first)` : milestone.status.replace('_', ' ')}
                         </span>
                     </div>
                 </div>
@@ -127,6 +147,16 @@ function MilestoneDetailView({ project, milestoneId, onBack, user }: { project: 
         reason: ''
     });
 
+    const [allMilestones, setAllMilestones] = useState<any[]>([]);
+    const [closureStatus, setClosureStatus] = useState<any>(null);
+    const [showClosureVideoModal, setShowClosureVideoModal] = useState(false);
+    const [closureVideoFile, setClosureVideoFile] = useState<File | null>(null);
+    const [capturedLat, setCapturedLat] = useState<number | null>(null);
+    const [capturedLng, setCapturedLng] = useState<number | null>(null);
+    const [capturedAtStr, setCapturedAtStr] = useState<string>(new Date().toISOString());
+    const [capturingGps, setCapturingGps] = useState(false);
+    const [uploadingClosureVideo, setUploadingClosureVideo] = useState(false);
+
     const loadData = () => {
         setLoading(true);
         const crEndpoint = user?.role === 'FUNDER'
@@ -137,19 +167,79 @@ function MilestoneDetailView({ project, milestoneId, onBack, user }: { project: 
             axios.get(`http://localhost:8081/api/v1/projects/${project.id}/milestones`),
             axios.get(`http://localhost:8081/api/v1/projects/${project.id}/milestones/${milestoneId}/tasks`),
             axios.get(crEndpoint).catch(() => ({ data: [] })),
-            axios.get(`http://localhost:8081/api/v1/milestones/${milestoneId}/clarifications`).catch(() => ({ data: [] }))
-        ]).then(([msRes, tasksRes, crRes, clarRes]) => {
+            axios.get(`http://localhost:8081/api/v1/milestones/${milestoneId}/clarifications`).catch(() => ({ data: [] })),
+            axios.get(`http://localhost:8081/api/v1/projects/${project.id}/closure-gates`).catch(() => ({ data: null }))
+        ]).then(([msRes, tasksRes, crRes, clarRes, closureRes]) => {
             const m = msRes.data.find((x: any) => x.id === milestoneId);
             setMilestone(m);
+            setAllMilestones(msRes.data || []);
             setTasks(tasksRes.data.sort((a: any, b: any) => a.sequenceNumber - b.sequenceNumber));
             setChangeRequests(crRes.data || []);
             setClarifications(clarRes.data || []);
+            if (closureRes.data) setClosureStatus(closureRes.data);
         }).catch(console.error).finally(() => setLoading(false));
     };
 
     useEffect(() => {
         loadData();
     }, [milestoneId]);
+
+    const handleCaptureGps = () => {
+        if (!navigator.geolocation) {
+            showAlert({ type: 'warning', message: 'Geolocation is not supported by your browser.' });
+            return;
+        }
+        setCapturingGps(true);
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                setCapturedLat(pos.coords.latitude);
+                setCapturedLng(pos.coords.longitude);
+                setCapturedAtStr(new Date().toISOString());
+                setCapturingGps(false);
+                showAlert({ type: 'info', message: `GPS location captured (${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)})` });
+            },
+            (err) => {
+                setCapturingGps(false);
+                showAlert({ type: 'warning', message: 'Unable to retrieve GPS coordinates: ' + err.message });
+            },
+            { enableHighAccuracy: true, timeout: 10000 }
+        );
+    };
+
+    const handleUploadClosureVideoSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!closureVideoFile) {
+            showAlert({ type: 'warning', message: 'Please select a video file to upload.' });
+            return;
+        }
+
+        setUploadingClosureVideo(true);
+        const formData = new FormData();
+        formData.append('file', closureVideoFile);
+        if (capturedLat != null) formData.append('lat', capturedLat.toString());
+        if (capturedLng != null) formData.append('lng', capturedLng.toString());
+        if (capturedAtStr) formData.append('capturedAt', capturedAtStr);
+
+        const token = localStorage.getItem('token');
+        const headers: any = { 'Content-Type': 'multipart/form-data' };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        try {
+            await axios.post(`http://localhost:8081/api/v1/projects/${project.id}/closure-video`, formData, { headers });
+            showAlert({ 
+                type: 'success', 
+                title: 'Closure Video Uploaded', 
+                message: 'Geo-tagged closure video uploaded successfully! Funder will verify coordinates and video evidence.' 
+            });
+            setShowClosureVideoModal(false);
+            setClosureVideoFile(null);
+            loadData();
+        } catch (err: any) {
+            showAlert({ type: 'error', message: err.response?.data?.message || 'Failed to upload closure video.' });
+        } finally {
+            setUploadingClosureVideo(false);
+        }
+    };
 
     const latestClarification = clarifications.length > 0 ? clarifications[0] : null;
     const isClarificationPending = latestClarification && latestClarification.status === 'PENDING_RESPONSE';
@@ -379,28 +469,165 @@ function MilestoneDetailView({ project, milestoneId, onBack, user }: { project: 
                 </div>
             </div>
 
+            {/* Milestone Sequential Lock Warning */}
+            {(() => {
+                const sorted = [...allMilestones].sort((a, b) => (a.sequenceNumber || 0) - (b.sequenceNumber || 0));
+                const prev = sorted.find((m: any) => (m.sequenceNumber || 0) === (milestone.sequenceNumber || 0) - 1);
+                const isSeqLocked = prev && prev.status !== 'COMPLETED';
+                if (isSeqLocked) {
+                    return (
+                        <div className="bg-amber-50 border-2 border-amber-300 rounded-2xl p-5 shadow-sm flex items-center gap-3 text-amber-950">
+                            <Lock className="w-6 h-6 text-amber-600 shrink-0" />
+                            <div>
+                                <h4 className="font-extrabold text-sm">Sequential Progression Locked: Complete Milestone {prev.sequenceNumber} First</h4>
+                                <p className="text-xs font-semibold text-amber-800 mt-0.5">
+                                    Milestone {prev.sequenceNumber} ("{prev.title}") is currently <strong>{prev.status.replace('_', ' ')}</strong>. Ground-level tasks and evidence for Milestone {milestone.sequenceNumber} will unlock once Milestone {prev.sequenceNumber} is completed.
+                                </p>
+                            </div>
+                        </div>
+                    );
+                }
+                return null;
+            })()}
+
+            {/* Dedicated Final Closure Gates Card (if Milestone is Closure Phase) */}
+            {(milestone.milestoneType === 'CLOSURE' || milestone.title?.toLowerCase().includes('closure') || milestone.sequenceNumber === allMilestones.length) && closureStatus && (
+                <div className="bg-white border-2 border-purple-200 rounded-2xl p-6 shadow-sm space-y-5">
+                    <div className="flex justify-between items-center pb-3 border-b border-slate-100">
+                        <div className="flex items-center gap-2">
+                            <Award className="w-6 h-6 text-purple-600" />
+                            <div>
+                                <h3 className="text-base font-black text-slate-900">Project Closure Requirements & Gates</h3>
+                                <p className="text-xs font-medium text-slate-500">All 3 gates are evaluated server-side to allow formal project closure.</p>
+                            </div>
+                        </div>
+                        <span className={`text-xs font-black px-3 py-1 rounded-full ${
+                            closureStatus.closed ? 'bg-emerald-100 text-emerald-800' :
+                            closureStatus.canClose ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
+                            'bg-amber-100 text-amber-800'
+                        }`}>
+                            {closureStatus.closed ? 'PROJECT CLOSED' : closureStatus.canClose ? 'GATES PASSED (READY TO CLOSE)' : 'GATES PENDING'}
+                        </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {/* Gate 1 */}
+                        <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+                            <div className="flex justify-between items-center text-xs font-bold">
+                                <span className="text-slate-700">Gate 1: Coverage (≥ {closureStatus.requiredCoveragePercentage || 10}%)</span>
+                                <span className={closureStatus.gate1Passed ? 'text-emerald-600' : 'text-amber-600'}>
+                                    {closureStatus.coveragePercentage}%
+                                </span>
+                            </div>
+                            <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                                <div className={`h-full ${closureStatus.gate1Passed ? 'bg-[#00A875]' : 'bg-amber-500'}`} style={{ width: `${Math.min(100, closureStatus.coveragePercentage * (100 / (closureStatus.requiredCoveragePercentage || 10)))}%` }}></div>
+                            </div>
+                            <div className="text-[11px] text-slate-500 font-semibold">
+                                {closureStatus.uniqueFeedbackCount || 0} / {closureStatus.targetBeneficiaries || 100} unique (Min sample: {closureStatus.minSampleSize || 10})
+                            </div>
+                        </div>
+
+                        {/* Gate 2 */}
+                        <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+                            <div className="flex justify-between items-center text-xs font-bold">
+                                <span className="text-slate-700">Gate 2: Sentiment (≥ {closureStatus.requiredPositivePercentage || 80}%)</span>
+                                <span className={closureStatus.gate2Passed ? 'text-emerald-600' : 'text-amber-600'}>
+                                    {closureStatus.positivePercentage}%
+                                </span>
+                            </div>
+                            <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                                <div className={`h-full ${closureStatus.gate2Passed ? 'bg-[#00A875]' : 'bg-amber-500'}`} style={{ width: `${Math.min(100, closureStatus.positivePercentage)}%` }}></div>
+                            </div>
+                            <div className="text-[11px] text-slate-500 font-semibold">
+                                {closureStatus.positiveCount || 0} positive out of {closureStatus.uniqueFeedbackCount || 0} responses
+                            </div>
+                        </div>
+
+                        {/* Gate 3: Closure Video */}
+                        <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+                            <div className="flex justify-between items-center text-xs font-bold">
+                                <span className="text-slate-700">Gate 3: Geo-tagged Video</span>
+                                <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${
+                                    closureStatus.closureVideoStatus === 'VERIFIED' ? 'bg-emerald-100 text-emerald-800' :
+                                    closureStatus.closureVideoStatus === 'PENDING' ? 'bg-amber-100 text-amber-800' :
+                                    closureStatus.closureVideoStatus === 'REJECTED' ? 'bg-rose-100 text-rose-800' :
+                                    'bg-slate-200 text-slate-600'
+                                }`}>
+                                    {closureStatus.closureVideoStatus || 'NOT_SUBMITTED'}
+                                </span>
+                            </div>
+                            <div className="text-[11px] text-slate-500 font-semibold">
+                                {closureStatus.closureVideoVerified ? '✓ Video Verified by Funder' : 'Upload video with GPS coordinates'}
+                            </div>
+                            <button
+                                onClick={() => {
+                                    setShowClosureVideoModal(true);
+                                    handleCaptureGps();
+                                }}
+                                className="w-full mt-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-1.5 px-3 rounded-lg text-xs transition flex items-center justify-center gap-1.5 shadow-sm"
+                            >
+                                <Video size={13} /> {closureStatus.closureVideoSubmitted ? 'Update / Re-upload Video' : 'Upload Closure Video'}
+                            </button>
+                        </div>
+                    </div>
+
+                    {closureStatus.closureVideoStatus === 'REJECTED' && closureStatus.closureVideo?.reviewReason && (
+                        <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-800 space-y-1">
+                            <div className="font-bold flex items-center gap-1.5 text-rose-950">
+                                <AlertTriangle size={14} className="text-rose-600" /> Funder Requested Video Re-upload:
+                            </div>
+                            <p className="font-medium italic">"{closureStatus.closureVideo.reviewReason}"</p>
+                        </div>
+                    )}
+                </div>
+            )}
+
             {/* Request Approval / Submit Evidence Action */}
             <div className="mt-8 pt-8 border-t border-[#DDE3EA] flex justify-end">
-                {milestone.status === 'LOCKED' ? (
-                    <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 w-full flex justify-between items-center text-slate-500 font-bold text-sm">
+                {project.isWithdrawn ? (
+                    <div className="bg-rose-50 border border-rose-200 rounded-xl p-6 w-full flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 text-rose-800 font-bold text-sm">
                         <div className="flex items-center gap-2">
-                            <Lock className="w-5 h-5 text-slate-400" /> Milestone is Locked — Complete previous milestone(s) first to unlock evidence submission.
+                            <AlertCircle className="w-5 h-5 text-rose-600 shrink-0" />
+                            Funding engagement has been withdrawn. Evidence submission is paused.
                         </div>
+                        <span className="text-xs font-semibold text-rose-700 bg-rose-100/70 px-3 py-1.5 rounded-lg border border-rose-200">
+                            Click "Remodify & Republish" above to adjust project scope
+                        </span>
                     </div>
-                ) : milestone.status === 'VERIFIED' || milestone.status === 'COMPLETED' || milestone.status === 'DISBURSED' ? (
-                    <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-6 w-full flex justify-between items-center">
-                        <div className="flex items-center gap-2 text-emerald-700 font-bold">
-                            <CheckCircle2 className="w-5 h-5" /> Milestone Verified & Funds Released
-                        </div>
-                    </div>
-                ) : (
-                    <button
-                        onClick={() => setShowProofModal(true)}
-                        className={`${isClarificationPending ? 'bg-amber-600 hover:bg-amber-700' : 'bg-emerald-600 hover:bg-emerald-700'} text-white px-6 py-3 rounded-lg font-bold transition shadow-sm flex items-center gap-2`}
-                    >
-                        <Upload className="w-5 h-5" /> {isClarificationPending ? 'Submit Clarification & Updated Evidence' : 'Submit Evidence for Milestone Verification'}
-                    </button>
-                )}
+                ) : (() => {
+                    const sorted = [...allMilestones].sort((a, b) => (a.sequenceNumber || 0) - (b.sequenceNumber || 0));
+                    const prev = sorted.find((m: any) => (m.sequenceNumber || 0) === (milestone.sequenceNumber || 0) - 1);
+                    const isSeqLocked = prev && prev.status !== 'COMPLETED';
+
+                    if (isSeqLocked || milestone.status === 'LOCKED') {
+                        return (
+                            <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 w-full flex justify-between items-center text-slate-500 font-bold text-sm">
+                                <div className="flex items-center gap-2">
+                                    <Lock className="w-5 h-5 text-slate-400" /> Milestone is Locked — Complete Milestone {prev ? prev.sequenceNumber : 1} first.
+                                </div>
+                            </div>
+                        );
+                    }
+
+                    if (milestone.status === 'VERIFIED' || milestone.status === 'COMPLETED' || milestone.status === 'DISBURSED') {
+                        return (
+                            <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-6 w-full flex justify-between items-center">
+                                <div className="flex items-center gap-2 text-emerald-700 font-bold">
+                                    <CheckCircle2 className="w-5 h-5" /> Milestone Verified & Funds Released
+                                </div>
+                            </div>
+                        );
+                    }
+
+                    return (
+                        <button
+                            onClick={() => setShowProofModal(true)}
+                            className={`${isClarificationPending ? 'bg-amber-600 hover:bg-amber-700' : 'bg-emerald-600 hover:bg-emerald-700'} text-white px-6 py-3 rounded-lg font-bold transition shadow-sm flex items-center gap-2`}
+                        >
+                            <Upload className="w-5 h-5" /> {isClarificationPending ? 'Submit Clarification & Updated Evidence' : 'Submit Evidence for Milestone Verification'}
+                        </button>
+                    );
+                })()}
             </div>
 
             {/* Direct Milestone Evidence Upload Modal */}
@@ -552,6 +779,91 @@ function MilestoneDetailView({ project, milestoneId, onBack, user }: { project: 
                                 {proposing ? 'Submitting...' : 'Submit Proposal'}
                             </button>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Geo-tagged Closure Video Upload Modal */}
+            {showClosureVideoModal && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden border border-slate-200">
+                        <form onSubmit={handleUploadClosureVideoSubmit}>
+                            <div className="p-6 border-b border-slate-200 bg-purple-50">
+                                <h3 className="text-xl font-black text-purple-950 flex items-center gap-2">
+                                    <Video className="w-5 h-5 text-purple-600" /> Upload Geo-tagged Closure Video
+                                </h3>
+                                <p className="text-xs text-purple-800 font-medium mt-1">
+                                    Capture video evidence on-site. GPS coordinates and capture timestamp are embedded for tamper-resistance.
+                                </p>
+                            </div>
+                            <div className="p-6 space-y-4">
+                                {/* GPS Location Capture Status */}
+                                <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+                                    <div className="flex justify-between items-center text-xs font-bold text-slate-700">
+                                        <span className="flex items-center gap-1.5">
+                                            <MapPin size={14} className="text-rose-500" /> On-site GPS Geotag
+                                        </span>
+                                        <button
+                                            type="button"
+                                            onClick={handleCaptureGps}
+                                            disabled={capturingGps}
+                                            className="text-indigo-600 hover:text-indigo-800 text-[11px] font-black underline"
+                                        >
+                                            {capturingGps ? 'Detecting GPS...' : 'Refresh GPS'}
+                                        </button>
+                                    </div>
+                                    {capturedLat != null && capturedLng != null ? (
+                                        <div className="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg p-2 flex items-center justify-between">
+                                            <span>✓ Coordinates: {capturedLat.toFixed(5)}, {capturedLng.toFixed(5)}</span>
+                                            <span className="text-[10px] text-slate-400 font-normal">Browser Geolocation</span>
+                                        </div>
+                                    ) : (
+                                        <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-2 flex items-center justify-between">
+                                            <span>⚠️ GPS not yet captured.</span>
+                                            <button
+                                                type="button"
+                                                onClick={handleCaptureGps}
+                                                className="bg-amber-600 text-white text-[10px] font-bold px-2 py-1 rounded"
+                                            >
+                                                Allow Location
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-700 mb-1">Select Video File (.mp4, .mov, .webm) *</label>
+                                    <input
+                                        type="file"
+                                        accept="video/*"
+                                        required
+                                        onChange={e => setClosureVideoFile(e.target.files?.[0] || null)}
+                                        className="w-full border border-slate-300 rounded-xl p-2.5 text-xs text-slate-700"
+                                    />
+                                </div>
+
+                                <div className="text-[11px] text-slate-500 space-y-1">
+                                    <p>• SHA-256 hash is automatically computed upon upload for cryptographic tamper-proofing.</p>
+                                    <p>• Funder will review video playback, timestamp, and map pin before granting final closure pass.</p>
+                                </div>
+                            </div>
+                            <div className="p-6 border-t border-slate-200 bg-slate-50 flex justify-end gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowClosureVideoModal(false)}
+                                    className="px-5 py-2.5 text-slate-700 font-bold hover:bg-slate-200 rounded-xl text-xs transition"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={uploadingClosureVideo || !closureVideoFile}
+                                    className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2.5 rounded-xl font-black text-xs shadow-md transition disabled:opacity-50 flex items-center gap-2"
+                                >
+                                    {uploadingClosureVideo ? 'Uploading & Hashing...' : 'Upload Closure Video'}
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             )}

@@ -254,6 +254,13 @@ public class OrgProjectService {
 
         dto.setEngagementStatus(engagement.getStatus());
         dto.setEngagementId(engagement.getId());
+        dto.setWithdrawnAt(engagement.getWithdrawnAt());
+        dto.setWithdrawnBy(engagement.getWithdrawnBy());
+        dto.setWithdrawalReason(engagement.getWithdrawalReason());
+        dto.setRemodifyStatus(engagement.getRemodifyStatus());
+        if (engagement.getFunder() != null) {
+            dto.setWithdrawnFunderName(engagement.getFunder().getOrgName());
+        }
         dto.setNgoTrustProfile(trustProfile);
 
         dto.setMilestones(milestones.stream().map(this::toMilestoneSummary).collect(Collectors.toList()));

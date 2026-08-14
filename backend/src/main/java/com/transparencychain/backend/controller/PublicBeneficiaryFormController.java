@@ -10,7 +10,7 @@ import java.util.*;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
-@RequestMapping("/api/v1/public/beneficiary-forms")
+@RequestMapping({"/api/v1/public/beneficiary-forms", "/api/public/forms"})
 public class PublicBeneficiaryFormController {
 
     @Autowired
@@ -40,25 +40,33 @@ public class PublicBeneficiaryFormController {
     @GetMapping("/{secureToken}")
     public ResponseEntity<?> getForm(@PathVariable String secureToken) {
         BeneficiaryVerificationForm form = formRepository.findByShareToken(secureToken).orElse(null);
-        if (form == null || form.getStatus() != BeneficiaryVerificationForm.FormStatus.ACTIVE) {
-            return ResponseEntity.badRequest().body("Form is not active or does not exist.");
+        if (form == null) {
+            return ResponseEntity.badRequest().body("Form does not exist.");
+        }
+        if (form.getStatus() == BeneficiaryVerificationForm.FormStatus.DRAFT) {
+            form.setStatus(BeneficiaryVerificationForm.FormStatus.ACTIVE);
+            form = formRepository.save(form);
+        } else if (form.getStatus() == BeneficiaryVerificationForm.FormStatus.CLOSED) {
+            return ResponseEntity.badRequest().body("Form is closed.");
         }
 
         Map<String, Object> response = new HashMap<>();
         response.put("formId", form.getId());
         response.put("title", form.getTitle());
         response.put("description", form.getDescription());
-        response.put("projectTitle", form.getProject().getTitle());
-        response.put("projectLocation", form.getProject().getGeography());
+        response.put("projectTitle", form.getProject() != null ? form.getProject().getTitle() : "");
+        response.put("projectLocation", form.getProject() != null ? form.getProject().getGeography() : "");
 
         List<Map<String, Object>> qList = new ArrayList<>();
-        for (BeneficiaryFormQuestion q : form.getQuestions()) {
-            Map<String, Object> qMap = new HashMap<>();
-            qMap.put("id", q.getId());
-            qMap.put("text", q.getQuestionText());
-            qMap.put("type", q.getQuestionType().name());
-            qMap.put("required", q.isRequired());
-            qList.add(qMap);
+        if (form.getQuestions() != null) {
+            for (BeneficiaryFormQuestion q : form.getQuestions()) {
+                Map<String, Object> qMap = new HashMap<>();
+                qMap.put("id", q.getId());
+                qMap.put("text", q.getQuestionText());
+                qMap.put("type", q.getQuestionType() != null ? q.getQuestionType().name() : "YES_NO");
+                qMap.put("required", q.isRequired());
+                qList.add(qMap);
+            }
         }
         response.put("questions", qList);
 
@@ -68,7 +76,10 @@ public class PublicBeneficiaryFormController {
     @PostMapping("/{secureToken}/responses")
     public ResponseEntity<?> submitResponse(@PathVariable String secureToken, @RequestBody Map<String, Object> payload) {
         BeneficiaryVerificationForm form = formRepository.findByShareToken(secureToken).orElseThrow();
-        if (form.getStatus() != BeneficiaryVerificationForm.FormStatus.ACTIVE) {
+        if (form.getStatus() == BeneficiaryVerificationForm.FormStatus.DRAFT) {
+            form.setStatus(BeneficiaryVerificationForm.FormStatus.ACTIVE);
+            form = formRepository.save(form);
+        } else if (form.getStatus() == BeneficiaryVerificationForm.FormStatus.CLOSED) {
             return ResponseEntity.badRequest().body("Form is closed.");
         }
 
@@ -105,9 +116,31 @@ public class PublicBeneficiaryFormController {
             }
         }
 
+        String beneficiaryId = (String) payload.get("beneficiaryId");
+        if (beneficiaryId == null || beneficiaryId.trim().isEmpty()) {
+            beneficiaryId = (String) payload.get("phone");
+        }
+        if (beneficiaryId == null || beneficiaryId.trim().isEmpty()) {
+            beneficiaryId = (String) payload.get("responseToken");
+        }
+        if (beneficiaryId == null || beneficiaryId.trim().isEmpty()) {
+            beneficiaryId = UUID.randomUUID().toString();
+        }
+        response.setBeneficiaryId(beneficiaryId);
+        response.setResponseToken(beneficiaryId);
+
         response.setOverallResponse(hasNo ? BeneficiaryFormResponse.OverallResponse.NO : BeneficiaryFormResponse.OverallResponse.YES);
         response.setRating(rating);
         response.setFeedback(feedback);
+
+        if (!hasNo && (rating == null || rating >= 4)) {
+            response.setSentiment(BeneficiaryFormResponse.Sentiment.POSITIVE);
+        } else if (hasNo || (rating != null && rating <= 2)) {
+            response.setSentiment(BeneficiaryFormResponse.Sentiment.NEGATIVE);
+        } else {
+            response.setSentiment(BeneficiaryFormResponse.Sentiment.NEUTRAL);
+        }
+
         responseRepository.save(response);
 
         // Record in AI-driven BeneficiaryFeedback model

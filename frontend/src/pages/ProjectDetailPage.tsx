@@ -6,11 +6,12 @@ import {
     CheckCircle2, Circle, AlertCircle, PlusCircle, CheckSquare, 
     History, Sparkles, Coins, Clock, ArrowRight, Lock, Unlock, 
     ShieldCheck, ShieldAlert, FileText, ChevronDown, ChevronUp, RefreshCw, Send, AlertTriangle,
-    QrCode, Link, Award
+    QrCode, Link, Award, MapPin, Video, Eye, XCircle, ExternalLink, Play
 } from 'lucide-react';
 import QRCode from 'react-qr-code';
 
 import { useAlert } from '../context/AlertContext';
+import { BlockchainVerificationCard } from '../components/BlockchainVerificationCard';
 
 export default function ProjectDetailPage() {
     const { id } = useParams<{id: string}>();
@@ -97,7 +98,7 @@ export default function ProjectDetailPage() {
 
             // Fetch Project Closure Status
             try {
-                const closureRes = await axios.get(`http://localhost:8081/api/v1/projects/${id}/closure-status`);
+                const closureRes = await axios.get(`http://localhost:8081/api/v1/projects/${id}/closure-gates`);
                 setClosureStatus(closureRes.data);
             } catch (e) {
                 console.error("Closure status fetch error", e);
@@ -106,6 +107,52 @@ export default function ProjectDetailPage() {
             console.error("Error loading project data", err);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const [showVideoRejectModal, setShowVideoRejectModal] = useState(false);
+    const [videoRejectReason, setVideoRejectReason] = useState('');
+    const [showVideoPreviewModal, setShowVideoPreviewModal] = useState(false);
+
+    const handleVerifyVideo = async (decision: 'VERIFY' | 'REJECT', reason?: string) => {
+        try {
+            await axios.post(`http://localhost:8081/api/v1/projects/${id}/closure-video/verify`, {
+                decision,
+                reason: reason || ''
+            });
+            showAlert({
+                type: decision === 'VERIFY' ? 'success' : 'info',
+                title: decision === 'VERIFY' ? 'Closure Video Verified' : 'Closure Video Rejected',
+                message: decision === 'VERIFY' 
+                    ? 'Closure video has been verified. The Video Verification Gate is now PASSED.'
+                    : 'Closure video rejected. The NGO has been notified to re-upload with required corrections.'
+            });
+            setShowVideoRejectModal(false);
+            setVideoRejectReason('');
+            fetchData();
+        } catch (err: any) {
+            showAlert({ type: 'error', message: err.response?.data?.message || 'Error reviewing closure video' });
+        }
+    };
+
+    const handleMarkProjectDone = async () => {
+        const confirmed = await showAlert({
+            type: 'confirm',
+            title: 'Mark Project as Done & Finalize',
+            message: 'All 3 closure gates are satisfied! Are you ready to formally mark this project as COMPLETED and finalize the project lifecycle?'
+        });
+        if (!confirmed) return;
+        try {
+            const res = await axios.post(`http://localhost:8081/api/v1/projects/${id}/mark-done`);
+            setClosureStatus(res.data);
+            showAlert({
+                type: 'success',
+                title: 'Project Formally Closed & Completed!',
+                message: 'Congratulations! All milestones are finished, beneficiary feedback verified, and the project is officially CLOSED on-chain.'
+            });
+            fetchData();
+        } catch (err: any) {
+            showAlert({ type: 'error', message: err.response?.data?.message || 'Failed to complete project.' });
         }
     };
 
@@ -280,16 +327,17 @@ export default function ProjectDetailPage() {
     const handleDeclineNegotiation = async () => {
         const confirmed = await showAlert({
             type: 'confirm',
-            title: 'Decline Negotiation',
-            message: 'Are you sure you want to decline this negotiation and withdraw? The project will remain published for other funders.'
+            title: 'Withdraw Funding Engagement',
+            message: 'Are you sure you want to withdraw funding engagement from this project? The project will return to the NGO to remodify and republish.'
         });
         if (!confirmed) return;
         try {
-            await axios.post(`http://localhost:8081/api/org/projects/${id}/decline`);
-            showAlert({ type: 'info', message: 'Negotiation declined and engagement withdrawn.' });
+            const reason = window.prompt("Optional withdrawal reason for the NGO (e.g. Budget constraints, Milestone timeline change needed):") || "";
+            await axios.post(`http://localhost:8081/api/org/projects/${id}/withdraw`, { reason });
+            showAlert({ type: 'info', message: 'Funding engagement withdrawn.' });
             fetchData();
         } catch (err: any) {
-            showAlert({ type: 'error', message: err.response?.data?.message || 'Failed to decline negotiation' });
+            showAlert({ type: 'error', message: err.response?.data?.message || 'Failed to withdraw engagement' });
         }
     };
 
@@ -513,7 +561,11 @@ export default function ProjectDetailPage() {
                                     <h3 className="text-lg font-black text-slate-900">Milestone Breakdown</h3>
                                     <p className="text-xs font-semibold text-slate-500 mt-0.5">Renegotiate milestone values, lock budgets, and verify evidence.</p>
                                 </div>
-                                {allMilestonesLocked ? (
+                                {engagement?.status === 'WITHDRAWN' ? (
+                                    <span className="text-xs font-black text-slate-500 bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-full flex items-center gap-1">
+                                        <AlertCircle size={13} className="text-slate-400" /> Engagement Withdrawn — Read Only
+                                    </span>
+                                ) : allMilestonesLocked ? (
                                     <span className="text-xs font-extrabold text-[#00A875] bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full flex items-center gap-1">
                                         <CheckCircle2 size={13} /> All Locked
                                     </span>
@@ -748,6 +800,18 @@ export default function ProjectDetailPage() {
                                                     )}
                                                 </div>
                                             </div>
+
+                                            {/* Blockchain Merkle Verification Card */}
+                                            {(m.status === 'LOCKED' || m.status === 'IN_PROGRESS' || m.status === 'IN_REVIEW' || m.status === 'AWAITING_FUNDER_APPROVAL' || m.status === 'VERIFIED' || m.status === 'DISBURSED' || m.status === 'COMPLETED') && (
+                                                <div className="mt-4 pt-3 border-t border-slate-100">
+                                                    <BlockchainVerificationCard
+                                                        projectId={id!}
+                                                        milestoneId={m.id}
+                                                        userRole={user?.role}
+                                                        onStatusChange={fetchData}
+                                                    />
+                                                </div>
+                                            )}
                                         </div>
                                     );
                                 })}
@@ -765,12 +829,34 @@ export default function ProjectDetailPage() {
                                 <div className="border border-slate-100 rounded-xl p-4 bg-slate-50">
                                     <div className="text-xs font-bold text-slate-400 uppercase mb-1">Engagement state</div>
                                     <div className="flex items-center gap-2">
-                                        <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 animate-pulse"></span>
-                                        <span className="text-base font-black text-indigo-900">{engagement?.status || 'DISCOVERED'}</span>
+                                        <span className={`w-2.5 h-2.5 rounded-full ${engagement?.status === 'WITHDRAWN' ? 'bg-slate-400' : 'bg-indigo-500 animate-pulse'}`}></span>
+                                        <span className={`text-base font-black ${engagement?.status === 'WITHDRAWN' ? 'text-slate-600' : 'text-indigo-900'}`}>{engagement?.status || 'DISCOVERED'}</span>
                                     </div>
                                 </div>
 
                                 {/* Flow Control Buttons */}
+                                {engagement?.status === 'WITHDRAWN' && (
+                                    <div className="bg-rose-50 border border-rose-200 rounded-xl p-4 text-xs space-y-2">
+                                        <div className="font-bold text-rose-900 flex items-center gap-1.5">
+                                            <AlertCircle size={14} className="text-rose-600" />
+                                            Engagement Withdrawn
+                                        </div>
+                                        <p className="text-rose-700 font-medium leading-relaxed">
+                                            Funding engagement on this project has been withdrawn. Milestone actions and disbursements are paused.
+                                        </p>
+                                        {project.withdrawalReason && (
+                                            <div className="bg-white/80 border border-rose-200/60 rounded-lg p-2.5 text-[11px] text-rose-900 italic font-semibold">
+                                                Reason: "{project.withdrawalReason}"
+                                            </div>
+                                        )}
+                                        {project.withdrawnAt && (
+                                            <div className="text-[10px] text-rose-500 font-bold">
+                                                Withdrawn on {new Date(project.withdrawnAt).toLocaleString()}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
                                 {engagement?.status === 'DISCOVERED' && (
                                     <button 
                                         onClick={markUnderReview}
@@ -781,12 +867,20 @@ export default function ProjectDetailPage() {
                                 )}
 
                                 {engagement?.status === 'UNDER_REVIEW' && (
-                                    <button 
-                                        onClick={initiateNegotiations}
-                                        className="w-full bg-[#00A875] hover:bg-emerald-600 text-white font-bold py-3 rounded-xl shadow-md transition"
-                                    >
-                                        Initiate Milestone Negotiations
-                                    </button>
+                                    <div className="space-y-2">
+                                        <button 
+                                            onClick={initiateNegotiations}
+                                            className="w-full bg-[#00A875] hover:bg-emerald-600 text-white font-bold py-3 rounded-xl shadow-md transition"
+                                        >
+                                            Initiate Milestone Negotiations
+                                        </button>
+                                        <button
+                                            onClick={handleDeclineNegotiation}
+                                            className="w-full bg-slate-50 hover:bg-red-50 text-slate-600 hover:text-red-600 font-bold py-2 rounded-xl border border-slate-200 hover:border-red-200 transition text-xs"
+                                        >
+                                            Withdraw Review & Exit
+                                        </button>
+                                    </div>
                                 )}
 
                                 {engagement?.status === 'NEGOTIATING' && (
@@ -808,7 +902,7 @@ export default function ProjectDetailPage() {
                                             onClick={handleDeclineNegotiation}
                                             className="w-full bg-red-50 hover:bg-red-100 text-red-600 font-bold py-2 rounded-xl border border-red-200 transition text-xs flex items-center justify-center gap-1"
                                         >
-                                            Decline Negotiation & Exit
+                                            Withdraw Funding Engagement
                                         </button>
                                     </div>
                                 )}
@@ -859,53 +953,190 @@ export default function ProjectDetailPage() {
                                 <h3 className="text-lg font-black text-slate-900 flex items-center gap-2">
                                     <Award className="text-[#00A875]" size={20} /> Project Closure Gates
                                 </h3>
-                                <span className={`text-xs font-black px-2.5 py-1 rounded-full ${closureStatus?.isClosed ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-amber-100 text-amber-800 border border-amber-300'}`}>
-                                    {closureStatus?.isClosed ? 'PROJECT CLOSED' : 'IN PROGRESS'}
+                                <span className={`text-xs font-black px-2.5 py-1 rounded-full ${
+                                    engagement?.status === 'WITHDRAWN' 
+                                        ? 'bg-slate-100 text-slate-600 border border-slate-300' 
+                                        : closureStatus?.closed 
+                                            ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' 
+                                            : closureStatus?.canClose
+                                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                                : 'bg-amber-100 text-amber-800 border border-amber-300'
+                                }`}>
+                                    {engagement?.status === 'WITHDRAWN' ? 'PAUSED / NOT APPLICABLE' : closureStatus?.closed ? 'PROJECT CLOSED' : closureStatus?.canClose ? 'GATES PASSED (READY TO CLOSE)' : 'GATES IN PROGRESS'}
                                 </span>
                             </div>
 
-                            <div className="space-y-3">
-                                {/* Coverage Gate */}
-                                <div>
-                                    <div className="flex justify-between text-xs font-bold mb-1">
-                                        <span className="text-slate-600">Beneficiary Coverage (Target ≥ 20%)</span>
-                                        <span className={closureStatus?.coverageThresholdMet ? 'text-emerald-600 font-black' : 'text-slate-900'}>
-                                            {closureStatus?.totalFeedbackCount || 0} / {closureStatus?.targetBeneficiaries || 100} ({closureStatus?.coveragePercentage || 0}%)
+                            <div className="space-y-4">
+                                {/* Gate 1: Beneficiary Coverage & Sample Size */}
+                                <div className="p-3.5 bg-slate-50 border border-slate-100 rounded-xl space-y-2">
+                                    <div className="flex justify-between items-center text-xs font-bold">
+                                        <span className="text-slate-700 flex items-center gap-1.5">
+                                            {closureStatus?.gate1Passed ? <CheckCircle2 size={14} className="text-[#00A875]" /> : <Clock size={14} className="text-amber-500" />}
+                                            Gate 1: Beneficiary Coverage (≥ {closureStatus?.requiredCoveragePercentage || 10}%)
+                                        </span>
+                                        <span className={closureStatus?.gate1Passed ? 'text-emerald-700 font-black' : 'text-slate-900'}>
+                                            {closureStatus?.uniqueFeedbackCount || 0} / {closureStatus?.targetBeneficiaries || 100} ({closureStatus?.coveragePercentage || 0}%)
                                         </span>
                                     </div>
-                                    <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
-                                        <div className={`h-full transition-all duration-500 ${closureStatus?.coverageThresholdMet ? 'bg-emerald-500' : 'bg-amber-500'}`} style={{ width: `${Math.min(100, (closureStatus?.coveragePercentage || 0) * 5)}%` }}></div>
+                                    <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                                        <div className={`h-full transition-all duration-500 ${closureStatus?.gate1Passed ? 'bg-[#00A875]' : 'bg-amber-500'}`} style={{ width: `${Math.min(100, (closureStatus?.coveragePercentage || 0) * (100 / (closureStatus?.requiredCoveragePercentage || 10)))}%` }}></div>
                                     </div>
-                                </div>
-
-                                {/* Sentiment Gate */}
-                                <div>
-                                    <div className="flex justify-between text-xs font-bold mb-1">
-                                        <span className="text-slate-600">Positive Sentiment (Target ≥ 80%)</span>
-                                        <span className={closureStatus?.positiveThresholdMet ? 'text-emerald-600 font-black' : 'text-slate-900'}>
-                                            {closureStatus?.positiveFeedbackCount || 0} positive ({closureStatus?.positivePercentage || 0}%)
+                                    <div className="flex justify-between text-[11px] text-slate-500 font-medium">
+                                        <span>Statistical Sample Floor: {closureStatus?.uniqueFeedbackCount || 0} / {closureStatus?.minSampleSize || 10} unique</span>
+                                        <span className={closureStatus?.sampleSizeMet ? 'text-emerald-600 font-bold' : 'text-amber-600 font-bold'}>
+                                            {closureStatus?.sampleSizeMet ? '✓ Sample Met' : 'Needs More Responses'}
                                         </span>
                                     </div>
-                                    <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
-                                        <div className={`h-full transition-all duration-500 ${closureStatus?.positiveThresholdMet ? 'bg-emerald-500' : 'bg-amber-500'}`} style={{ width: `${closureStatus?.positivePercentage || 0}%` }}></div>
+                                </div>
+
+                                {/* Gate 2: Positive Sentiment Rate */}
+                                <div className="p-3.5 bg-slate-50 border border-slate-100 rounded-xl space-y-2">
+                                    <div className="flex justify-between items-center text-xs font-bold">
+                                        <span className="text-slate-700 flex items-center gap-1.5">
+                                            {closureStatus?.gate2Passed ? <CheckCircle2 size={14} className="text-[#00A875]" /> : <Clock size={14} className="text-amber-500" />}
+                                            Gate 2: Positive Sentiment (≥ {closureStatus?.requiredPositivePercentage || 80}%)
+                                        </span>
+                                        <span className={closureStatus?.gate2Passed ? 'text-emerald-700 font-black' : 'text-slate-900'}>
+                                            {closureStatus?.positivePercentage || 0}%
+                                        </span>
+                                    </div>
+                                    <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                                        <div className={`h-full transition-all duration-500 ${closureStatus?.gate2Passed ? 'bg-[#00A875]' : 'bg-amber-500'}`} style={{ width: `${Math.min(100, closureStatus?.positivePercentage || 0)}%` }}></div>
+                                    </div>
+                                    <div className="flex justify-between text-[11px] text-slate-500 font-medium">
+                                        <span>Breakdown: {closureStatus?.positiveCount || 0} 👍 | {closureStatus?.negativeCount || 0} 👎 | {closureStatus?.neutralCount || 0} 😐</span>
+                                        <span className={closureStatus?.gate2Passed ? 'text-emerald-600 font-bold' : 'text-amber-600 font-bold'}>
+                                            {closureStatus?.gate2Passed ? '✓ Sentiment Met' : 'Below Target'}
+                                        </span>
                                     </div>
                                 </div>
 
-                                {/* Closure Video Gate */}
-                                <div className="flex justify-between items-center pt-2 border-t border-slate-100 text-xs font-bold">
-                                    <span className="text-slate-600">NGO Geo-tagged Closure Video:</span>
-                                    <span className={closureStatus?.closureVideoSubmitted ? 'text-emerald-600 font-black flex items-center gap-1' : 'text-slate-400'}>
-                                        {closureStatus?.closureVideoSubmitted ? '✓ Submitted' : 'Pending Upload'}
-                                    </span>
+                                {/* Gate 3: Geo-tagged Closure Video Review */}
+                                <div className="p-3.5 bg-slate-50 border border-slate-100 rounded-xl space-y-2.5">
+                                    <div className="flex justify-between items-center text-xs font-bold">
+                                        <span className="text-slate-700 flex items-center gap-1.5">
+                                            {closureStatus?.gate3Passed ? <CheckCircle2 size={14} className="text-[#00A875]" /> : <Video size={14} className="text-indigo-500" />}
+                                            Gate 3: NGO Geo-tagged Closure Video
+                                        </span>
+                                        <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${
+                                            closureStatus?.closureVideoStatus === 'VERIFIED' ? 'bg-emerald-100 text-emerald-800' :
+                                            closureStatus?.closureVideoStatus === 'PENDING' ? 'bg-amber-100 text-amber-800 animate-pulse' :
+                                            closureStatus?.closureVideoStatus === 'REJECTED' ? 'bg-rose-100 text-rose-800' :
+                                            'bg-slate-200 text-slate-600'
+                                        }`}>
+                                            {closureStatus?.closureVideoStatus || 'NOT_SUBMITTED'}
+                                        </span>
+                                    </div>
+
+                                    {closureStatus?.closureVideo && (
+                                        <div className="bg-white p-3 rounded-lg border border-slate-200 text-xs space-y-2">
+                                            <div className="flex items-center justify-between">
+                                                <div className="font-bold text-slate-900 flex items-center gap-1.5">
+                                                    <Video size={14} className="text-indigo-600" />
+                                                    Closure Video File
+                                                </div>
+                                                <a 
+                                                    href={`http://localhost:8081${closureStatus.closureVideo.fileUrl}`} 
+                                                    target="_blank" 
+                                                    rel="noreferrer"
+                                                    className="text-[#00A875] hover:underline font-bold text-[11px] flex items-center gap-1"
+                                                >
+                                                    <Play size={11} /> Play / Download
+                                                </a>
+                                            </div>
+
+                                            {closureStatus.closureVideo.capturedLat && closureStatus.closureVideo.capturedLng && (
+                                                <div className="flex flex-wrap items-center gap-2 text-[11px]">
+                                                    <span className="text-slate-500 flex items-center gap-1 font-semibold">
+                                                        <MapPin size={12} className="text-rose-500" />
+                                                        {closureStatus.closureVideo.capturedLat?.toFixed(4)}, {closureStatus.closureVideo.capturedLng?.toFixed(4)}
+                                                    </span>
+                                                    <a 
+                                                        href={`https://maps.google.com/?q=${closureStatus.closureVideo.capturedLat},${closureStatus.closureVideo.capturedLng}`} 
+                                                        target="_blank" 
+                                                        rel="noreferrer"
+                                                        className="text-blue-600 hover:underline flex items-center gap-0.5 text-[10px]"
+                                                    >
+                                                        <ExternalLink size={10} /> View Map
+                                                    </a>
+                                                    {closureStatus.closureVideo.geotagDistanceFlag && (
+                                                        <span className="text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded text-[10px] font-bold">
+                                                            ⚠️ {closureStatus.closureVideo.distanceFromProjectKm}km from project site
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            )}
+
+                                            {closureStatus.closureVideo.capturedAt && (
+                                                <div className="text-[10px] text-slate-400">
+                                                    Recorded: {new Date(closureStatus.closureVideo.capturedAt).toLocaleString()}
+                                                </div>
+                                            )}
+
+                                            {/* Funder Review Buttons if Video is PENDING */}
+                                            {isFunder && closureStatus.closureVideoStatus === 'PENDING' && (
+                                                <div className="pt-2 border-t border-slate-100 flex gap-2">
+                                                    <button
+                                                        onClick={() => handleVerifyVideo('VERIFY')}
+                                                        className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-1.5 px-3 rounded-lg text-xs transition flex items-center justify-center gap-1 shadow-sm"
+                                                    >
+                                                        <CheckCircle2 size={13} /> Verify Video
+                                                    </button>
+                                                    <button
+                                                        onClick={() => setShowVideoRejectModal(true)}
+                                                        className="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold py-1.5 px-3 rounded-lg text-xs transition flex items-center justify-center gap-1"
+                                                    >
+                                                        <XCircle size={13} /> Reject
+                                                    </button>
+                                                </div>
+                                            )}
+
+                                            {closureStatus.closureVideoStatus === 'REJECTED' && closureStatus.closureVideo.reviewReason && (
+                                                <div className="p-2 bg-rose-50 border border-rose-200 rounded text-[11px] text-rose-800">
+                                                    <strong>Rejection reason:</strong> {closureStatus.closureVideo.reviewReason}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
 
-                                {closureStatus?.eligibleForClosure && !closureStatus?.isClosed && (
-                                    <button 
-                                        onClick={handleFinalizeClosure}
-                                        className="w-full mt-2 bg-emerald-600 hover:bg-emerald-700 text-white font-black py-2.5 rounded-xl shadow-md transition text-xs flex items-center justify-center gap-1"
-                                    >
-                                        <CheckCircle2 size={16} /> Finalize & Close Project
-                                    </button>
+                                {/* Checklist / Status Feedback */}
+                                {closureStatus?.failureReasons?.length > 0 && !closureStatus?.closed && (
+                                    <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl space-y-1.5 text-xs text-amber-900">
+                                        <div className="font-bold flex items-center gap-1 text-amber-950">
+                                            <AlertTriangle size={14} className="text-amber-600" /> Pending Gate Requirements:
+                                        </div>
+                                        <ul className="list-disc list-inside space-y-1 text-[11px] text-amber-800">
+                                            {closureStatus.failureReasons.map((r: string, idx: number) => (
+                                                <li key={idx}>{r}</li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+
+                                {/* Mark Project as Done Button */}
+                                {isFunder && !closureStatus?.closed && (
+                                    <div>
+                                        <button 
+                                            onClick={handleMarkProjectDone}
+                                            disabled={!closureStatus?.canClose}
+                                            className={`w-full py-3 rounded-xl font-black text-xs flex items-center justify-center gap-2 shadow-sm transition ${
+                                                closureStatus?.canClose 
+                                                    ? 'bg-[#00A875] hover:bg-emerald-600 text-white cursor-pointer shadow-emerald-200 shadow-md animate-bounce' 
+                                                    : 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed'
+                                            }`}
+                                        >
+                                            <CheckCircle2 size={16} /> 
+                                            {closureStatus?.canClose ? 'Mark Project as Done & Finalize Grant' : 'Mark Project as Done (Gates Incomplete)'}
+                                        </button>
+                                    </div>
+                                )}
+
+                                {closureStatus?.closed && (
+                                    <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-center text-xs font-bold text-emerald-900 flex items-center justify-center gap-1.5">
+                                        <Award size={16} className="text-[#00A875]" />
+                                        This project is fully closed and finalized.
+                                    </div>
                                 )}
                             </div>
                         </div>
@@ -1268,6 +1499,52 @@ export default function ProjectDetailPage() {
                                 <p className="text-xs text-slate-500 font-medium mt-2">
                                     Scanning this QR code or opening the link lets beneficiaries submit ground-level confirmation feedback for this milestone without any login required.
                                 </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/* Modal: Reject Closure Video */}
+            {showVideoRejectModal && (
+                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden border border-slate-200">
+                        <div className="p-5 border-b border-slate-200 flex justify-between items-center bg-rose-50">
+                            <h3 className="text-base font-black text-rose-950 flex items-center gap-1.5">
+                                <XCircle size={18} className="text-rose-600" /> Reject Closure Video
+                            </h3>
+                            <button onClick={() => setShowVideoRejectModal(false)} className="text-slate-400 hover:text-slate-600 text-lg font-bold">✕</button>
+                        </div>
+                        <div className="p-6 space-y-4">
+                            <p className="text-xs text-slate-600 font-medium">
+                                Please specify the rejection reason or required corrections so the NGO can re-upload an appropriate geo-tagged video.
+                            </p>
+                            <div>
+                                <label className="block text-xs font-bold text-slate-700 mb-1">Rejection Reason / Guidance *</label>
+                                <textarea
+                                    required
+                                    rows={3}
+                                    value={videoRejectReason}
+                                    onChange={e => setVideoRejectReason(e.target.value)}
+                                    placeholder="e.g. Geotag location does not match project site; or video resolution is unclear."
+                                    className="w-full border border-slate-300 rounded-xl p-3 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500"
+                                />
+                            </div>
+                            <div className="flex gap-2 pt-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowVideoRejectModal(false)}
+                                    className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl text-xs transition"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => handleVerifyVideo('REJECT', videoRejectReason)}
+                                    disabled={!videoRejectReason.trim()}
+                                    className="flex-1 bg-rose-600 hover:bg-rose-700 text-white font-bold py-2.5 rounded-xl text-xs transition disabled:opacity-50"
+                                >
+                                    Confirm Rejection
+                                </button>
                             </div>
                         </div>
                     </div>

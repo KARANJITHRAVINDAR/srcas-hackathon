@@ -98,6 +98,12 @@ public class MilestoneNegotiationService {
             throw new IllegalStateException("This project slot is locked by another funder's active commitment.");
         }
 
+        // Withdrawn engagement guard
+        OrgProjectEngagement currentEng = engagementRepository.findByFunderIdAndProjectId(funderId, projectId).orElse(null);
+        if (currentEng != null && currentEng.getStatus() == OrgProjectEngagement.EngagementStatus.WITHDRAWN) {
+            throw new IllegalStateException("Cannot raise change requests on a withdrawn funding engagement.");
+        }
+
         // Only PENDING or MODIFIED milestones can have new CRs raised
         if (milestone.getStatus() != Milestone.MilestoneStatus.PENDING
                 && milestone.getStatus() != Milestone.MilestoneStatus.MODIFIED) {
@@ -389,6 +395,12 @@ public class MilestoneNegotiationService {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new RuntimeException("Project not found: " + projectId));
 
+        // Withdrawn engagement guard
+        OrgProjectEngagement eng = engagementRepository.findByFunderIdAndProjectId(funder.getId(), projectId).orElse(null);
+        if (eng != null && eng.getStatus() == OrgProjectEngagement.EngagementStatus.WITHDRAWN) {
+            throw new IllegalStateException("Cannot accept and lock milestones on a withdrawn funding engagement.");
+        }
+
         List<Milestone> milestones = milestoneRepository.findByProjectId(projectId);
         if (milestones.isEmpty()) {
             throw new IllegalStateException("No milestones found for this project.");
@@ -486,20 +498,55 @@ public class MilestoneNegotiationService {
     }
 
     @Transactional
-    public void declineNegotiation(UUID projectId, UUID funderUserId) {
+    public void declineNegotiation(UUID projectId, UUID funderUserId, String reason) {
         FunderProfile funder = funderProfileRepository.findByUserId(funderUserId)
                 .orElseThrow(() -> new RuntimeException("Funder profile not found for user: " + funderUserId));
 
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Project not found: " + projectId));
+
         OrgProjectEngagement engagement = engagementRepository.findByFunderIdAndProjectId(funder.getId(), projectId)
-                .orElseThrow(() -> new RuntimeException("No active engagement found for project: " + projectId));
+                .orElseGet(() -> {
+                    OrgProjectEngagement newEng = new OrgProjectEngagement();
+                    newEng.setFunder(funder);
+                    newEng.setProject(project);
+                    return newEng;
+                });
 
         engagement.setStatus(OrgProjectEngagement.EngagementStatus.WITHDRAWN);
+        engagement.setWithdrawnAt(LocalDateTime.now());
+        engagement.setWithdrawnBy(funderUserId);
+        engagement.setWithdrawalReason(reason);
+        engagement.setRemodifyStatus(OrgProjectEngagement.RemodifyStatus.PENDING_REMODIFICATION);
         engagementRepository.save(engagement);
+        if (project != null) {
+            // Keep or revert project status to PUBLISHED so NGO can remodify / other funders can discover
+            if (project.getStatus() == Project.ProjectStatus.ACTIVE) {
+                project.setStatus(Project.ProjectStatus.PUBLISHED);
+                projectRepository.save(project);
+            }
+
+            // Notify NGO of withdrawal
+            if (project.getNgo() != null && project.getNgo().getUser() != null) {
+                String orgName = funder.getOrgName() != null && !funder.getOrgName().isBlank() ? funder.getOrgName() : "A Funder";
+                String reasonSuffix = (reason != null && !reason.isBlank()) ? " Reason: \"" + reason + "\"" : "";
+                notificationService.create(
+                        Notification.RecipientType.NGO,
+                        project.getNgo().getUser(),
+                        project,
+                        null,
+                        Notification.NotificationEventType.PROJECT_WITHDRAWN,
+                        "Funder Withdrawn from Project",
+                        orgName + " has withdrawn funding engagement from '" + project.getTitle() + "'." + reasonSuffix,
+                        "/ngo/projects/" + project.getId()
+                );
+            }
+        }
 
         auditLogService.logAction(
                 projectId,
                 "NEGOTIATION_DECLINED",
-                "Funder " + funder.getId() + " declined negotiation and withdrew engagement. Project remains published for other funders."
+                "Funder " + funder.getId() + " (" + funder.getOrgName() + ") withdrew engagement. Reason: " + reason
         );
     }
 

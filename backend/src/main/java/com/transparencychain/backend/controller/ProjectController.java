@@ -16,8 +16,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
+import com.transparencychain.backend.model.Milestone;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -51,6 +53,11 @@ public class ProjectController {
     @Autowired
     com.transparencychain.backend.service.ImpactGenerationService impactGenerationService;
 
+    @Autowired
+    com.transparencychain.backend.repository.OrgProjectEngagementRepository engagementRepository;
+
+    @Autowired
+    com.transparencychain.backend.service.NotificationService notificationService;
 
     @PostMapping("/{id}/escrow")
     @PreAuthorize("hasRole('FUNDER')")
@@ -86,7 +93,143 @@ public class ProjectController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getProject(@PathVariable UUID id) {
         Project project = projectRepository.findById(id).orElseThrow(() -> new RuntimeException("Project not found"));
-        return ResponseEntity.ok(project);
+        java.util.Map<String, Object> map = new java.util.LinkedHashMap<>();
+        map.put("id", project.getId());
+        map.put("title", project.getTitle());
+        map.put("description", project.getDescription());
+        map.put("sdgGoal", project.getSdgGoal());
+        map.put("sdgTarget", project.getSdgTarget());
+        map.put("totalBudget", project.getTotalBudget());
+        map.put("geography", project.getGeography());
+        map.put("latitude", project.getLatitude());
+        map.put("longitude", project.getLongitude());
+        map.put("projectDuration", project.getProjectDuration());
+        map.put("impactKpi", project.getImpactKpi());
+        map.put("expectedBeneficiaries", project.getExpectedBeneficiaries());
+        map.put("status", project.getStatus());
+        map.put("createdAt", project.getCreatedAt());
+
+        if (project.getNgo() != null) {
+            java.util.Map<String, Object> ngoMap = new java.util.LinkedHashMap<>();
+            ngoMap.put("id", project.getNgo().getId());
+            ngoMap.put("orgName", project.getNgo().getOrgName());
+            ngoMap.put("verificationStatus", project.getNgo().getVerificationStatus());
+            ngoMap.put("trustScore", project.getNgo().getTrustScore());
+            map.put("ngo", ngoMap);
+        } else {
+            map.put("ngo", null);
+        }
+
+        if (project.getFunder() != null) {
+            java.util.Map<String, Object> funderMap = new java.util.LinkedHashMap<>();
+            funderMap.put("id", project.getFunder().getId());
+            funderMap.put("orgName", project.getFunder().getOrgName());
+            map.put("funder", funderMap);
+        } else {
+            map.put("funder", null);
+        }
+
+        // Check engagements for withdrawal
+        List<com.transparencychain.backend.model.OrgProjectEngagement> engagements = engagementRepository.findByProjectId(id);
+        com.transparencychain.backend.model.OrgProjectEngagement withdrawnEng = engagements.stream()
+                .filter(e -> e.getStatus() == com.transparencychain.backend.model.OrgProjectEngagement.EngagementStatus.WITHDRAWN)
+                .findFirst().orElse(null);
+        if (withdrawnEng != null) {
+            map.put("isWithdrawn", true);
+            map.put("withdrawalReason", withdrawnEng.getWithdrawalReason());
+            map.put("withdrawnAt", withdrawnEng.getWithdrawnAt());
+            map.put("withdrawnBy", withdrawnEng.getWithdrawnBy());
+            map.put("remodifyStatus", withdrawnEng.getRemodifyStatus());
+            if (withdrawnEng.getFunder() != null) {
+                map.put("withdrawnFunderName", withdrawnEng.getFunder().getOrgName());
+            }
+        } else {
+            map.put("isWithdrawn", false);
+        }
+
+        return ResponseEntity.ok(map);
+    }
+
+    @PostMapping("/{id}/remodify")
+    @PreAuthorize("hasRole('NGO')")
+    public ResponseEntity<?> remodifyProject(@PathVariable UUID id, @RequestBody(required = false) java.util.Map<String, Object> payload) {
+        Project project = projectRepository.findById(id).orElseThrow(() -> new RuntimeException("Project not found"));
+        
+        if (payload != null) {
+            if (payload.containsKey("title") && payload.get("title") != null) {
+                project.setTitle(payload.get("title").toString());
+            }
+            if (payload.containsKey("description") && payload.get("description") != null) {
+                project.setDescription(payload.get("description").toString());
+            }
+            if (payload.containsKey("sdgGoal") && payload.get("sdgGoal") != null) {
+                try {
+                    project.setSdgGoal(Project.SdgGoal.valueOf(payload.get("sdgGoal").toString()));
+                } catch (Exception ignored) {}
+            }
+            if (payload.containsKey("sdgTarget") && payload.get("sdgTarget") != null) {
+                project.setSdgTarget(payload.get("sdgTarget").toString());
+            }
+            if (payload.containsKey("totalBudget") && payload.get("totalBudget") != null) {
+                try {
+                    project.setTotalBudget(new BigDecimal(payload.get("totalBudget").toString()));
+                } catch (Exception ignored) {}
+            }
+            if (payload.containsKey("geography") && payload.get("geography") != null) {
+                project.setGeography(payload.get("geography").toString());
+            }
+            if (payload.containsKey("projectDuration") && payload.get("projectDuration") != null) {
+                project.setProjectDuration(payload.get("projectDuration").toString());
+            }
+            if (payload.containsKey("expectedBeneficiaries") && payload.get("expectedBeneficiaries") != null) {
+                try {
+                    project.setExpectedBeneficiaries(Integer.parseInt(payload.get("expectedBeneficiaries").toString()));
+                } catch (Exception ignored) {}
+            }
+
+            // Update milestones if provided
+            if (payload.containsKey("milestones") && payload.get("milestones") != null) {
+                try {
+                    List<java.util.Map<String, Object>> msList = (List<java.util.Map<String, Object>>) payload.get("milestones");
+                    for (java.util.Map<String, Object> msData : msList) {
+                        if (msData.containsKey("id") && msData.get("id") != null) {
+                            try {
+                                UUID msId = UUID.fromString(msData.get("id").toString());
+                                Milestone ms = milestoneRepository.findById(msId).orElse(null);
+                                if (ms != null) {
+                                    if (msData.containsKey("title") && msData.get("title") != null) ms.setTitle(msData.get("title").toString());
+                                    if (msData.containsKey("description") && msData.get("description") != null) ms.setDescription(msData.get("description").toString());
+                                    if (msData.containsKey("amountAllocated") && msData.get("amountAllocated") != null) {
+                                        ms.setAmountAllocated(new BigDecimal(msData.get("amountAllocated").toString()));
+                                    }
+                                    if (msData.containsKey("sequenceNumber") && msData.get("sequenceNumber") != null) {
+                                        ms.setSequenceNumber(Integer.parseInt(msData.get("sequenceNumber").toString()));
+                                    }
+                                    ms.setStatus(Milestone.MilestoneStatus.PENDING);
+                                    milestoneRepository.save(ms);
+                                }
+                            } catch (Exception ignored) {}
+                        }
+                    }
+                } catch (Exception ignored) {}
+            }
+        }
+
+        // Set project back to PUBLISHED
+        project.setStatus(Project.ProjectStatus.PUBLISHED);
+        projectRepository.save(project);
+
+        // Reset engagements: remodifyStatus -> RESUBMITTED, status -> DISCOVERED
+        List<com.transparencychain.backend.model.OrgProjectEngagement> engagements = engagementRepository.findByProjectId(id);
+        for (com.transparencychain.backend.model.OrgProjectEngagement eng : engagements) {
+            eng.setRemodifyStatus(com.transparencychain.backend.model.OrgProjectEngagement.RemodifyStatus.RESUBMITTED);
+            eng.setStatus(com.transparencychain.backend.model.OrgProjectEngagement.EngagementStatus.DISCOVERED);
+            engagementRepository.save(eng);
+        }
+
+        auditLogService.logAction(id, "PROJECT_REMODIFIED", "NGO updated and republished project.");
+
+        return ResponseEntity.ok(new MessageResponse("Project remodified and republished successfully."));
     }
     
     @GetMapping

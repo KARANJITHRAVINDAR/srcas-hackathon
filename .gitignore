@@ -1,9 +1,29 @@
+# Git ignore — never commit secrets
 .env
-.env.local
-*.log
-*.pid
+*.env
+.env.*
+!.env.example
+
+# Java build artifacts
 target/
+*.class
+*.jar
+backend/target/
+
+# Node build artifacts
 node_modules/
-dist/
-build/
+frontend/dist/
+frontend/node_modules/
+
+# Contracts build
+contracts/build/
+
+# Uploaded test media files
+backend/uploads/
+uploads/
+
+# IDE files
+.idea/
+*.iml
+.vscode/
 .DS_Store

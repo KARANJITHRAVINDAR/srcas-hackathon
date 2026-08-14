@@ -35,6 +35,11 @@ public class ProjectDetailDto {
     // Engagement state for the requesting org
     private OrgProjectEngagement.EngagementStatus engagementStatus;
     private UUID engagementId;
+    private LocalDateTime withdrawnAt;
+    private UUID withdrawnBy;
+    private String withdrawalReason;
+    private String withdrawnFunderName;
+    private OrgProjectEngagement.RemodifyStatus remodifyStatus;
 
     // NGO trust profile (multi-dimensional panel)
     private NgoTrustProfileDto ngoTrustProfile;

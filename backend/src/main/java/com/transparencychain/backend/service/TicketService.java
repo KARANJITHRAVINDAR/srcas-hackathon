@@ -53,6 +53,9 @@ public class TicketService {
     @Autowired
     private NotificationService notificationService;
 
+    @Autowired
+    private FunderProfileRepository funderProfileRepository;
+
     @Transactional
     public Ticket raiseTicket(UUID milestoneId, UUID ngoUserId) {
         Milestone milestone = milestoneRepository.findById(milestoneId)
@@ -183,6 +186,18 @@ public class TicketService {
 
         User reviewer = userRepository.findById(reviewerUserId)
                 .orElseThrow(() -> new IllegalArgumentException("Reviewer user not found: " + reviewerUserId));
+
+        // Withdrawn engagement guard
+        if (ticket.getMilestone() != null && ticket.getMilestone().getProject() != null) {
+            UUID projectId = ticket.getMilestone().getProject().getId();
+            FunderProfile funder = funderProfileRepository.findByUserId(reviewerUserId).orElse(null);
+            if (funder != null) {
+                OrgProjectEngagement eng = engagementRepository.findByFunderIdAndProjectId(funder.getId(), projectId).orElse(null);
+                if (eng != null && eng.getStatus() == OrgProjectEngagement.EngagementStatus.WITHDRAWN) {
+                    throw new IllegalStateException("Cannot submit review decisions or clarifications on a withdrawn project engagement.");
+                }
+            }
+        }
 
         // Create the Ticket Review
         TicketReview review = new TicketReview();
@@ -441,6 +456,14 @@ public class TicketService {
         }
 
         Ticket ticket = tickets.get(0);
+
+        if (ticket.getMilestone() != null && ticket.getMilestone().getProject() != null) {
+            List<OrgProjectEngagement> engagements = engagementRepository.findByProjectId(ticket.getMilestone().getProject().getId());
+            boolean allWithdrawn = !engagements.isEmpty() && engagements.stream().allMatch(e -> e.getStatus() == OrgProjectEngagement.EngagementStatus.WITHDRAWN);
+            if (allWithdrawn) {
+                throw new IllegalStateException("Cannot respond to clarifications on a withdrawn project. Please remodify and republish the project.");
+            }
+        }
 
         // Find pending clarification or create one
         Optional<TicketClarification> pendingOpt = ticketClarificationRepository

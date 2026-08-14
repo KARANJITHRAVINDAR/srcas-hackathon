@@ -33,3 +33,12 @@ jwt:
   secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
   access-token-expiration: 86400000
   refresh-token-expiration: 604800000
+
+blockchain:
+  polygon:
+    rpc-url: ${POLYGON_RPC_URL:}
+    private-key: ${BLOCKCHAIN_PRIVATE_KEY:}
+    chain-id: ${BLOCKCHAIN_CHAIN_ID:80002}
+    wallet-address: ${BLOCKCHAIN_WALLET_ADDRESS:}
+    contract-address: ${BLOCKCHAIN_CONTRACT_ADDRESS:0xb0f1b1e8805f7a90da89a4476c741b95de201d4e}
+    confirmations-required: 3

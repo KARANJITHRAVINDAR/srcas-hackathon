@@ -159,13 +159,16 @@ public class OrgNegotiationController {
         }
     }
 
-    @PostMapping("/projects/{projectId}/decline")
-    public ResponseEntity<?> declineNegotiation(@PathVariable UUID projectId) {
+    @PostMapping({"/projects/{projectId}/decline", "/projects/{projectId}/withdraw"})
+    public ResponseEntity<?> declineNegotiation(
+            @PathVariable UUID projectId,
+            @RequestBody(required = false) java.util.Map<String, String> body) {
         UserDetailsImpl userDetails = (UserDetailsImpl)
                 SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         try {
-            negotiationService.declineNegotiation(projectId, userDetails.getId());
-            return ResponseEntity.ok(new MessageResponse("Negotiation declined and engagement withdrawn. Project remains available to other funders."));
+            String reason = body != null ? body.get("reason") : null;
+            negotiationService.declineNegotiation(projectId, userDetails.getId(), reason);
+            return ResponseEntity.ok(new MessageResponse("Negotiation declined and engagement withdrawn. Project remains available for remodification."));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
         }

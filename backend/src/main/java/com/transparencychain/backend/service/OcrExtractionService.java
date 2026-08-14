@@ -1,7 +1,5 @@
 package com.transparencychain.backend.service;
 
-import com.google.cloud.documentai.v1.*;
-import com.google.protobuf.ByteString;
 import net.sourceforge.tess4j.ITesseract;
 import net.sourceforge.tess4j.Tesseract;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -322,122 +320,14 @@ public class OcrExtractionService {
     }
 
     private String extractRawTextWithDocumentAi(byte[] fileBytes, String contentType) throws Exception {
-        String endpoint = String.format("%s-documentai.googleapis.com:443", location);
-        DocumentProcessorServiceSettings settings = DocumentProcessorServiceSettings.newBuilder()
-                .setEndpoint(endpoint)
-                .build();
-
-        try (DocumentProcessorServiceClient client = DocumentProcessorServiceClient.create(settings)) {
-            String name = ProcessorName.of(projectId, location, processorId).toString();
-
-            RawDocument rawDocument = RawDocument.newBuilder()
-                    .setContent(ByteString.copyFrom(fileBytes))
-                    .setMimeType(contentType)
-                    .build();
-
-            ProcessRequest request = ProcessRequest.newBuilder()
-                    .setName(name)
-                    .setRawDocument(rawDocument)
-                    .build();
-
-            ProcessResponse response = client.processDocument(request);
-            return response.getDocument().getText();
-        }
+        throw new UnsupportedOperationException("Google Document AI library not active. Using local OCR fallback.");
     }
 
     private com.transparencychain.backend.dto.InvoiceExtractionResult processInvoiceWithDocumentAi(
             byte[] fileBytes, 
             String contentType
     ) throws Exception {
-        String endpoint = String.format("%s-documentai.googleapis.com:443", location);
-        DocumentProcessorServiceSettings settings = DocumentProcessorServiceSettings.newBuilder()
-                .setEndpoint(endpoint)
-                .build();
-
-        try (DocumentProcessorServiceClient client = DocumentProcessorServiceClient.create(settings)) {
-            String name = ProcessorName.of(projectId, location, processorId).toString();
-
-            RawDocument rawDocument = RawDocument.newBuilder()
-                    .setContent(ByteString.copyFrom(fileBytes))
-                    .setMimeType(contentType)
-                    .build();
-
-            ProcessRequest request = ProcessRequest.newBuilder()
-                    .setName(name)
-                    .setRawDocument(rawDocument)
-                    .build();
-
-            ProcessResponse response = client.processDocument(request);
-            Document document = response.getDocument();
-
-            com.transparencychain.backend.dto.InvoiceExtractionResult result = new com.transparencychain.backend.dto.InvoiceExtractionResult();
-            result.setRawText(document.getText());
-            result.setOcrConfidence(95); // Indicates API call success confidence
-
-            // Parse structured entities
-            for (Document.Entity entity : document.getEntitiesList()) {
-                String type = entity.getType();
-                String mention = entity.getMentionText();
-                
-                if ("supplier_name".equalsIgnoreCase(type)) {
-                    result.setVendorName(mention);
-                } else if ("invoice_id".equalsIgnoreCase(type) || "invoice_number".equalsIgnoreCase(type)) {
-                    result.setInvoiceNumber(mention);
-                } else if ("invoice_date".equalsIgnoreCase(type)) {
-                    try {
-                        result.setInvoiceDate(java.time.LocalDate.parse(mention));
-                    } catch (Exception e) {
-                        // fallback regex date parser if direct parse fails
-                        String parsedDate = extractRegex(mention, "([0-9]{2,4}[-/][0-9]{2}[-/][0-9]{2,4})");
-                        if (parsedDate != null) {
-                            try {
-                                result.setInvoiceDate(java.time.LocalDate.parse(parsedDate.replaceAll("/", "-")));
-                            } catch (Exception ignored) {}
-                        }
-                    }
-                } else if ("vat_number".equalsIgnoreCase(type) || "gstin".equalsIgnoreCase(type) || type.contains("tax")) {
-                    result.setGstin(mention);
-                } else if ("total_amount".equalsIgnoreCase(type)) {
-                    try {
-                        String cleanAmt = mention.replaceAll("[^0-9.]", "");
-                        result.setTotalAmount(new BigDecimal(cleanAmt));
-                    } catch (Exception ignored) {}
-                }
-            }
-
-            // Extract line items if present
-            List<com.transparencychain.backend.dto.InvoiceItem> lineItems = new ArrayList<>();
-            for (Document.Entity entity : document.getEntitiesList()) {
-                if ("line_item".equalsIgnoreCase(entity.getType())) {
-                    com.transparencychain.backend.dto.InvoiceItem item = new com.transparencychain.backend.dto.InvoiceItem();
-                    for (Document.Entity subEntity : entity.getPropertiesList()) {
-                        String subType = subEntity.getType();
-                        String subMention = subEntity.getMentionText();
-                        
-                        if ("line_item/description".equalsIgnoreCase(subType)) {
-                            item.setDescription(subMention);
-                        } else if ("line_item/quantity".equalsIgnoreCase(subType)) {
-                            try {
-                                item.setQuantity(new BigDecimal(subMention.replaceAll("[^0-9.]", "")));
-                            } catch (Exception ignored) {}
-                        } else if ("line_item/unit_price".equalsIgnoreCase(subType)) {
-                            try {
-                                item.setUnitPrice(new BigDecimal(subMention.replaceAll("[^0-9.]", "")));
-                            } catch (Exception ignored) {}
-                        } else if ("line_item/amount".equalsIgnoreCase(subType)) {
-                            try {
-                                item.setTotal(new BigDecimal(subMention.replaceAll("[^0-9.]", "")));
-                            } catch (Exception ignored) {}
-                        }
-                    }
-                    if (item.getDescription() != null) {
-                        lineItems.add(item);
-                    }
-                }
-            }
-            result.setItems(lineItems);
-            return result;
-        }
+        throw new UnsupportedOperationException("Google Document AI library not active. Using local OCR fallback.");
     }
 
     private String extractRegex(String text, String regex) {

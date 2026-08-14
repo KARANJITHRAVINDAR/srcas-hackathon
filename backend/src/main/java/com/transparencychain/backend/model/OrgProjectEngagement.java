@@ -36,10 +36,23 @@ public class OrgProjectEngagement {
     private LocalDateTime viewedAt;
     private LocalDateTime committedAt;
 
+    private LocalDateTime withdrawnAt;
+    private UUID withdrawnBy;
+
+    @Column(columnDefinition = "TEXT")
+    private String withdrawalReason;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private RemodifyStatus remodifyStatus = RemodifyStatus.NONE;
+
     @PrePersist
     protected void onCreate() {
         if (viewedAt == null) {
             viewedAt = LocalDateTime.now();
+        }
+        if (remodifyStatus == null) {
+            remodifyStatus = RemodifyStatus.NONE;
         }
     }
 
@@ -51,5 +64,11 @@ public class OrgProjectEngagement {
         ACTIVE,
         COMPLETED,
         WITHDRAWN
+    }
+
+    public enum RemodifyStatus {
+        NONE,
+        PENDING_REMODIFICATION,
+        RESUBMITTED
     }
 }
