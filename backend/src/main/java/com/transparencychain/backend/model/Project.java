@@ -41,8 +41,35 @@ public class Project {
     private BigDecimal totalBudget;
 
     private String geography;
+
+    // Authoritative geographic coordinates
     private Double latitude;
     private Double longitude;
+
+    // Complete human-readable location metadata
+    @Column(columnDefinition = "TEXT")
+    private String displayAddress;
+
+    private String locationName;
+    private String road;
+    private String neighbourhood;
+    private String suburb;
+    private String locality;
+    private String city;
+    private String district;
+    private String state;
+    private String postcode;
+    private String country;
+    private String countryCode;
+    private String geocodingProvider;
+    private LocalDateTime geocodedAt;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "location_status")
+    private LocationStatus locationStatus = LocationStatus.UNVERIFIED;
+
+    @Column(columnDefinition = "VARCHAR(255)")
+    private String locationBlockchainHash;
 
     @Enumerated(EnumType.STRING)
     @Column(columnDefinition = "VARCHAR(255)")
@@ -58,6 +85,16 @@ public class Project {
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
+        if (locationStatus == null) {
+            locationStatus = LocationStatus.UNVERIFIED;
+        }
+    }
+
+    public enum LocationStatus {
+        UNVERIFIED,
+        USER_CONFIRMED,
+        VERIFIED,
+        FLAGGED
     }
 
     public enum SdgGoal {

@@ -73,6 +73,7 @@ public class WebSecurityConfig {
                 auth.requestMatchers("/api/v1/auth/**").permitAll()
                     .requestMatchers("/api/v1/public/**", "/api/public/**").permitAll()
                     .requestMatchers("/api/v1/ngo/register/**").permitAll()
+                    .requestMatchers("/api/v1/location/**", "/api/location/**").permitAll()
                     .requestMatchers("/uploads/**").permitAll()
                     .requestMatchers("/error").permitAll()
                     .anyRequest().authenticated()

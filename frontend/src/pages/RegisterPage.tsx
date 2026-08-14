@@ -19,7 +19,7 @@ interface SubScores {
 }
 
 export default function RegisterPage() {
-    const { login } = useAuth();
+    const { login, user } = useAuth();
     const navigate = useNavigate();
     const { showAlert } = useAlert();
 

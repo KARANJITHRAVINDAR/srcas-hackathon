@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
+import com.transparencychain.backend.dto.InvoiceExtractionResult;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -130,6 +131,44 @@ public class OcrExtractionService {
 
     public OcrExtractionService(OpenRouterAiService aiService) {
         this.openRouterAiService = aiService;
+    }
+
+    public InvoiceExtractionResult extractInvoice(MultipartFile file) {
+        String rawText = extractRawText(file);
+        InvoiceExtractionResult result = new InvoiceExtractionResult();
+        result.setRawText(rawText != null ? rawText : "");
+        result.setOcrConfidence(rawText != null && rawText.length() > 50 ? 90 : 30);
+        
+        if (rawText != null && !rawText.isBlank()) {
+            String clean = rawText.replaceAll("\\r", "");
+            Matcher gstinMatcher = Pattern.compile("\\b[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}\\b").matcher(clean);
+            if (gstinMatcher.find()) {
+                result.setGstin(gstinMatcher.group(0));
+            }
+            
+            Matcher invMatcher = Pattern.compile("(?i)(?:invoice\\s*(?:no|number|#)|inv\\s*(?:no|#))\\s*[:|\\-]?\\s*([A-Za-z0-9\\-_/]+)").matcher(clean);
+            if (invMatcher.find()) {
+                result.setInvoiceNumber(invMatcher.group(1).trim());
+            }
+            
+            Matcher totalMatcher = Pattern.compile("(?i)(?:total\\s*(?:amount)?|grand\\s*total|net\\s*amount|amount\\s*payable)\\s*[:|\\-]?\\s*(?:INR|Rs\\.?|₹)?\\s*([0-9,]+(?:\\.[0-9]{2})?)").matcher(clean);
+            if (totalMatcher.find()) {
+                try {
+                    String num = totalMatcher.group(1).replace(",", "");
+                    result.setTotalAmount(new java.math.BigDecimal(num));
+                } catch (Exception ignored) {}
+            }
+            
+            String[] lines = clean.split("\n");
+            for (String line : lines) {
+                String trimmed = line.trim();
+                if (trimmed.length() > 3 && !trimmed.toLowerCase().contains("tax invoice") && !trimmed.toLowerCase().contains("bill to") && !trimmed.toLowerCase().contains("invoice")) {
+                    result.setVendorName(trimmed);
+                    break;
+                }
+            }
+        }
+        return result;
     }
 
     /**

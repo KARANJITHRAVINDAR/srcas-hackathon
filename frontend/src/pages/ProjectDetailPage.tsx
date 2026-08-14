@@ -12,6 +12,7 @@ import QRCode from 'react-qr-code';
 
 import { useAlert } from '../context/AlertContext';
 import { BlockchainVerificationCard } from '../components/BlockchainVerificationCard';
+import LocationSearchMap from '../components/LocationSearchMap';
 
 export default function ProjectDetailPage() {
     const { id } = useParams<{id: string}>();
@@ -554,6 +555,47 @@ export default function ProjectDetailPage() {
                                 <p className="text-sm font-semibold text-slate-600 leading-relaxed">{project.description}</p>
                             </div>
                         </div>
+
+                        {/* Project Location & OpenStreetMap Card */}
+                        {(project.latitude || project.geography || project.displayAddress) && (
+                            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <div className="p-2 rounded-xl bg-emerald-50 text-[#00A875] border border-emerald-200">
+                                            <MapPin size={18} />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-lg font-black text-slate-900">Project Location & Geography</h3>
+                                            <p className="text-xs font-semibold text-slate-500">Verified geographic coordinates and OpenStreetMap survey</p>
+                                        </div>
+                                    </div>
+                                    <span className={`text-xs font-extrabold px-2.5 py-1 rounded-full border flex items-center gap-1 ${
+                                        project.locationStatus === 'VERIFIED' || project.locationStatus === 'USER_CONFIRMED'
+                                            ? 'bg-emerald-50 text-[#00A875] border-emerald-200'
+                                            : 'bg-amber-50 text-amber-700 border-amber-200'
+                                    }`}>
+                                        <CheckCircle2 size={12} />
+                                        {project.locationStatus ? project.locationStatus.replace('_', ' ') : 'LOCATION SET'}
+                                    </span>
+                                </div>
+
+                                <LocationSearchMap
+                                    initialLatitude={project.latitude ? parseFloat(project.latitude) : undefined}
+                                    initialLongitude={project.longitude ? parseFloat(project.longitude) : undefined}
+                                    initialAddress={project.displayAddress || project.geography}
+                                    readOnly={true}
+                                />
+
+                                {project.locationBlockchainHash && (
+                                    <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 flex items-center justify-between text-xs">
+                                        <span className="font-semibold text-slate-600">Location Blockchain Hash:</span>
+                                        <code className="font-mono text-slate-800 bg-white px-2 py-0.5 rounded border border-slate-200 text-[11px]">
+                                            {project.locationBlockchainHash.substring(0, 18)}...
+                                        </code>
+                                    </div>
+                                )}
+                            </div>
+                        )}
 
                         <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
                             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">

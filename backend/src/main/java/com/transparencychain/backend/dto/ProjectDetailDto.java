@@ -11,7 +11,7 @@ import java.util.UUID;
 
 /**
  * Full project detail response for the org's Project Detail screen.
- * Combines project metadata, the NGO trust profile panel, and the milestone list.
+ * Combines project metadata, complete location information, the NGO trust profile panel, and the milestone list.
  */
 @Data
 public class ProjectDetailDto {
@@ -26,6 +26,25 @@ public class ProjectDetailDto {
     private String geography;
     private Double latitude;
     private Double longitude;
+
+    // Location metadata
+    private String displayAddress;
+    private String locationName;
+    private String road;
+    private String neighbourhood;
+    private String suburb;
+    private String locality;
+    private String city;
+    private String district;
+    private String state;
+    private String postcode;
+    private String country;
+    private String countryCode;
+    private String geocodingProvider;
+    private LocalDateTime geocodedAt;
+    private Project.LocationStatus locationStatus;
+    private String locationBlockchainHash;
+
     private String projectDuration;
     private String impactKpi;
     private Integer expectedBeneficiaries;

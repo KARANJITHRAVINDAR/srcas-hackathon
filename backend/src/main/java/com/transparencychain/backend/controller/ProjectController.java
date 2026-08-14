@@ -103,6 +103,22 @@ public class ProjectController {
         map.put("geography", project.getGeography());
         map.put("latitude", project.getLatitude());
         map.put("longitude", project.getLongitude());
+        map.put("displayAddress", project.getDisplayAddress());
+        map.put("locationName", project.getLocationName());
+        map.put("road", project.getRoad());
+        map.put("neighbourhood", project.getNeighbourhood());
+        map.put("suburb", project.getSuburb());
+        map.put("locality", project.getLocality());
+        map.put("city", project.getCity());
+        map.put("district", project.getDistrict());
+        map.put("state", project.getState());
+        map.put("postcode", project.getPostcode());
+        map.put("country", project.getCountry());
+        map.put("countryCode", project.getCountryCode());
+        map.put("geocodingProvider", project.getGeocodingProvider());
+        map.put("geocodedAt", project.getGeocodedAt());
+        map.put("locationStatus", project.getLocationStatus());
+        map.put("locationBlockchainHash", project.getLocationBlockchainHash());
         map.put("projectDuration", project.getProjectDuration());
         map.put("impactKpi", project.getImpactKpi());
         map.put("expectedBeneficiaries", project.getExpectedBeneficiaries());
@@ -271,6 +287,25 @@ public class ProjectController {
         project.setGeography(request.getGeography());
         project.setLatitude(request.getLatitude());
         project.setLongitude(request.getLongitude());
+        project.setDisplayAddress(request.getDisplayAddress());
+        project.setLocationName(request.getLocationName());
+        project.setRoad(request.getRoad());
+        project.setNeighbourhood(request.getNeighbourhood());
+        project.setSuburb(request.getSuburb());
+        project.setLocality(request.getLocality());
+        project.setCity(request.getCity());
+        project.setDistrict(request.getDistrict());
+        project.setState(request.getState());
+        project.setPostcode(request.getPostcode());
+        project.setCountry(request.getCountry());
+        project.setCountryCode(request.getCountryCode());
+        project.setGeocodingProvider(request.getGeocodingProvider());
+        if (request.getLocationStatus() != null) {
+            project.setLocationStatus(request.getLocationStatus());
+        } else if (request.getLatitude() != null && request.getLongitude() != null) {
+            project.setLocationStatus(Project.LocationStatus.USER_CONFIRMED);
+        }
+        project.setLocationBlockchainHash(request.getLocationBlockchainHash());
         project.setSdgTarget(request.getSdgTarget());
         project.setProjectDuration(request.getProjectDuration());
         project.setImpactKpi(request.getImpactKpi());

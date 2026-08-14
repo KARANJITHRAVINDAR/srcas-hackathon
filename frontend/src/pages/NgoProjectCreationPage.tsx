@@ -4,30 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Target, MapPin, Users, DollarSign, FileText, Send, Building2, CheckCircle2, Milestone as MilestoneIcon, Calendar, ArrowRight, Edit3, Sparkles } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useAlert } from '../context/AlertContext';
-import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
-
-// Fix leaflet default icon path issues in bundlers
-import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
-import markerIcon from 'leaflet/dist/images/marker-icon.png';
-import markerShadow from 'leaflet/dist/images/marker-shadow.png';
-
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-    iconUrl: markerIcon,
-    iconRetinaUrl: markerIcon2x,
-    shadowUrl: markerShadow,
-});
-
-function MapEvents({ onLocationSelected }: { onLocationSelected: (lat: number, lng: number) => void }) {
-    useMapEvents({
-        click(e) {
-            onLocationSelected(e.latlng.lat, e.latlng.lng);
-        },
-    });
-    return null;
-}
+import LocationSearchMap, { type LocationData } from '../components/LocationSearchMap';
 
 interface AutoMilestone {
     id: string;
@@ -59,11 +36,47 @@ export default function NgoProjectCreationPage() {
         geography: '',
         latitude: '',
         longitude: '',
+        displayAddress: '',
+        locationName: '',
+        road: '',
+        neighbourhood: '',
+        suburb: '',
+        locality: '',
+        city: '',
+        district: '',
+        state: '',
+        postcode: '',
+        country: '',
+        countryCode: '',
+        geocodingProvider: 'OpenStreetMap',
+        locationStatus: 'UNVERIFIED',
         expectedBeneficiaries: '',
         projectDuration: '',
         impactKpi: '',
         funderId: 'OPEN'
     });
+
+    const handleLocationChange = (loc: LocationData) => {
+        setFormData(prev => ({
+            ...prev,
+            latitude: loc.latitude ? String(loc.latitude) : '',
+            longitude: loc.longitude ? String(loc.longitude) : '',
+            displayAddress: loc.displayAddress || '',
+            locationName: loc.locationName || '',
+            road: loc.road || '',
+            neighbourhood: loc.neighbourhood || '',
+            suburb: loc.suburb || '',
+            locality: loc.locality || '',
+            city: loc.city || '',
+            district: loc.district || '',
+            state: loc.state || '',
+            postcode: loc.postcode || '',
+            country: loc.country || '',
+            countryCode: loc.countryCode || '',
+            locationStatus: loc.locationStatus,
+            geography: prev.geography || (loc.city && loc.state ? `${loc.city}, ${loc.state}, ${loc.country || 'India'}` : loc.displayAddress || prev.geography)
+        }));
+    };
 
     const sdgGoals = [
         'SDG1', 'SDG2', 'SDG3', 'SDG4', 'SDG5', 'SDG6', 'SDG7', 'SDG8', 'SDG9', 
@@ -366,33 +379,13 @@ export default function NgoProjectCreationPage() {
                                     <input required type="text" value={formData.geography} onChange={e => setFormData({...formData, geography: e.target.value})} className="w-full bg-[#F8FAFC] border border-[#DDE3EA] rounded-lg p-3 outline-none focus:border-[#00A875] focus:ring-1 focus:ring-[#00A875]" placeholder="e.g. Rural Tamil Nadu, India" />
                                 </div>
                                 <div className="md:col-span-2">
-                                    <label className="block text-sm font-bold text-[#10172A] mb-2">Project Location (Click on Map to Select)</label>
-                                    <div className="w-full h-80 rounded-xl overflow-hidden border border-[#DDE3EA] relative z-10 mb-4">
-                                        <MapContainer 
-                                            center={[20.5937, 78.9629]} 
-                                            zoom={5} 
-                                            style={{ height: '100%', width: '100%' }}
-                                        >
-                                            <TileLayer
-                                                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                                                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                                            />
-                                            {formData.latitude && formData.longitude && (
-                                                <Marker position={[parseFloat(formData.latitude), parseFloat(formData.longitude)]} />
-                                            )}
-                                            <MapEvents onLocationSelected={(lat, lng) => setFormData(prev => ({...prev, latitude: lat.toFixed(6), longitude: lng.toFixed(6)}))} />
-                                        </MapContainer>
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="block text-xs font-bold text-[#52627A] uppercase mb-1">Latitude</label>
-                                            <input required type="number" step="any" value={formData.latitude} onChange={e => setFormData({...formData, latitude: e.target.value})} className="w-full bg-[#F8FAFC] border border-[#DDE3EA] rounded-lg p-2.5 outline-none focus:border-[#00A875] focus:ring-1 focus:ring-[#00A875]" placeholder="e.g. 11.0168" />
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs font-bold text-[#52627A] uppercase mb-1">Longitude</label>
-                                            <input required type="number" step="any" value={formData.longitude} onChange={e => setFormData({...formData, longitude: e.target.value})} className="w-full bg-[#F8FAFC] border border-[#DDE3EA] rounded-lg p-2.5 outline-none focus:border-[#00A875] focus:ring-1 focus:ring-[#00A875]" placeholder="e.g. 76.9558" />
-                                        </div>
-                                    </div>
+                                    <label className="block text-sm font-bold text-[#10172A] mb-2">Project Location & OpenStreetMap Search</label>
+                                    <LocationSearchMap
+                                        initialLatitude={formData.latitude ? parseFloat(formData.latitude) : undefined}
+                                        initialLongitude={formData.longitude ? parseFloat(formData.longitude) : undefined}
+                                        initialAddress={formData.displayAddress}
+                                        onLocationChange={handleLocationChange}
+                                    />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-bold text-[#10172A] mb-2">Expected Beneficiaries</label>

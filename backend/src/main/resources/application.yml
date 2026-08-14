@@ -42,3 +42,12 @@ blockchain:
     wallet-address: ${BLOCKCHAIN_WALLET_ADDRESS:}
     contract-address: ${BLOCKCHAIN_CONTRACT_ADDRESS:0xb0f1b1e8805f7a90da89a4476c741b95de201d4e}
     confirmations-required: 3
+
+geocoding:
+  provider: ${GEOCODING_PROVIDER:nominatim}
+  pelias:
+    base-url: ${PELIAS_BASE_URL:https://geocode.earth/v1}
+    api-key: ${PELIAS_API_KEY:}
+  nominatim:
+    base-url: ${NOMINATIM_BASE_URL:https://nominatim.openstreetmap.org}
+

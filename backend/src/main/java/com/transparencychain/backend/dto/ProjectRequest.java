@@ -3,6 +3,7 @@ package com.transparencychain.backend.dto;
 import com.transparencychain.backend.model.Project;
 import lombok.Data;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Data
 public class ProjectRequest {
@@ -14,7 +15,24 @@ public class ProjectRequest {
     private Double latitude;
     private Double longitude;
     
-    // New fields
+    // Complete location metadata
+    private String displayAddress;
+    private String locationName;
+    private String road;
+    private String neighbourhood;
+    private String suburb;
+    private String locality;
+    private String city;
+    private String district;
+    private String state;
+    private String postcode;
+    private String country;
+    private String countryCode;
+    private String geocodingProvider;
+    private Project.LocationStatus locationStatus;
+    private String locationBlockchainHash;
+
+    // Project metadata fields
     private String sdgTarget;
     private String projectDuration;
     private String impactKpi;
