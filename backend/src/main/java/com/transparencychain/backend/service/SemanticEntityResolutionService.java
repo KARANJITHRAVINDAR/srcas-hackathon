@@ -117,6 +117,21 @@ public class SemanticEntityResolutionService {
      * Clusters all organization-identifying entities across all uploaded documents.
      * If the entity instances do not converge into a single cluster, flags genuine identity divergence.
      */
+    public boolean isValidCandidateOrgName(String val) {
+        if (val == null || val.isBlank()) return false;
+        String lettersOnly = val.replaceAll("[^A-Za-z]", "");
+        if (lettersOnly.length() < 6) return false;
+        String upper = val.toUpperCase().trim();
+        if (upper.equals("DESIGNATION") || upper.equals("REGISTRATION TYPE") ||
+            upper.equals("ENTITY NAME") || upper.equals("NAME") || upper.equals("PAN") ||
+            upper.contains("APPLICANT") || upper.contains("INCOME TAX") ||
+            upper.contains("NGO DARPAN") || upper.startsWith("THE TRUST") ||
+            upper.equals("THE FOUNDER")) {
+            return false;
+        }
+        return true;
+    }
+
     public EntityClusterResult clusterOrganizationEntities(List<EntityInstance> instances) {
         EntityClusterResult result = new EntityClusterResult();
         if (instances == null || instances.isEmpty()) {
@@ -129,6 +144,11 @@ public class SemanticEntityResolutionService {
 
         for (EntityInstance instance : instances) {
             if (instance.rawValue == null || instance.rawValue.trim().isEmpty()) continue;
+            // Ignore OCR noise tokens that are not viable organization names
+            if (!isValidCandidateOrgName(instance.rawValue)) {
+                log.info("[ENTITY_CLUSTER] Discarding non-viable org candidate token: '{}' from {}", instance.rawValue, instance.sourceDocument);
+                continue;
+            }
 
             boolean addedToExisting = false;
             for (List<EntityInstance> cluster : clusters) {
