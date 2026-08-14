@@ -31,6 +31,9 @@ public class PublicBeneficiaryFormController {
     @Autowired
     private com.transparencychain.backend.service.AuditLogService auditLogService;
 
+    @Autowired
+    private com.transparencychain.backend.service.ImpactGenerationService impactGenerationService;
+
     @GetMapping("/{secureToken}")
     public ResponseEntity<?> getForm(@PathVariable String secureToken) {
         BeneficiaryVerificationForm form = formRepository.findByShareToken(secureToken).orElse(null);
@@ -103,6 +106,23 @@ public class PublicBeneficiaryFormController {
         response.setRating(rating);
         response.setFeedback(feedback);
         responseRepository.save(response);
+
+        // Record in AI-driven BeneficiaryFeedback model
+        try {
+            com.transparencychain.backend.model.BeneficiaryFeedback.FeedbackStatus fbStatus = hasNo 
+                    ? com.transparencychain.backend.model.BeneficiaryFeedback.FeedbackStatus.DISPUTED 
+                    : com.transparencychain.backend.model.BeneficiaryFeedback.FeedbackStatus.CONFIRMED;
+            String videoUrl = (String) payload.get("videoUrl");
+            impactGenerationService.recordBeneficiaryFeedback(
+                form.getProject().getId(),
+                form.getMilestone() != null ? form.getMilestone().getId() : null,
+                videoUrl,
+                feedback,
+                fbStatus
+            );
+        } catch (Exception e) {
+            System.err.println("Failed to record beneficiary feedback in Impact service: " + e.getMessage());
+        }
 
         if (!hasNo && form.getMilestone() != null) {
             Milestone milestone = form.getMilestone();

@@ -2,6 +2,7 @@ package com.transparencychain.backend.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -10,6 +11,7 @@ import java.util.UUID;
 @Data
 @Entity
 @Table(name = "evidence_analysis")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class EvidenceAnalysis {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -17,6 +19,7 @@ public class EvidenceAnalysis {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "evidence_id", nullable = false)
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private ProofSubmission proof;
 
     private String vendorName;

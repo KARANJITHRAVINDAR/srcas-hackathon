@@ -75,26 +75,37 @@ export default function ProjectEvidenceTab({ project }: { project: any }) {
                             <div className="h-40 bg-gray-100 flex items-center justify-center border-b border-[#DDE3EA] relative">
                                 {item.fileType?.includes('image') ? (
                                     <div className="absolute inset-0 bg-gray-200">
-                                        <img src={`/api/placeholder/400/320`} alt="Evidence" className="w-full h-full object-cover opacity-50 grayscale" />
+                                        <img src={`http://localhost:8081/uploads/${item.fileUrl}`} alt="Evidence" className="w-full h-full object-cover" />
+                                    </div>
+                                ) : item.fileType?.includes('video') ? (
+                                    <div className="absolute inset-0 bg-black">
+                                        <video src={`http://localhost:8081/uploads/${item.fileUrl}`} className="w-full h-full object-cover" />
+                                        <div className="absolute inset-0 flex items-center justify-center">
+                                            <div className="w-12 h-12 bg-white/30 rounded-full flex items-center justify-center backdrop-blur-sm">
+                                                <div className="w-0 h-0 border-t-8 border-t-transparent border-l-[12px] border-l-white border-b-8 border-b-transparent ml-1" />
+                                            </div>
+                                        </div>
                                     </div>
                                 ) : (
                                     <FileText className="w-16 h-16 text-gray-300" />
                                 )}
                                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
-                                    <button className="p-2 bg-white rounded-full text-[#10172A] hover:scale-110 transition-transform">
+                                    <a href={`http://localhost:8081/uploads/${item.fileUrl}`} target="_blank" rel="noopener noreferrer" className="p-2 bg-white rounded-full text-[#10172A] hover:scale-110 transition-transform">
                                         <Eye size={20} />
-                                    </button>
-                                    <button className="p-2 bg-white rounded-full text-[#10172A] hover:scale-110 transition-transform">
+                                    </a>
+                                    <a href={`http://localhost:8081/uploads/${item.fileUrl}`} download className="p-2 bg-white rounded-full text-[#10172A] hover:scale-110 transition-transform">
                                         <Download size={20} />
-                                    </button>
+                                    </a>
                                 </div>
                             </div>
                             
                             <div className="p-4">
                                 <div className="flex justify-between items-start mb-3">
                                     <div className="flex-1 min-w-0 pr-4">
-                                        <h3 className="font-bold text-[#10172A] truncate" title={item.fileUrl}>{item.fileUrl}</h3>
-                                        <p className="text-xs text-[#52627A] mt-0.5">{new Date(item.submittedAt).toLocaleString()}</p>
+                                        <h3 className="font-bold text-[#10172A] truncate" title={item.fileUrl}>{item.fileUrl.substring(item.fileUrl.indexOf('_') + 1)}</h3>
+                                        <p className="text-xs text-[#52627A] mt-0.5">
+                                            {Array.isArray(item.submittedAt) ? new Date(item.submittedAt[0], item.submittedAt[1] - 1, item.submittedAt[2], item.submittedAt[3], item.submittedAt[4]).toLocaleString() : new Date(item.submittedAt).toLocaleString()}
+                                        </p>
                                     </div>
                                     {getStatusBadge(item.status)}
                                 </div>

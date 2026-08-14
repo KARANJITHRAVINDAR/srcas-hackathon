@@ -48,6 +48,9 @@ public class ProjectController {
     @Autowired
     com.transparencychain.backend.service.MilestoneAutoGenerator milestoneAutoGenerator;
 
+    @Autowired
+    com.transparencychain.backend.service.ImpactGenerationService impactGenerationService;
+
 
     @PostMapping("/{id}/escrow")
     @PreAuthorize("hasRole('FUNDER')")
@@ -141,6 +144,13 @@ public class ProjectController {
         
         // Auto-generate default milestones based on budget/duration
         java.util.List<com.transparencychain.backend.model.Milestone> autoMilestones = milestoneAutoGenerator.generate(project);
+        
+        // Auto-generate AI impact metrics tailored to project goal & scope
+        try {
+            impactGenerationService.initializeProjectMetrics(project);
+        } catch (Exception ex) {
+            System.err.println("Impact metric auto-gen warning: " + ex.getMessage());
+        }
         
         auditLogService.logAction(project.getId(), "PROJECT", "Project PROPOSED by NGO " + ngo.getOrgName()
                 + " with " + autoMilestones.size() + " auto-generated milestones");

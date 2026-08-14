@@ -546,12 +546,12 @@ export default function ProjectDetailPage() {
                                                         <span className={`text-[10px] font-black px-2 py-0.5 rounded border ${
                                                             m.status === 'LOCKED' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
                                                             m.status === 'IN_PROGRESS' ? 'bg-blue-50 text-blue-700 border-blue-200' :
-                                                            m.status === 'IN_REVIEW' ? 'bg-amber-50 text-amber-700 border-amber-200 animate-pulse' :
-                                                            m.status === 'VERIFIED' ? 'bg-green-50 text-[#00A875] border-emerald-200' :
+                                                            (m.status === 'IN_REVIEW' || m.status === 'AWAITING_FUNDER_APPROVAL' || m.status === 'TICKET_RAISED') ? 'bg-amber-50 text-amber-700 border-amber-200 animate-pulse' :
+                                                            (m.status === 'VERIFIED' || m.status === 'COMPLETED' || m.status === 'DISBURSED') ? 'bg-green-50 text-[#00A875] border-emerald-200' :
                                                             m.status === 'MODIFIED' ? 'bg-indigo-50 text-indigo-700 border-indigo-200' :
                                                             'bg-slate-50 text-slate-600 border-slate-200'
                                                         }`}>
-                                                            {m.status}
+                                                            {m.status === 'AWAITING_FUNDER_APPROVAL' ? 'AWAITING APPROVAL' : m.status}
                                                         </span>
                                                     </div>
 
@@ -672,7 +672,7 @@ export default function ProjectDetailPage() {
                                                     )}
 
                                                     {/* FUNDER CONTROLS FOR NEGOTIATION */}
-                                                    {isFunder && (m.status === 'PENDING' || m.status === 'MODIFIED' || m.status === 'PROPOSED' || m.status === 'DRAFT' || m.status === 'AVAILABLE' || m.status === 'AWAITING_FUNDER_APPROVAL') && !pendingCR && (
+                                                    {isFunder && (m.status === 'PENDING' || m.status === 'MODIFIED' || m.status === 'PROPOSED' || m.status === 'DRAFT' || m.status === 'AVAILABLE') && !pendingCR && (
                                                         <div className="flex flex-col gap-1.5">
                                                             <button 
                                                                 onClick={() => { setSelectedMilestone(m); setShowChangeModal(true); }}
@@ -732,10 +732,10 @@ export default function ProjectDetailPage() {
                                                     )}
 
                                                     {/* FUNDER EVIDENCE REVIEW ACTION */}
-                                                    {isFunder && (m.status === 'IN_REVIEW' || m.status === 'EVIDENCE_SUBMITTED' || m.status === 'TICKET_RAISED') && (
+                                                    {isFunder && (m.status === 'IN_REVIEW' || m.status === 'EVIDENCE_SUBMITTED' || m.status === 'TICKET_RAISED' || m.status === 'AWAITING_FUNDER_APPROVAL') && (
                                                         <button 
                                                             onClick={() => navigate(`/funder/verification?milestoneId=${m.id}`)}
-                                                            className="bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold px-4 py-2 rounded-lg transition flex items-center justify-center gap-1.5"
+                                                            className="bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold px-4 py-2 rounded-lg transition flex items-center justify-center gap-1.5 shadow-sm animate-pulse"
                                                         >
                                                             <ShieldCheck size={14} /> Review Evidence & Release
                                                         </button>

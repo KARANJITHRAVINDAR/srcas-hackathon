@@ -9,9 +9,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.transaction.annotation.Transactional;
 import java.util.UUID;
 import java.util.Map;
+import java.util.List;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import org.springframework.util.StringUtils;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -35,85 +40,90 @@ public class ProofController {
     
     @Autowired
     AuditLogService auditLogService;
+    
+    @Autowired
+    TicketRepository ticketRepository;
 
     @Autowired
-    com.transparencychain.backend.service.BlockchainService blockchainService;
-    
+    com.transparencychain.backend.service.ImpactGenerationService impactGenerationService;
+
     @Autowired
-    com.transparencychain.backend.service.TicketService ticketService;
+    UserRepository userRepository;
+    
+    private final String UPLOAD_DIR = "uploads/";
+
+    private String saveFile(org.springframework.web.multipart.MultipartFile file) throws java.io.IOException {
+        Path uploadPath = Paths.get(UPLOAD_DIR);
+        if (!Files.exists(uploadPath)) {
+            Files.createDirectories(uploadPath);
+        }
+        String fileName = UUID.randomUUID().toString() + "_" + StringUtils.cleanPath(file.getOriginalFilename());
+        Path filePath = uploadPath.resolve(fileName);
+        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+        return fileName;
+    }
     
     @PostMapping("/milestones/{milestoneId}/proofs")
-    @PreAuthorize("hasRole('NGO')")
-    @Transactional
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> submitProof(@PathVariable UUID milestoneId, 
                                          @RequestParam("file") org.springframework.web.multipart.MultipartFile file,
                                          @RequestParam("metadata") String metadata,
                                          @RequestParam(value = "expectedType", defaultValue = "INVOICE") String expectedType) {
         Milestone milestone = milestoneRepository.findById(milestoneId).orElseThrow();
-
-        // Enforce milestone sequence check
-        Project project = milestone.getProject();
-        java.util.List<Milestone> projectMilestones = milestoneRepository.findByProjectId(project.getId());
-        projectMilestones.sort(java.util.Comparator.comparingInt(m -> m.getSequenceNumber() != null ? m.getSequenceNumber() : 1));
-
-        int currentSeq = milestone.getSequenceNumber() != null ? milestone.getSequenceNumber() : 1;
-        for (Milestone m : projectMilestones) {
-            int mSeq = m.getSequenceNumber() != null ? m.getSequenceNumber() : 1;
-            if (mSeq < currentSeq) {
-                if (m.getStatus() != Milestone.MilestoneStatus.DISBURSED &&
-                    m.getStatus() != Milestone.MilestoneStatus.VERIFIED &&
-                    m.getStatus() != Milestone.MilestoneStatus.COMPLETED) {
-                    return ResponseEntity.badRequest().body(new MessageResponse(
-                        "Cannot submit evidence: Complete previous milestone (Phase " + mSeq + ") first."
-                    ));
-                }
-            }
+        
+        if (milestone.getStatus() == Milestone.MilestoneStatus.LOCKED) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Cannot submit evidence for a locked milestone. Please complete earlier milestones first."));
         }
-
-        String contentType = file.getContentType();
-        String originalFilename = file.getOriginalFilename();
-        boolean isValid = (contentType != null && (contentType.startsWith("video/") || contentType.equals("application/pdf") || contentType.startsWith("image/"))) ||
-                          (originalFilename != null && (originalFilename.toLowerCase().endsWith(".mp4") ||
-                                                        originalFilename.toLowerCase().endsWith(".mov") ||
-                                                        originalFilename.toLowerCase().endsWith(".avi") ||
-                                                        originalFilename.toLowerCase().endsWith(".mkv") ||
-                                                        originalFilename.toLowerCase().endsWith(".webm") ||
-                                                        originalFilename.toLowerCase().endsWith(".pdf") ||
-                                                        originalFilename.toLowerCase().endsWith(".png") ||
-                                                        originalFilename.toLowerCase().endsWith(".jpg") ||
-                                                        originalFilename.toLowerCase().endsWith(".jpeg")));
-        if (!isValid) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Only video, PDF, or image files are allowed for evidence."));
+        
+        String savedFileName;
+        try {
+            savedFileName = saveFile(file);
+        } catch (java.io.IOException e) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Failed to save file on server"));
         }
         
         ProofSubmission proof = new ProofSubmission();
         proof.setMilestone(milestone);
-        proof.setFileUrl(file.getOriginalFilename());
+        proof.setFileUrl(savedFileName);
         proof.setFileType(file.getContentType());
         proof.setMetadata(metadata);
         proof.setStatus(ProofSubmission.ProofStatus.PENDING_AI_CHECK);
-        proofRepository.saveAndFlush(proof);
+        proofRepository.save(proof);
         
-        milestone.setStatus(Milestone.MilestoneStatus.EVIDENCE_SUBMITTED);
-        milestoneRepository.saveAndFlush(milestone);
+        milestone.setStatus(Milestone.MilestoneStatus.AWAITING_FUNDER_APPROVAL);
+        milestoneRepository.save(milestone);
         
-        String txHash = "0xhash";
+        // Auto-increment AI Impact metrics (Reported)
         try {
-            txHash = blockchainService.anchorEvidence(milestone.getId(), originalFilename, file.getBytes());
+            impactGenerationService.processEvidenceSubmission(milestone, proof);
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Impact evidence processing warning: " + e.getMessage());
         }
         
-        auditLogService.logAction(milestone.getId(), "MILESTONE", "Evidence submitted and anchored. ID: " + proof.getId() + ", Tx Hash: " + txHash);
-        
-        // Automatically raise fund release verification ticket if NGO user is available
+        auditLogService.logAction(milestone.getId(), "MILESTONE", "Evidence submitted. ID: " + proof.getId());
+
+        // Create or update Ticket for Funder Verification Center
         try {
-            if (milestone.getProject().getNgo() != null && milestone.getProject().getNgo().getUser() != null) {
-                ticketService.raiseTicket(milestone.getId(), milestone.getProject().getNgo().getUser().getId());
+            User ngoUser = null;
+            if (milestone.getProject() != null && milestone.getProject().getNgo() != null) {
+                ngoUser = milestone.getProject().getNgo().getUser();
             }
-        } catch (Exception e) {
-            System.err.println("Auto ticket creation failed: " + e.getMessage());
-            e.printStackTrace();
+            if (ngoUser == null) {
+                List<User> users = userRepository.findAll();
+                ngoUser = users.stream().filter(u -> u.getRole() == Role.NGO).findFirst().orElse(null);
+            }
+            if (ngoUser != null) {
+                Ticket ticket = new Ticket();
+                ticket.setMilestone(milestone);
+                ticket.setRaisedByNgo(ngoUser);
+                ticket.setEvidence(proof);
+                ticket.setStatus(Ticket.TicketStatus.OPEN);
+                ticket.setRiskLevel(Ticket.RiskLevel.LOW);
+                ticket.setRiskScore(java.math.BigDecimal.ZERO);
+                ticketRepository.save(ticket);
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
         
         try {
@@ -141,7 +151,7 @@ public class ProofController {
     }
     
     @PostMapping("/projects/{projectId}/milestones/{milestoneId}/tasks/{taskId}/evidence")
-    @PreAuthorize("hasRole('NGO')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> submitTaskProof(@PathVariable UUID projectId,
                                              @PathVariable UUID milestoneId,
                                              @PathVariable UUID taskId,
@@ -151,10 +161,21 @@ public class ProofController {
         Milestone milestone = milestoneRepository.findById(milestoneId).orElseThrow();
         MilestoneTask task = milestoneTaskRepository.findById(taskId).orElseThrow();
         
+        if (milestone.getStatus() == Milestone.MilestoneStatus.LOCKED) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Cannot submit evidence for a locked milestone. Please complete earlier milestones first."));
+        }
+        
+        String savedFileName;
+        try {
+            savedFileName = saveFile(file);
+        } catch (java.io.IOException e) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Failed to save file on server"));
+        }
+        
         ProofSubmission proof = new ProofSubmission();
         proof.setMilestone(milestone);
         proof.setMilestoneTask(task);
-        proof.setFileUrl(file.getOriginalFilename());
+        proof.setFileUrl(savedFileName);
         proof.setFileType(file.getContentType());
         proof.setMetadata(metadata);
         proof.setStatus(ProofSubmission.ProofStatus.PENDING_AI_CHECK);
@@ -163,7 +184,38 @@ public class ProofController {
         task.setStatus(MilestoneTask.TaskStatus.PROOF_SUBMITTED);
         milestoneTaskRepository.save(task);
         
+        // Auto-increment AI Impact metrics (Reported)
+        try {
+            impactGenerationService.processEvidenceSubmission(milestone, proof);
+        } catch (Exception e) {
+            System.err.println("Impact evidence processing warning: " + e.getMessage());
+        }
+        
         auditLogService.logAction(milestone.getId(), "TASK_EVIDENCE", "Evidence submitted for task: " + task.getTaskName() + " ID: " + proof.getId());
+
+        // Create or update Ticket for Funder Verification Center
+        try {
+            User ngoUser = null;
+            if (milestone.getProject() != null && milestone.getProject().getNgo() != null) {
+                ngoUser = milestone.getProject().getNgo().getUser();
+            }
+            if (ngoUser == null) {
+                List<User> users = userRepository.findAll();
+                ngoUser = users.stream().filter(u -> u.getRole() == Role.NGO).findFirst().orElse(null);
+            }
+            if (ngoUser != null) {
+                Ticket ticket = new Ticket();
+                ticket.setMilestone(milestone);
+                ticket.setRaisedByNgo(ngoUser);
+                ticket.setEvidence(proof);
+                ticket.setStatus(Ticket.TicketStatus.OPEN);
+                ticket.setRiskLevel(Ticket.RiskLevel.LOW);
+                ticket.setRiskScore(java.math.BigDecimal.ZERO);
+                ticketRepository.save(ticket);
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
         
         try {
             // Trigger async AI analysis

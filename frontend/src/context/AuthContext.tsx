@@ -21,6 +21,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const navigate = useNavigate();
 
     useEffect(() => {
+        const reqInterceptor = axios.interceptors.request.use(
+            config => {
+                const storedToken = localStorage.getItem('token');
+                if (storedToken) {
+                    config.headers = config.headers || {};
+                    config.headers['Authorization'] = `Bearer ${storedToken}`;
+                }
+                return config;
+            },
+            error => Promise.reject(error)
+        );
+
         if (token) {
             axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         } else {
@@ -55,6 +67,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         );
 
         return () => {
+            axios.interceptors.request.eject(reqInterceptor);
             axios.interceptors.response.eject(interceptor);
         };
     }, [token, navigate]);

@@ -36,9 +36,11 @@ public class DisbursementService {
         Project project = projectRepository.findById(projectId).orElse(null);
         Milestone milestone = milestoneRepository.findById(milestoneId).orElse(null);
 
-        // 1. Update Milestone Status to DISBURSED & unlock next sequential milestone
+        // 1. Update Milestone Status to DISBURSED, update releasedAmount & unlock next sequential milestone
         if (milestone != null) {
             milestone.setStatus(Milestone.MilestoneStatus.DISBURSED);
+            BigDecimal prevReleased = milestone.getReleasedAmount() != null ? milestone.getReleasedAmount() : BigDecimal.ZERO;
+            milestone.setReleasedAmount(prevReleased.add(amount));
             milestoneRepository.save(milestone);
 
             // Unlock next sequential milestone

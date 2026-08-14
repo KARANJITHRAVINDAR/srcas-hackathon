@@ -146,10 +146,11 @@ export default function NgoProjectCreationPage() {
         if (!projectId) return;
         setLoading(true);
         try {
-            const payload = autoMilestones.map(ms => ({
+            const payload = autoMilestones.map((ms, index) => ({
                 title: ms.title,
                 description: ms.description,
                 amountAllocated: ms.amountAllocated,
+                sequenceNumber: ms.sequenceNumber || (index + 1)
             }));
             await axios.post(`http://localhost:8081/api/v1/projects/${projectId}/milestones/bulk`, payload);
             showAlert({ type: 'success', message: 'Project and milestones saved successfully!' });

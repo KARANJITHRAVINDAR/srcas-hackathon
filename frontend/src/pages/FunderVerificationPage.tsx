@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useSearchParams } from 'react-router-dom';
 import { 
     ShieldCheck, AlertCircle, ArrowRight, Play, CheckCircle2, XCircle, 
-    MessageSquare, AlertTriangle, Coins, Sparkles, HelpCircle, Film, RefreshCw
+    MessageSquare, AlertTriangle, Coins, Sparkles, HelpCircle, Film, RefreshCw, FileText
 } from 'lucide-react';
 
 import { useAlert } from '../context/AlertContext';
@@ -248,16 +248,37 @@ export default function FunderVerificationPage() {
                                     </h3>
                                     {selectedTicket.evidence?.fileUrl ? (
                                         <div className="space-y-2">
-                                            <div className="relative rounded-2xl overflow-hidden border border-[#DDE3EA] bg-black aspect-video max-w-xl shadow-inner group">
-                                                <video 
-                                                    src="https://assets.mixkit.co/videos/preview/mixkit-hand-holding-a-green-plant-40348-large.mp4" 
-                                                    controls 
-                                                    className="w-full h-full object-cover"
-                                                />
+                                            <div className="relative rounded-2xl overflow-hidden border border-[#DDE3EA] bg-black aspect-video max-w-xl shadow-inner group flex items-center justify-center">
+                                                {selectedTicket.evidence?.fileType?.includes('image') ? (
+                                                    <img 
+                                                        src={`http://localhost:8081/uploads/${selectedTicket.evidence.fileUrl}`} 
+                                                        alt="Evidence" 
+                                                        className="w-full h-full object-contain bg-slate-900"
+                                                    />
+                                                ) : selectedTicket.evidence?.fileType?.includes('pdf') ? (
+                                                    <div className="p-8 text-center text-white space-y-3">
+                                                        <FileText size={48} className="mx-auto text-emerald-400" />
+                                                        <p className="font-bold text-sm">PDF Document Attached</p>
+                                                        <a 
+                                                            href={`http://localhost:8081/uploads/${selectedTicket.evidence.fileUrl}`} 
+                                                            target="_blank" 
+                                                            rel="noopener noreferrer"
+                                                            className="inline-flex items-center gap-2 bg-white text-slate-900 font-bold px-4 py-2 rounded-lg text-xs hover:bg-slate-100 transition"
+                                                        >
+                                                            Open PDF in New Tab
+                                                        </a>
+                                                    </div>
+                                                ) : (
+                                                    <video 
+                                                        src={`http://localhost:8081/uploads/${selectedTicket.evidence.fileUrl}`} 
+                                                        controls 
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                )}
                                             </div>
                                             <div className="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-2 rounded-lg inline-flex items-center gap-1.5">
                                                 <ShieldCheck size={14} className="text-indigo-600" />
-                                                File: {selectedTicket.evidence?.fileUrl} (Cryptographically anchored on-chain)
+                                                File: {selectedTicket.evidence?.fileUrl?.substring(selectedTicket.evidence?.fileUrl?.indexOf('_') + 1)} (Cryptographically anchored on-chain)
                                             </div>
                                         </div>
                                     ) : (

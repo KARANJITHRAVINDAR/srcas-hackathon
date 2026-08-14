@@ -2,12 +2,14 @@ package com.transparencychain.backend.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
 @Entity
 @Table(name = "proof_submissions")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class ProofSubmission {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -32,6 +34,7 @@ public class ProofSubmission {
     private ProofStatus status;
     
     @OneToOne(mappedBy = "proof", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private EvidenceAnalysis evidenceAnalysis;
 
     private LocalDateTime submittedAt;

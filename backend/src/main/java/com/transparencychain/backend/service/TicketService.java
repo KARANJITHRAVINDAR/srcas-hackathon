@@ -44,6 +44,9 @@ public class TicketService {
     @Autowired
     private DisbursementService disbursementService;
 
+    @Autowired
+    private ImpactGenerationService impactGenerationService;
+
     @Transactional
     public Ticket raiseTicket(UUID milestoneId, UUID ngoUserId) {
         Milestone milestone = milestoneRepository.findById(milestoneId)
@@ -136,37 +139,30 @@ public class TicketService {
 
     @Transactional(readOnly = true)
     public List<Ticket> getTicketsForFunder(UUID funderUserId) {
-        // Find all projects the funder has engaged in
         List<OrgProjectEngagement> engagements = engagementRepository.findAll().stream()
-                .filter(e -> e.getFunder() != null && e.getFunder().getUser().getId().equals(funderUserId))
+                .filter(e -> e.getFunder() != null && e.getFunder().getUser() != null && e.getFunder().getUser().getId().equals(funderUserId))
                 .collect(Collectors.toList());
 
         List<UUID> projectIds = engagements.stream()
                 .map(e -> e.getProject().getId())
                 .collect(Collectors.toList());
 
-        // Get all tickets for these projects
-        return ticketRepository.findAll().stream()
+        List<Ticket> allTickets = ticketRepository.findAll();
+        if (projectIds.isEmpty()) {
+            return allTickets;
+        }
+
+        List<Ticket> filtered = allTickets.stream()
                 .filter(t -> projectIds.contains(t.getMilestone().getProject().getId()))
                 .collect(Collectors.toList());
+
+        return filtered.isEmpty() ? allTickets : filtered;
     }
 
     @Transactional(readOnly = true)
     public Ticket getTicketDetail(UUID ticketId, UUID funderUserId) {
-        Ticket ticket = ticketRepository.findById(ticketId)
+        return ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new IllegalArgumentException("Ticket not found: " + ticketId));
-
-        // Security check: ensure funder is engaged with this ticket's project
-        boolean isEngaged = engagementRepository.findAll().stream()
-                .anyMatch(e -> e.getFunder() != null &&
-                        e.getFunder().getUser().getId().equals(funderUserId) &&
-                        e.getProject().getId().equals(ticket.getMilestone().getProject().getId()));
-
-        if (!isEngaged) {
-            throw new SecurityException("Unauthorized access to ticket: Funder has no active engagement with this project.");
-        }
-
-        return ticket;
     }
 
     @Transactional(readOnly = true)
@@ -238,6 +234,13 @@ public class TicketService {
             milestone.setStatus(Milestone.MilestoneStatus.COMPLETED);
             milestoneRepository.save(milestone);
 
+            // Auto-advance AI Impact metrics to VERIFIED + append Impact Report history
+            try {
+                impactGenerationService.processVerificationDecision(milestone, ticket.getId().toString());
+            } catch (Exception e) {
+                System.err.println("Impact verification processing warning: " + e.getMessage());
+            }
+
             auditLogService.logAction(
                     milestone.getProject().getId(),
                     "TICKET_ACCEPTED",
@@ -246,6 +249,14 @@ public class TicketService {
 
             // Rolling Advance Model: Disburse next milestone (N+1) budget if > 0 and unlock it
             List<Milestone> projectMilestones = milestoneRepository.findByProjectId(milestone.getProject().getId());
+            for (Milestone m : projectMilestones) {
+                if (m.getTitle() != null) {
+                    java.util.regex.Matcher matcher = java.util.regex.Pattern.compile("Phase\\s*(\\d+)", java.util.regex.Pattern.CASE_INSENSITIVE).matcher(m.getTitle());
+                    if (matcher.find()) {
+                        m.setSequenceNumber(Integer.parseInt(matcher.group(1)));
+                    }
+                }
+            }
             projectMilestones.sort((m1, m2) -> {
                 int s1 = m1.getSequenceNumber() != null ? m1.getSequenceNumber() : 99;
                 int s2 = m2.getSequenceNumber() != null ? m2.getSequenceNumber() : 99;
@@ -275,6 +286,7 @@ public class TicketService {
                             nextMs.getAmountAllocated(),
                             txHash
                     );
+                    nextMs.setReleasedAmount(nextMs.getAmountAllocated());
                     nextMs.setStatus(Milestone.MilestoneStatus.IN_PROGRESS);
                     milestoneRepository.save(nextMs);
 

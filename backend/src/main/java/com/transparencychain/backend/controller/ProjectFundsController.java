@@ -85,8 +85,21 @@ public class ProjectFundsController {
 
     @GetMapping("/milestones")
     public ResponseEntity<?> getMilestoneFinancials(@PathVariable UUID projectId) {
-        // Enriches milestones with expenses so frontend can show M1 Spent
-        List<Milestone> milestones = milestoneRepository.findByProjectIdOrderByDueDateAsc(projectId);
+        List<Milestone> milestones = milestoneRepository.findByProjectId(projectId);
+        for (Milestone m : milestones) {
+            if (m.getTitle() != null) {
+                java.util.regex.Matcher matcher = java.util.regex.Pattern.compile("Phase\\s*(\\d+)", java.util.regex.Pattern.CASE_INSENSITIVE).matcher(m.getTitle());
+                if (matcher.find()) {
+                    m.setSequenceNumber(Integer.parseInt(matcher.group(1)));
+                }
+            }
+        }
+        milestones.sort((a, b) -> Integer.compare(
+            a.getSequenceNumber() != null ? a.getSequenceNumber() : 99,
+            b.getSequenceNumber() != null ? b.getSequenceNumber() : 99
+        ));
+
+        List<FundTransaction> txs = fundTransactionRepository.findByProjectIdOrderByTransactionDateDesc(projectId);
         List<Map<String, Object>> response = new ArrayList<>();
 
         for (Milestone m : milestones) {
@@ -94,16 +107,30 @@ public class ProjectFundsController {
             map.put("id", m.getId());
             map.put("title", m.getTitle());
             map.put("status", m.getStatus());
-            map.put("allocatedAmount", m.getAmountAllocated());
-            map.put("releasedAmount", m.getReleasedAmount());
-            map.put("additionalAllocatedAmount", m.getAdditionalAllocatedAmount());
+            map.put("sequenceNumber", m.getSequenceNumber());
+            map.put("allocatedAmount", m.getAmountAllocated() != null ? m.getAmountAllocated() : BigDecimal.ZERO);
+            
+            // Calculate released amount dynamically from fund transactions
+            BigDecimal milestoneReleased = txs.stream()
+                .filter(t -> t.getMilestone() != null && t.getMilestone().getId().equals(m.getId()) 
+                          && (t.getType() == FundTransaction.TransactionType.MILESTONE_RELEASE || t.getType() == FundTransaction.TransactionType.ADDITIONAL_FUND_RELEASE)
+                          && t.getStatus() == FundTransaction.TransactionStatus.RELEASED)
+                .map(FundTransaction::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            if (milestoneReleased.compareTo(BigDecimal.ZERO) == 0 && m.getReleasedAmount() != null) {
+                milestoneReleased = m.getReleasedAmount();
+            }
+
+            map.put("releasedAmount", milestoneReleased);
+            map.put("additionalAllocatedAmount", m.getAdditionalAllocatedAmount() != null ? m.getAdditionalAllocatedAmount() : BigDecimal.ZERO);
             
             // Total spent for THIS milestone
             BigDecimal milestoneSpent = expenseRepository.findByMilestoneId(m.getId()).stream()
                 .filter(e -> e.getStatus() != Expense.ExpenseStatus.REJECTED && e.getStatus() != Expense.ExpenseStatus.FLAGGED)
                 .map(Expense::getAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-            map.put("spentAmount", milestoneSpent);
+            map.put("spentAmount", milestoneSpent != null ? milestoneSpent : BigDecimal.ZERO);
 
             response.add(map);
         }

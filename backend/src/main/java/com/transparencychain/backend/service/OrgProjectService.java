@@ -108,11 +108,18 @@ public class OrgProjectService {
 
         // Build milestone list ordered by sequenceNumber
         List<Milestone> milestones = milestoneRepository.findByProjectId(projectId);
-        milestones.sort((a, b) -> {
-            int seqA = a.getSequenceNumber() != null ? a.getSequenceNumber() : Integer.MAX_VALUE;
-            int seqB = b.getSequenceNumber() != null ? b.getSequenceNumber() : Integer.MAX_VALUE;
-            return Integer.compare(seqA, seqB);
-        });
+        for (Milestone m : milestones) {
+            if (m.getTitle() != null) {
+                java.util.regex.Matcher matcher = java.util.regex.Pattern.compile("Phase\\s*(\\d+)", java.util.regex.Pattern.CASE_INSENSITIVE).matcher(m.getTitle());
+                if (matcher.find()) {
+                    m.setSequenceNumber(Integer.parseInt(matcher.group(1)));
+                }
+            }
+        }
+        milestones.sort((a, b) -> Integer.compare(
+            a.getSequenceNumber() != null ? a.getSequenceNumber() : 99,
+            b.getSequenceNumber() != null ? b.getSequenceNumber() : 99
+        ));
 
         // Build NGO trust profile panel
         NgoTrustProfileDto trustProfile = buildTrustProfile(project.getNgo());

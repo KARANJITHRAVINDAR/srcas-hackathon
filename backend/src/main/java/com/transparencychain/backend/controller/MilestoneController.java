@@ -53,10 +53,26 @@ public class MilestoneController {
             milestoneRepository.deleteAll(existing);
         }
 
-        for (Milestone m : milestones) {
+        for (int i = 0; i < milestones.size(); i++) {
+            Milestone m = milestones.get(i);
             m.setProject(project);
-            m.setStatus(Milestone.MilestoneStatus.AVAILABLE);
+            if (m.getTitle() != null) {
+                java.util.regex.Matcher matcher = java.util.regex.Pattern.compile("Phase\\s*(\\d+)", java.util.regex.Pattern.CASE_INSENSITIVE).matcher(m.getTitle());
+                if (matcher.find()) {
+                    m.setSequenceNumber(Integer.parseInt(matcher.group(1)));
+                } else if (m.getSequenceNumber() == null) {
+                    m.setSequenceNumber(i + 1);
+                }
+            } else if (m.getSequenceNumber() == null) {
+                m.setSequenceNumber(i + 1);
+            }
+            m.setStatus(Milestone.MilestoneStatus.PENDING);
         }
+        
+        milestones.sort((a, b) -> Integer.compare(
+            a.getSequenceNumber() != null ? a.getSequenceNumber() : 99,
+            b.getSequenceNumber() != null ? b.getSequenceNumber() : 99
+        ));
         
         milestoneRepository.saveAll(milestones);
         

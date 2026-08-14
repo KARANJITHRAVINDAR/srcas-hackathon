@@ -4,13 +4,20 @@ server:
 spring:
   application:
     name: backend
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
   datasource:
-    url: jdbc:mariadb://localhost:3306/transparency_chain?createDatabaseIfNotExist=true
+    url: jdbc:mysql://localhost:3306/transparency_chain?createDatabaseIfNotExist=true
     username: root
-    password: root
-    driverClassName: org.mariadb.jdbc.Driver
+    password: Ks@kbd23777
+    driverClassName: com.mysql.cj.jdbc.Driver
   jpa:
-    database-platform: org.hibernate.dialect.MariaDBDialect
+    database-platform: org.hibernate.dialect.MySQLDialect
     hibernate:
       ddl-auto: update
     show-sql: true
@@ -26,19 +33,3 @@ jwt:
   secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
   access-token-expiration: 86400000
   refresh-token-expiration: 604800000
-
-polygon:
-  amoy:
-    rpc-url: ${POLYGON_AMOY_RPC_URL:https://rpc-amoy.polygon.technology/}
-    private-key: ${POLYGON_AMOY_PRIVATE_KEY:}
-    contract-address: ${POLYGON_AMOY_CONTRACT_ADDRESS:}
-
-document:
-  ai:
-    project-id: ${DOCUMENT_AI_PROJECT_ID:}
-    location: ${DOCUMENT_AI_LOCATION:us}
-    processor-id: ${DOCUMENT_AI_PROCESSOR_ID:}
-
-openrouter:
-  api:
-    key: ${OPENROUTER_API_KEY:}

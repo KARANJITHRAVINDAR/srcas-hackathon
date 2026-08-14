@@ -149,7 +149,7 @@ function MilestoneDetailView({ project, milestoneId, onBack, user }: { project: 
     }, [milestoneId]);
 
     const canPropose = milestone && (milestone.status === 'PENDING' || milestone.status === 'MODIFIED' || milestone.status === 'IN_PROGRESS' || milestone.status === 'AVAILABLE');
-    const canSubmitProof = milestone && milestone.status !== 'VERIFIED';
+    const canSubmitProof = milestone && (milestone.status === 'IN_PROGRESS' || milestone.status === 'AWAITING_FUNDER_APPROVAL' || milestone.status === 'REJECTED');
     const pendingFunderCR = changeRequests.find(cr => cr.status === 'PENDING' && cr.proposed?.proposedBy === 'FUNDER');
 
     const handlePropose = async () => {
@@ -210,10 +210,14 @@ function MilestoneDetailView({ project, milestoneId, onBack, user }: { project: 
         formData.append('metadata', JSON.stringify({ note: proofNote, timestamp: new Date().toISOString() }));
         formData.append('expectedType', proofType);
 
+        const token = localStorage.getItem('token');
+        const headers: any = { 'Content-Type': 'multipart/form-data' };
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+
         try {
-            await axios.post(`http://localhost:8081/api/v1/milestones/${milestoneId}/proofs`, formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            });
+            await axios.post(`http://localhost:8081/api/v1/milestones/${milestoneId}/proofs`, formData, { headers });
             showAlert({ type: 'success', title: 'Evidence Uploaded', message: 'Evidence submitted successfully! Raised fund release verification ticket.' });
             setShowProofModal(false);
             setProofFile(null);
@@ -335,7 +339,13 @@ function MilestoneDetailView({ project, milestoneId, onBack, user }: { project: 
 
             {/* Request Approval / Submit Evidence Action */}
             <div className="mt-8 pt-8 border-t border-[#DDE3EA] flex justify-end">
-                {milestone.status === 'VERIFIED' ? (
+                {milestone.status === 'LOCKED' ? (
+                    <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 w-full flex justify-between items-center text-slate-500 font-bold text-sm">
+                        <div className="flex items-center gap-2">
+                            <Lock className="w-5 h-5 text-slate-400" /> Milestone is Locked — Complete previous milestone(s) first to unlock evidence submission.
+                        </div>
+                    </div>
+                ) : milestone.status === 'VERIFIED' || milestone.status === 'COMPLETED' || milestone.status === 'DISBURSED' ? (
                     <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-6 w-full flex justify-between items-center">
                         <div className="flex items-center gap-2 text-emerald-700 font-bold">
                             <CheckCircle2 className="w-5 h-5" /> Milestone Verified & Funds Released

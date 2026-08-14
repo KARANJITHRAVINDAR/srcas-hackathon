@@ -161,7 +161,7 @@ export default function ProjectFundsTab({ project }: { project: any }) {
             <div>
                 <h3 className="text-xl font-bold text-[#10172A] mb-4">Milestone Funding Breakdown</h3>
                 <div className="space-y-4">
-                    {milestones.map((m) => {
+                    {[...milestones].sort((a, b) => (a.sequenceNumber || 0) - (b.sequenceNumber || 0)).map((m) => {
                         const remaining = m.allocatedAmount + m.additionalAllocatedAmount - m.spentAmount;
                         return (
                             <div key={m.id} className="bg-white border border-[#DDE3EA] rounded-xl shadow-sm p-6">

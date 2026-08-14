@@ -179,7 +179,7 @@ export default function NgoProjectWorkspace() {
                         <div className="pt-6 border-t border-[#DDE3EA]">
                             <h3 className="text-sm font-bold text-[#52627A] uppercase mb-4">Milestone Progress Summary</h3>
                             <div className="space-y-3">
-                                {milestones.map((m, idx) => (
+                                {[...milestones].sort((a, b) => (a.sequenceNumber || 0) - (b.sequenceNumber || 0)).map((m, idx) => (
                                     <div key={m.id} className="flex items-center gap-4">
                                         <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${m.status === 'COMPLETED' ? 'bg-[#00A875] text-white' : 'bg-gray-100 text-gray-500'}`}>
                                             M{idx + 1}

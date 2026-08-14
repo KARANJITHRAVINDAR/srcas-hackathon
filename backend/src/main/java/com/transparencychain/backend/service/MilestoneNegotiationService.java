@@ -379,6 +379,15 @@ public class MilestoneNegotiationService {
             throw new IllegalStateException("No milestones found for this project.");
         }
 
+        for (Milestone m : milestones) {
+            if (m.getTitle() != null) {
+                java.util.regex.Matcher matcher = java.util.regex.Pattern.compile("Phase\\s*(\\d+)", java.util.regex.Pattern.CASE_INSENSITIVE).matcher(m.getTitle());
+                if (matcher.find()) {
+                    m.setSequenceNumber(Integer.parseInt(matcher.group(1)));
+                }
+            }
+        }
+
         // Sort milestones by sequence number ascending
         milestones.sort((m1, m2) -> {
             int s1 = m1.getSequenceNumber() != null ? m1.getSequenceNumber() : 99;
@@ -430,6 +439,7 @@ public class MilestoneNegotiationService {
                         m1.getAmountAllocated(),
                         txHash
                 );
+                m1.setReleasedAmount(m1.getAmountAllocated());
                 m1.setStatus(Milestone.MilestoneStatus.IN_PROGRESS);
                 milestoneRepository.save(m1);
             }

@@ -4,12 +4,17 @@ import com.transparencychain.backend.model.User;
 import com.transparencychain.backend.model.Role;
 import com.transparencychain.backend.model.NgoProfile;
 import com.transparencychain.backend.model.FunderProfile;
+import com.transparencychain.backend.model.Project;
+import com.transparencychain.backend.model.Milestone;
+import com.transparencychain.backend.model.ProofSubmission;
+import com.transparencychain.backend.model.Ticket;
 import com.transparencychain.backend.repository.*;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
+import java.util.List;
 
 @Component
 public class DemoDataSeeder implements CommandLineRunner {
@@ -19,7 +24,10 @@ public class DemoDataSeeder implements CommandLineRunner {
     private final FunderProfileRepository funderProfileRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public DemoDataSeeder(UserRepository userRepository, NgoProfileRepository ngoProfileRepository, FunderProfileRepository funderProfileRepository, PasswordEncoder passwordEncoder) {
+    public DemoDataSeeder(UserRepository userRepository, 
+                          NgoProfileRepository ngoProfileRepository, 
+                          FunderProfileRepository funderProfileRepository, 
+                          PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.ngoProfileRepository = ngoProfileRepository;
         this.funderProfileRepository = funderProfileRepository;
@@ -77,6 +85,23 @@ public class DemoDataSeeder implements CommandLineRunner {
             User funderUser = funder.getUser();
             funderUser.setPasswordHash(passwordEncoder.encode("demo"));
             userRepository.save(funderUser);
+
+            // Also ensure globalfunder@demo.com exists
+            Optional<User> globalFunderOpt = userRepository.findByEmail("globalfunder@demo.com");
+            if (globalFunderOpt.isEmpty()) {
+                User gf = new User();
+                gf.setEmail("globalfunder@demo.com");
+                gf.setPasswordHash(passwordEncoder.encode("123456"));
+                gf.setRole(Role.FUNDER);
+                gf.setFullName("Organisation Admin");
+                gf.setVerified(true);
+                userRepository.save(gf);
+
+                FunderProfile gfp = new FunderProfile();
+                gfp.setUser(gf);
+                gfp.setOrgName("Global Fund Organization");
+                funderProfileRepository.save(gfp);
+            }
         }
     }
 }

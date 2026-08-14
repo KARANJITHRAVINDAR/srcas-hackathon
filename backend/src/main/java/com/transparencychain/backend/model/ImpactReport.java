@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;
 import java.util.UUID;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Data
 @Entity
@@ -15,10 +14,17 @@ public class ImpactReport {
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "kpi_id", nullable = false)
+    @JoinColumn(name = "project_id", nullable = true)
+    private Project project;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "kpi_id", nullable = true)
     private ProjectImpactKpi kpi;
 
+    private String kpiName;
+
     private String reportingPeriod;
+    
     private Double reportedValue;
     
     @Column(columnDefinition = "TEXT")
@@ -34,8 +40,8 @@ public class ImpactReport {
     
     @PrePersist
     protected void onCreate() {
-        submittedAt = LocalDateTime.now();
-        if(status == null) status = ReportStatus.PENDING;
+        if (submittedAt == null) submittedAt = LocalDateTime.now();
+        if (status == null) status = ReportStatus.VERIFIED;
     }
 
     public enum ReportStatus {
