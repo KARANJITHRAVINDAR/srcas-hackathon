@@ -1,7 +1,7 @@
 @echo off
 title Transparency Chain Launcher
 echo ====================================================
-echo Stopping any existing instances on ports 8081 & 5173...
+echo Stopping any existing instances on ports 8081 and 5173...
 echo ====================================================
 
 for /f "tokens=5" %%a in ('netstat -aon ^| findstr ":8081" ^| findstr "LISTENING"') do (
@@ -14,7 +14,7 @@ for /f "tokens=5" %%a in ('netstat -aon ^| findstr ":5173" ^| findstr "LISTENING
     taskkill /F /PID %%a >nul 2>&1
 )
 
-timeout /t 2 /nobreak >nul
+timeout /t 1 /nobreak >nul
 
 echo ====================================================
 echo Starting Transparency Chain Servers...
