@@ -69,7 +69,27 @@ public class SemanticEntityResolutionService {
         if (cleanA.equalsIgnoreCase(cleanB)) return true;
         if (cleanA.isEmpty() || cleanB.isEmpty()) return false;
 
-        // Tokenize and extract core distinct keywords
+        // 1. Whitespace & Punctuation Invariant Comparison (e.g. "CAREINDIAFOUNDATION" vs "CARE INDIA FOUNDATION")
+        String noSpaceA = cleanA.replaceAll("[^a-z0-9]", "");
+        String noSpaceB = cleanB.replaceAll("[^a-z0-9]", "");
+
+        if (noSpaceA.equalsIgnoreCase(noSpaceB)) {
+            return true;
+        }
+
+        // 2. Substring & Prefix Overlap on normalized alphanumeric strings (minimum 6 characters)
+        if (noSpaceA.length() >= 6 && noSpaceB.length() >= 6) {
+            if (noSpaceA.contains(noSpaceB) || noSpaceB.contains(noSpaceA)) {
+                return true;
+            }
+            // Typo tolerance on collapsed string
+            int noSpaceDist = computeLevenshteinDistance(noSpaceA, noSpaceB);
+            if (noSpaceDist <= 2) {
+                return true;
+            }
+        }
+
+        // 3. Tokenize and extract core distinct keywords
         List<String> tokensA = extractSignificantTokens(cleanA);
         List<String> tokensB = extractSignificantTokens(cleanB);
 
