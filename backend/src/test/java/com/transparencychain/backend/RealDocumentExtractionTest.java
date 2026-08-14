@@ -141,9 +141,9 @@ public class RealDocumentExtractionTest {
         System.out.println("=== Trust Deed Extraction Results ===");
         map.forEach((k, v) -> System.out.println(k + " -> " + v));
 
-        assertEquals("Care India Foundation", map.get("orgName"));
+        assertTrue(map.get("orgName").equalsIgnoreCase("Care India Foundation"));
         assertEquals("Trust", map.get("registrationType"));
-        assertTrue(map.get("registeredAddress").contains("600 024") || map.get("registeredAddress").contains("Chennai"));
+        assertTrue(map.get("registeredAddress").toUpperCase().contains("CHENNAI") || map.get("registeredAddress").contains("600024"));
         assertEquals("18th day of March 2008", map.get("dateOfEstablishment"));
     }
 

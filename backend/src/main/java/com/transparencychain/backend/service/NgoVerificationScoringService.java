@@ -75,12 +75,11 @@ public class NgoVerificationScoringService {
         boolean hardFailTriggered = false;
 
         // 1. Document Completeness Check (Max 20 pts)
+        // Core mandatory documents for legal identity: Registration (10AC/10AD/Cert), PAN Card, Constitution (Trust Deed/MOA)
         Set<DocumentType> mandatoryDocs = new HashSet<>(Arrays.asList(
                 DocumentType.LEGAL_REGISTRATION,
                 DocumentType.PAN,
-                DocumentType.CONSTITUTION,
-                DocumentType.ADDRESS_PROOF,
-                DocumentType.GOVERNING_BODY
+                DocumentType.CONSTITUTION
         ));
         if (hasBankAccount) {
             mandatoryDocs.add(DocumentType.BANK_ACCOUNT);
@@ -96,7 +95,11 @@ public class NgoVerificationScoringService {
             }
         }
 
-        double completenessScore = ((double) presentCount / mandatoryDocs.size()) * 20.0;
+        // Additional points for optional supporting proofs (Address proof, Darpan, Governing body resolution)
+        double completenessScore = ((double) presentCount / mandatoryDocs.size()) * 18.0;
+        if (uploadedDocTypes.contains(DocumentType.DARPAN) || uploadedDocTypes.contains(DocumentType.ADDRESS_PROOF) || uploadedDocTypes.contains(DocumentType.GOVERNING_BODY)) {
+            completenessScore = Math.min(20.0, completenessScore + 2.0);
+        }
         result.completenessScore = Math.round(completenessScore * 100.0) / 100.0;
 
         if (!missingDocs.isEmpty()) {
