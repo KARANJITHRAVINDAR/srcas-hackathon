@@ -110,78 +110,95 @@ public class OcrExtractionService {
             return results;
         }
 
-        // Apply Regex to the extracted text
+        // Apply extraction rules strictly for Section 2 specified fields
         switch (documentType) {
+            case "LEGAL_REGISTRATION":
+                String regNo = extractRegex(extractedText, "(?i)(?:registration\\s*number|reg\\s*no[.:]?|certificate\\s*no[.:]?)\\s*[:\\-]?\\s*([A-Z0-9/\\-]+)");
+                if (regNo != null) results.add(new OcrResult("registrationNumber", regNo, 95.0));
+                
+                String regDate = extractRegex(extractedText, "(?i)(?:date\\s*of\\s*registration|registration\\s*date|dated?)\\s*[:\\-]?\\s*([0-9]{2,4}[-/][0-9]{2}[-/][0-9]{2,4})");
+                if (regDate != null) results.add(new OcrResult("registrationDate", regDate, 93.0));
+                
+                String regAuth = extractRegex(extractedText, "(?i)(?:registering\\s*authority|registrar\\s*of\\s*societies|sub-registrar|charity\\s*commissioner|ministry\\s*of\\s*corporate\\s*affairs)\\s*[:\\-]?\\s*([A-Za-z\\s,]+)");
+                if (regAuth != null) results.add(new OcrResult("registeringAuthority", regAuth.trim(), 90.0));
+                break;
+
+            case "PAN":
             case "PAN_CARD":
                 String pan = extractRegex(extractedText, "[A-Z]{5}[0-9]{4}[A-Z]{1}");
                 if (pan != null) results.add(new OcrResult("panNumber", pan, 99.8));
-                String panName = extractRegex(extractedText, "(?i)Name:\\s*(.+)");
-                if (panName != null) results.add(new OcrResult("orgName", panName, 95.0));
-                break;
                 
+                String panName = extractRegex(extractedText, "(?i)(?:name|name\\s*on\\s*card|org\\s*name)\\s*[:\\-]?\\s*([A-Za-z0-9\\s.,&]+)");
+                if (panName != null) results.add(new OcrResult("orgName", panName.trim(), 96.0));
+                break;
+
+            case "CONSTITUTION":
+            case "TRUST_DEED":
+                String tdOrg = extractRegex(extractedText, "(?i)(?:name\\s*of\\s*the\\s*(?:trust|society|foundation|organization)|org\\s*name)\\s*[:\\-]?\\s*([A-Za-z0-9\\s.,&]+)");
+                if (tdOrg != null) results.add(new OcrResult("orgName", tdOrg.trim(), 97.0));
+                
+                String regType = extractRegex(extractedText, "(?i)(?:type\\s*of\\s*entity|registration\\s*type|entity\\s*type)\\s*[:\\-]?\\s*(Trust|Society|Section\\s*8\\s*Company|Section\\s*8|Non-Profit)");
+                if (regType != null) {
+                    results.add(new OcrResult("registrationType", regType.trim(), 98.0));
+                } else {
+                    // infer from text
+                    if (extractedText.toLowerCase().contains("trust deed") || extractedText.toLowerCase().contains("trust")) {
+                        results.add(new OcrResult("registrationType", "Trust", 92.0));
+                    } else if (extractedText.toLowerCase().contains("society")) {
+                        results.add(new OcrResult("registrationType", "Society", 92.0));
+                    } else if (extractedText.toLowerCase().contains("section 8")) {
+                        results.add(new OcrResult("registrationType", "Section 8 Company", 92.0));
+                    }
+                }
+                
+                String objClause = extractRegex(extractedText, "(?i)(?:objectives?\\s*clause|main\\s*objects?|aims?\\s*and\\s*objects?)\\s*[:\\-]?\\s*([A-Za-z0-9\\s.,&\\-]+)");
+                if (objClause != null) results.add(new OcrResult("objectivesClause", objClause.trim(), 91.0));
+                
+                String estDate = extractRegex(extractedText, "(?i)(?:date\\s*of\\s*establishment|established\\s*on|executed\\s*on)\\s*[:\\-]?\\s*([0-9]{2,4}[-/][0-9]{2}[-/][0-9]{2,4})");
+                if (estDate != null) results.add(new OcrResult("dateOfEstablishment", estDate, 94.0));
+                
+                String constAddr = extractRegex(extractedText, "(?i)(?:registered\\s*office|principal\\s*office|address)\\s*[:\\-]?\\s*([A-Za-z0-9\\s.,&\\-#]+(?:pincode|pin\\s*code|pin)?[\\s:]*[0-9]{6})");
+                if (constAddr != null) results.add(new OcrResult("registeredAddress", constAddr.trim(), 92.0));
+                break;
+
+            case "ADDRESS_PROOF":
+                String addr = extractRegex(extractedText, "(?i)(?:registered\\s*address|office\\s*address|address)\\s*[:\\-]?\\s*(.+)");
+                if (addr != null) results.add(new OcrResult("registeredAddress", addr.trim(), 95.0));
+                break;
+
+            case "GOVERNING_BODY":
+            case "BOARD_RESOLUTION":
+                String trustees = extractRegex(extractedText, "(?i)(?:trustees?|directors?|office\\s*bearers?|board\\s*members?)\\s*[:\\-]?\\s*(.+)");
+                if (trustees != null) results.add(new OcrResult("trusteeDetails", trustees.trim(), 93.0));
+                
+                String signatory = extractRegex(extractedText, "(?i)(?:signatory\\s*name|authorized\\s*signatory)\\s*[:\\-]?\\s*([A-Za-z\\s.]+)");
+                if (signatory != null) results.add(new OcrResult("authorizedSignatoryName", signatory.trim(), 95.0));
+                break;
+
+            case "BANK_ACCOUNT":
+            case "CANCELLED_CHEQUE":
+                String accHolder = extractRegex(extractedText, "(?i)(?:account\\s*holder\\s*name|in\\s*the\\s*name\\s*of|name\\s*of\\s*account|bank\\s*account\\s*name)\\s*[:\\-]?\\s*([A-Za-z0-9\\s.,&]+)");
+                if (accHolder != null) results.add(new OcrResult("orgName", accHolder.trim(), 95.0));
+                
+                String accNo = extractRegex(extractedText, "(?i)(?:a/?c\\s*no[.:]?|account\\s*number|acc\\s*no[.:]?)\\s*[:\\-]?\\s*([0-9]{9,18})");
+                if (accNo != null) results.add(new OcrResult("bankAccountNumber", accNo, 99.0));
+                
+                String ifsc = extractRegex(extractedText, "(?i)(?:ifsc|ifsc\\s*code)\\s*[:\\-]?\\s*([A-Z]{4}0[A-Z0-9]{6})");
+                if (ifsc != null) results.add(new OcrResult("ifscCode", ifsc.toUpperCase(), 99.5));
+                
+                String bank = extractRegex(extractedText, "(?i)(?:bank\\s*name|bank)\\s*[:\\-]?\\s*([A-Za-z\\s]+(?:Bank|Branch)?)");
+                if (bank != null) results.add(new OcrResult("bankName", bank.trim(), 94.0));
+                break;
+
+            case "DARPAN":
             case "DARPAN_CERT":
                 String darpanId = extractRegex(extractedText, "[A-Z]{2}/[0-9]{4}/[0-9]+");
                 if (darpanId != null) results.add(new OcrResult("darpanId", darpanId, 99.5));
-                String darpanOrg = extractRegex(extractedText, "(?i)Org Name:\\s*(.+)");
-                if (darpanOrg != null) results.add(new OcrResult("orgName", darpanOrg, 97.0));
-                String darpanAddr = extractRegex(extractedText, "(?i)Address:\\s*(.+)");
-                if (darpanAddr != null) results.add(new OcrResult("registeredAddress", darpanAddr, 95.0));
-                break;
                 
-            case "TRUST_DEED":
-                String tdOrg = extractRegex(extractedText, "(?i)Org Name:\\s*(.+)");
-                if (tdOrg != null) results.add(new OcrResult("orgName", tdOrg, 96.5));
-                String tdRegType = extractRegex(extractedText, "(?i)Registration Type:\\s*(.+)");
-                if (tdRegType != null) results.add(new OcrResult("registrationType", tdRegType, 99.1));
-                String tdRegNo = extractRegex(extractedText, "(?i)Registration Number:\\s*(.+)");
-                if (tdRegNo != null) results.add(new OcrResult("registrationNumber", tdRegNo, 94.2));
-                String tdDate = extractRegex(extractedText, "(?i)Date Of Establishment:\\s*(.+)");
-                if (tdDate != null) results.add(new OcrResult("dateOfEstablishment", tdDate, 98.0));
-                String tdAddr = extractRegex(extractedText, "(?i)Address:\\s*(.+)");
-                if (tdAddr != null) results.add(new OcrResult("registeredAddress", tdAddr, 95.0));
+                String darpanOrg = extractRegex(extractedText, "(?i)(?:registered\\s*name|org(?:anization)?\\s*name|ngo\\s*name)\\s*[:\\-]?\\s*([A-Za-z0-9\\s.,&]+)");
+                if (darpanOrg != null) results.add(new OcrResult("orgName", darpanOrg.trim(), 96.0));
                 break;
-                
-            case "CSR1_ACK":
-                String csrOrg = extractRegex(extractedText, "(?i)Org Name:\\s*(.+)");
-                if (csrOrg != null) results.add(new OcrResult("orgName", csrOrg, 97.5));
-                String csr = extractRegex(extractedText, "(?i)CSR1 Number:\\s*(CSR[O0-9]+)");
-                if (csr != null) results.add(new OcrResult("csr1RegistrationNumber", csr.replace("O", "0"), 98.8));
-                String csrPan = extractRegex(extractedText, "[A-Z]{5}[0-9]{4}[A-Z]{1}");
-                if (csrPan != null) results.add(new OcrResult("panNumber", csrPan, 99.0));
-                break;
-                
-            case "CANCELLED_CHEQUE":
-                String ifsc = extractRegex(extractedText, "(?i)IFSC Code:\\s*([A-Z]{4}0[A-Z0-9]{6})");
-                if (ifsc != null) results.add(new OcrResult("ifscCode", ifsc, 99.0));
-                String chqOrg = extractRegex(extractedText, "(?i)Bank Account Name:\\s*(.+)");
-                if (chqOrg != null) results.add(new OcrResult("bankAccountName", chqOrg, 96.0));
-                String acc = extractRegex(extractedText, "(?i)A.c\\s*No:\\s*([0-9]+)");
-                if (acc != null) results.add(new OcrResult("bankAccountNumber", acc, 99.2));
-                break;
-                
-            case "BOARD_RESOLUTION":
-                String brName = extractRegex(extractedText, "(?i)Signatory Name:\\s*(.+)");
-                if (brName != null) results.add(new OcrResult("authorizedSignatoryName", brName, 95.0));
-                String brDesig = extractRegex(extractedText, "(?i)Signatory Designation:\\s*(.+)");
-                if (brDesig != null) results.add(new OcrResult("authorizedSignatoryDesignation", brDesig, 94.0));
-                String brPan = extractRegex(extractedText, "(?i)Signatory PAN:\\s*([A-Z]{5}[0-9]{4}[A-Z]{1})");
-                if (brPan != null) results.add(new OcrResult("authorizedSignatoryPan", brPan, 98.0));
-                break;
-                
-            case "12A_CERT":
-                String reg12 = extractRegex(extractedText, "(?i)12A Number:\\s*(12A-[0-9]+-[0-9]+)");
-                if (reg12 != null) results.add(new OcrResult("reg12aNumber", reg12, 98.5));
-                String org12 = extractRegex(extractedText, "(?i)Org Name:\\s*(.+)");
-                if (org12 != null) results.add(new OcrResult("orgName", org12, 97.5));
-                break;
-                
-            case "80G_CERT":
-                String reg80 = extractRegex(extractedText, "(?i)80G Number:\\s*(80G-[0-9]+-[0-9]+)");
-                if (reg80 != null) results.add(new OcrResult("reg80gNumber", reg80, 97.5));
-                String org80 = extractRegex(extractedText, "(?i)Org Name:\\s*(.+)");
-                if (org80 != null) results.add(new OcrResult("orgName", org80, 97.5));
-                break;
-                
+
             default:
                 break;
         }
