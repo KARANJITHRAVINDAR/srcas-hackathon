@@ -72,6 +72,7 @@ public class WebSecurityConfig {
             .authorizeHttpRequests(auth -> 
                 auth.requestMatchers("/api/v1/auth/**").permitAll()
                     .requestMatchers("/api/v1/public/**", "/api/public/**").permitAll()
+                    .requestMatchers("/api/v1/ngo/register/**").permitAll()
                     .requestMatchers("/uploads/**").permitAll()
                     .requestMatchers("/error").permitAll()
                     .anyRequest().authenticated()

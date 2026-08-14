@@ -99,19 +99,32 @@ export default function RegisterPage() {
     };
 
     const handleUploadDocuments = async () => {
-        if (!userId || files.length === 0) return;
+        let effectiveUserId = userId;
+        if (!effectiveUserId && user?.id) {
+            effectiveUserId = user.id;
+        }
+        if (files.length === 0) {
+            showAlert({ type: 'warning', message: 'Please drop or select your documents first.' });
+            return;
+        }
         setUploading(true);
         setStep(3); // Show extracting animation
         
         try {
             const formData = new FormData();
-            formData.append('userId', userId);
+            if (effectiveUserId) {
+                formData.append('userId', effectiveUserId);
+            }
             formData.append('hasBankAccount', String(hasBankAccount));
             files.forEach(f => formData.append('files', f));
 
-            const res = await axios.post('http://localhost:8081/api/v1/ngo/register/documents', formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            });
+            const headers: Record<string, string> = { 'Content-Type': 'multipart/form-data' };
+            const token = localStorage.getItem('token');
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+
+            const res = await axios.post('http://localhost:8081/api/v1/ngo/register/documents', formData, { headers });
 
             const data = res.data;
             setSubmissionId(data.submissionId);
@@ -125,7 +138,7 @@ export default function RegisterPage() {
             setRejectionReasons(data.rejectionReasons || []);
 
             // Fetch populated fields for submission
-            const subRes = await axios.get(`http://localhost:8081/api/v1/ngo/register/submission/${data.submissionId}`);
+            const subRes = await axios.get(`http://localhost:8081/api/v1/ngo/register/submission/${data.submissionId}`, { headers });
             setExtractedFields(subRes.data.fields || []);
 
             setTimeout(() => {
