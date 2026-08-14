@@ -398,37 +398,7 @@ public class OcrExtractionService {
     public String findOrganizationName(String text, String[] lines) {
         if (text == null) return null;
 
-        // 1. Check if real Care India Foundation or similar entity is explicitly present
-        if (text.toUpperCase().contains("CARE INDIA FOUNDATION") || text.toUpperCase().contains("CAREINDIAFOUNDATION")) {
-            return "CARE INDIA FOUNDATION";
-        }
-
-        // 2. Check header lines (skipping URLs, timestamps, Darpan portal chrome)
-        for (int i = 0; i < Math.min(lines.length, 8); i++) {
-            String l = cleanExtractedValue(lines[i].trim());
-            if (l.contains("http") || l.contains("www.") || l.contains("NGO Darpan") || l.matches(".*\\d{2}/\\d{2}/\\d{4}.*")) {
-                continue;
-            }
-            if (isValidOrgName(l) && (l.toUpperCase().contains("TRUST") || l.toUpperCase().contains("FOUNDATION") || l.toUpperCase().contains("SOCIETY") || l.toUpperCase().contains("INITIATIVE") || l.toUpperCase().contains("MISSION"))) {
-                return l;
-            }
-        }
-
-        // 3. Combined "Name and Address" row (Form 10AD)
-        for (String line : lines) {
-            String l = line.trim();
-            Matcher nameAddrMatcher = Pattern.compile("(?i)^(?:\\d+\\s*[|.]\\s*)?name\\s*and\\s*address\\s*(?:of\\s*the\\s*applicant)?\\s*[:|\\-]?\\s*(.+)").matcher(l);
-            if (nameAddrMatcher.find()) {
-                String val = nameAddrMatcher.group(1).trim();
-                String[] parts = val.split("(?i),|(?=\\b(?:no\\.|door|plot|flat|street|road|nagar|puram|chennai|mumbai|delhi)\\b)");
-                if (parts.length > 0) {
-                    String extracted = cleanExtractedValue(parts[0].trim());
-                    if (isValidOrgName(extracted)) return extracted;
-                }
-            }
-        }
-
-        // 4. Table row format (Form 10AC: "2 | Name | ..." or "Name of the Applicant : ...")
+        // 1. Table row format (Form 10AC: "2 | Name | ..." or "Name of the Applicant : ...")
         for (String line : lines) {
             String l = line.trim();
             Matcher tableMatcher = Pattern.compile("(?i)^(?:\\d+\\s*[|.]\\s*)?(?:name\\s*of\\s*(?:the\\s*)?(?:applicant|trust|society|foundation|organization|entity)|entity\\s*name|consumer\\s*name|bank\\s*account\\s*name|registered\\s*name)\\s*[:|\\-]?\\s*(.+)").matcher(l);
@@ -438,11 +408,36 @@ public class OcrExtractionService {
             }
         }
 
-        // 5. Prose in Trust Deeds: "in the name of [Organization]"
+        // 2. Combined "Name and Address" row (Form 10AD)
+        for (String line : lines) {
+            String l = line.trim();
+            Matcher nameAddrMatcher = Pattern.compile("(?i)^(?:\\d+\\s*[|.]\\s*)?name\\s*and\\s*address\\s*(?:of\\s*the\\s*applicant)?\\s*[:|\\-]?\\s*(.+)").matcher(l);
+            if (nameAddrMatcher.find()) {
+                String val = nameAddrMatcher.group(1).trim();
+                String[] parts = val.split("(?i),|(?=\\b(?:no\\.|door|plot|flat|street|road|nagar|puram|chennai|mumbai|delhi|bangalore|kolkata|hyderabad|pune)\\b)");
+                if (parts.length > 0) {
+                    String extracted = cleanExtractedValue(parts[0].trim());
+                    if (isValidOrgName(extracted)) return extracted;
+                }
+            }
+        }
+
+        // 3. Prose in Trust Deeds / Bylaws: "in the name of [Organization]" or "known as [Organization]"
         Matcher deedMatcher = Pattern.compile("(?i)(?:in\\s*the\\s*name\\s*of|known\\s*as|hereinafter\\s*called\\s*(?:the\\s*)?(?:'|\"|the\\s*trust\\s*)?)\\s*([A-Z][A-Za-z0-9\\s.,&]{4,60}?)(?:'|\"|,|\\n|\\band\\b|\\bwith\\b)").matcher(text);
         if (deedMatcher.find()) {
             String val = cleanExtractedValue(deedMatcher.group(1).trim());
             if (isValidOrgName(val)) return val;
+        }
+
+        // 4. Check early header lines containing explicit legal keywords
+        for (int i = 0; i < Math.min(lines.length, 12); i++) {
+            String l = cleanExtractedValue(lines[i].trim());
+            if (l.contains("http") || l.contains("www.") || l.contains("NGO Darpan") || l.matches(".*\\d{2}/\\d{2}/\\d{4}.*")) {
+                continue;
+            }
+            if (isValidOrgName(l) && (l.toUpperCase().contains("TRUST") || l.toUpperCase().contains("FOUNDATION") || l.toUpperCase().contains("SOCIETY") || l.toUpperCase().contains("INITIATIVE") || l.toUpperCase().contains("MISSION") || l.toUpperCase().contains("SANSTHAN") || l.toUpperCase().contains("SAMITI") || l.toUpperCase().contains("ASSOCIATION"))) {
+                return l;
+            }
         }
 
         return null;
@@ -450,10 +445,6 @@ public class OcrExtractionService {
 
     public String findPanCardHolderName(String text, String[] lines) {
         if (text == null) return null;
-
-        if (text.toUpperCase().contains("CARE INDIA FOUNDATION") || text.toUpperCase().contains("CAREINDIAFOUNDATION")) {
-            return "CARE INDIA FOUNDATION";
-        }
 
         List<String> ignoredPanHeaders = Arrays.asList(
                 "INCOME TAX DEPARTMENT", "GOVT OF INDIA", "GOVT. OF INDIA",
@@ -464,7 +455,7 @@ public class OcrExtractionService {
         for (String line : lines) {
             String l = line.trim();
             String foundPan = findPanNumber(l);
-            if (l.length() >= 4 && l.length() <= 60 && (foundPan == null || !foundPan.equalsIgnoreCase(l))) {
+            if (l.length() >= 6 && l.length() <= 60 && !l.matches(".*\\d{2}[/\\-]\\d{2}[/\\-]\\d{4}.*") && (foundPan == null || !foundPan.equalsIgnoreCase(l))) {
                 boolean isHeader = false;
                 for (String ign : ignoredPanHeaders) {
                     if (l.toUpperCase().contains(ign)) {
@@ -683,13 +674,27 @@ public class OcrExtractionService {
 
     private boolean isValidOrgName(String val) {
         if (val == null || val.isBlank()) return false;
-        String upper = val.toUpperCase().trim();
+        String clean = cleanExtractedValue(val);
+        String lettersOnly = clean.replaceAll("[^A-Za-z]", "");
+        if (lettersOnly.length() < 6) return false;
+
+        // Discard strings with isolated single characters and numbers like "a 7 ag"
+        String[] words = clean.split("\\s+");
+        int singleLetterWordCount = 0;
+        for (String w : words) {
+            if (w.length() <= 1 || w.matches("^[0-9]+$")) singleLetterWordCount++;
+        }
+        if (words.length > 0 && (double) singleLetterWordCount / words.length >= 0.5) {
+            return false;
+        }
+
+        String upper = clean.toUpperCase().trim();
         if (upper.contains("APPLICANT") || upper.contains("DESIGNATION") || upper.contains("REGISTRATION TYPE") ||
             upper.contains("ENTITY NAME") || upper.equals("NAME") || upper.equals("PAN") ||
             upper.equals("ADDRESS") || upper.equals("ORDER NO") || upper.equals("DATE") ||
             upper.contains("NGO DARPAN") || upper.contains("INCOME TAX") || upper.startsWith("THE TRUST") ||
             upper.equals("THE FOUNDER") || upper.startsWith("11/01/") || upper.startsWith("202") ||
-            upper.contains("EEE EEE") || upper.length() < 3 || upper.length() > 80) {
+            upper.contains("EEE EEE") || upper.length() < 5 || upper.length() > 80) {
             return false;
         }
         return true;

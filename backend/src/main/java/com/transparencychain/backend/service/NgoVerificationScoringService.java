@@ -309,7 +309,10 @@ public class NgoVerificationScoringService {
                 field.setExtractedValues("[]");
             }
 
-            CandidateValue best = candidates.stream().max(Comparator.comparingDouble(c -> c.confidence)).orElse(candidates.get(0));
+            CandidateValue best = candidates.stream()
+                    .filter(c -> !fieldName.equals("orgName") || entityResolutionService.isValidCandidateOrgName(c.value))
+                    .max(Comparator.comparingDouble(c -> c.confidence))
+                    .orElse(candidates.get(0));
             field.setFinalValue(best.value);
 
             result.processedFields.add(field);
