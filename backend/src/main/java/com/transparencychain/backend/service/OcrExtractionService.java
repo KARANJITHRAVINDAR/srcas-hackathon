@@ -7,6 +7,7 @@ import org.apache.pdfbox.rendering.PDFRenderer;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -122,12 +123,37 @@ public class OcrExtractionService {
         return "";
     }
 
+    @Autowired(required = false)
+    private OpenRouterAiService openRouterAiService;
+
+    public OcrExtractionService() {}
+
+    public OcrExtractionService(OpenRouterAiService aiService) {
+        this.openRouterAiService = aiService;
+    }
+
     /**
      * Universal Semantic Field Extraction across tables, prose, ID cards, and government orders.
      */
     public List<OcrResult> extractFieldsFromText(String rawText, String documentType) {
         List<OcrResult> results = new ArrayList<>();
         if (rawText == null || rawText.isBlank()) return results;
+
+        // 1. First Priority: Intelligent LLM Extraction via OpenRouter API
+        if (openRouterAiService != null && openRouterAiService.isConfigured()) {
+            try {
+                Map<String, String> aiFields = openRouterAiService.extractDocumentFieldsWithAi(rawText, documentType);
+                if (aiFields != null && !aiFields.isEmpty()) {
+                    for (Map.Entry<String, String> entry : aiFields.entrySet()) {
+                        results.add(new OcrResult(entry.getKey(), entry.getValue(), 98.5));
+                    }
+                    log.info("[OCR] Extracted {} fields using OpenRouter AI for {}", results.size(), documentType);
+                    return results;
+                }
+            } catch (Exception e) {
+                log.warn("[OCR] OpenRouter AI extraction fallback to native semantic engine: {}", e.getMessage());
+            }
+        }
 
         String normalizedText = rawText.replaceAll("\\r", "");
         String[] lines = normalizedText.split("\n");

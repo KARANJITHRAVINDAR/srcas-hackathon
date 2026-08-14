@@ -27,6 +27,9 @@ public class NgoVerificationScoringService {
     @Autowired
     private SemanticEntityResolutionService entityResolutionService;
 
+    @Autowired(required = false)
+    private OpenRouterAiService openRouterAiService;
+
     // For standalone testing without Spring context injection
     public NgoVerificationScoringService() {
         this.entityResolutionService = new SemanticEntityResolutionService();
@@ -34,6 +37,11 @@ public class NgoVerificationScoringService {
 
     public NgoVerificationScoringService(SemanticEntityResolutionService resolutionService) {
         this.entityResolutionService = resolutionService;
+    }
+
+    public NgoVerificationScoringService(SemanticEntityResolutionService resolutionService, OpenRouterAiService aiService) {
+        this.entityResolutionService = resolutionService;
+        this.openRouterAiService = aiService;
     }
 
     public static class ScoringResult {
@@ -124,10 +132,35 @@ public class NgoVerificationScoringService {
         }
 
         // 3. Semantic Entity Resolution & Clustering across all uploaded documents (Max 35 pts)
+        double consistencyScore = 35.0;
+
+        // A. If OpenRouter AI is configured, use LLM-level packet reasoning
+        if (openRouterAiService != null && openRouterAiService.isConfigured()) {
+            List<Map<String, Object>> packetSummary = new ArrayList<>();
+            for (Map.Entry<String, List<OcrExtractionService.OcrResult>> entry : allExtractedResults.entrySet()) {
+                Map<String, Object> docMap = new HashMap<>();
+                docMap.put("documentType", entry.getKey());
+                for (OcrExtractionService.OcrResult r : entry.getValue()) {
+                    docMap.put(r.fieldName, r.value);
+                }
+                packetSummary.add(docMap);
+            }
+
+            OpenRouterAiService.AiVerificationReport aiReport = openRouterAiService.verifyPacketWithAi(packetSummary);
+            if (aiReport != null) {
+                if (!aiReport.isConverged) {
+                    hardFailTriggered = true;
+                    consistencyScore = 0.0;
+                    result.rejectionReasons.addAll(aiReport.discrepancies);
+                } else {
+                    consistencyScore = aiReport.consistencyScore;
+                }
+            }
+        }
+
+        // B. Semantic Clustering Engine
         SemanticEntityResolutionService.EntityClusterResult orgClusterResult =
                 entityResolutionService.clusterOrganizationEntities(allOrgInstances);
-
-        double consistencyScore = 35.0;
 
         if (!orgClusterResult.isConverged) {
             // Distinct organization mismatch across documents -> Major Fraud / Identity Divergence Signal

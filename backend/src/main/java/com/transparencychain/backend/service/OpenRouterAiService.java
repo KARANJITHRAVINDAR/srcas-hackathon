@@ -2,17 +2,24 @@ package com.transparencychain.backend.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.*;
 
+/**
+ * OpenRouter AI Service for intelligent Document Understanding,
+ * Semantic Entity Resolution, and NGO Packet Fraud Verification.
+ */
 @Service
 public class OpenRouterAiService {
+
+    private static final Logger log = LoggerFactory.getLogger(OpenRouterAiService.class);
 
     @Value("${openrouter.api.key:${OPENROUTER_API_KEY:}}")
     private String openRouterApiKey;
@@ -22,7 +29,14 @@ public class OpenRouterAiService {
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    public boolean isConfigured() {
+        return openRouterApiKey != null && !openRouterApiKey.trim().isBlank();
+    }
+
     public JsonNode callLlamaModel(String prompt) {
+        if (!isConfigured()) {
+            return null;
+        }
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
@@ -37,7 +51,7 @@ public class OpenRouterAiService {
             Map<String, Object> body = new HashMap<>();
             body.put("model", MODEL_NAME);
             body.put("messages", Collections.singletonList(message));
-            body.put("temperature", 0.3);
+            body.put("temperature", 0.1);
 
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
             ResponseEntity<String> response = restTemplate.exchange(OPENROUTER_URL, HttpMethod.POST, entity, String.class);
@@ -47,7 +61,7 @@ public class OpenRouterAiService {
                 JsonNode choices = root.path("choices");
                 if (choices.isArray() && choices.size() > 0) {
                     String contentStr = choices.get(0).path("message").path("content").asText();
-                    
+
                     // Extract JSON string from codeblock markdown if present
                     if (contentStr.contains("```json")) {
                         contentStr = contentStr.substring(contentStr.indexOf("```json") + 7);
@@ -65,7 +79,121 @@ public class OpenRouterAiService {
                 }
             }
         } catch (Exception e) {
-            System.err.println("OpenRouter API call error: " + e.getMessage());
+            log.warn("[OpenRouter AI] API call error: {}", e.getMessage());
+        }
+        return null;
+    }
+
+    /**
+     * AI-Powered Semantic Document Field Extraction.
+     * Uses LLM to extract fields from Indian NGO legal documents without rigid regex rules.
+     */
+    public Map<String, String> extractDocumentFieldsWithAi(String text, String documentType) {
+        if (!isConfigured() || text == null || text.isBlank()) {
+            return null;
+        }
+
+        String prompt = String.format(
+            "You are an expert Indian NGO Document Verification AI. Extract all official legal fields from this %s document text.\n" +
+            "Source Document Text:\n\"\"\"\n%s\n\"\"\"\n\n" +
+            "Extract the following fields accurately:\n" +
+            "- orgName: The exact official name of the NGO/Trust/Society. (On PAN cards, read the actual entity name, ignore income tax headers, watermarks, dates, or field labels).\n" +
+            "- panNumber: The 10-character alphanumeric PAN (e.g. AAATC9843M).\n" +
+            "- registrationNumber: The registration number, URN, or approval number (e.g. AAATC9843ME20219, AAATC9843M23CH01, 7846, TN/2017/0150250).\n" +
+            "- registrationDate: The registration, execution, or order date.\n" +
+            "- registeringAuthority: The issuing officer or department (e.g. CIT (Exemption), Sub-Registrar, Charity Commissioner).\n" +
+            "- registeredAddress: The full registered office address including 6-digit pin code.\n" +
+            "- registrationType: Trust, Society, or Section 8 Company.\n" +
+            "- trusteeDetails: Names and designations of trustees or office bearers.\n" +
+            "- authorizedSignatoryName: Name of managing trustee or authorized signatory.\n" +
+            "- darpanId: NGO Darpan ID if present.\n\n" +
+            "Return ONLY a JSON object with these keys (null for fields not present in document):\n" +
+            "{\n" +
+            "  \"orgName\": \"...\",\n" +
+            "  \"panNumber\": \"...\",\n" +
+            "  \"registrationNumber\": \"...\",\n" +
+            "  \"registrationDate\": \"...\",\n" +
+            "  \"registeringAuthority\": \"...\",\n" +
+            "  \"registeredAddress\": \"...\",\n" +
+            "  \"registrationType\": \"...\",\n" +
+            "  \"trusteeDetails\": \"...\",\n" +
+            "  \"authorizedSignatoryName\": \"...\",\n" +
+            "  \"darpanId\": \"...\"\n" +
+            "}",
+            documentType,
+            text.length() > 3000 ? text.substring(0, 3000) : text
+        );
+
+        JsonNode res = callLlamaModel(prompt);
+        if (res != null) {
+            Map<String, String> fields = new HashMap<>();
+            res.fieldNames().forEachRemaining(key -> {
+                JsonNode val = res.get(key);
+                if (val != null && !val.isNull() && !val.asText().isBlank() && !val.asText().equalsIgnoreCase("null")) {
+                    fields.put(key, val.asText().trim());
+                }
+            });
+            if (!fields.isEmpty()) {
+                log.info("[OpenRouter AI] Successfully extracted {} fields for docType={}", fields.size(), documentType);
+                return fields;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * AI-Powered Cross-Document Fraud Verification and Identity Convergence.
+     */
+    public static class AiVerificationReport {
+        public boolean isConverged;
+        public double consistencyScore;
+        public double authenticityScore;
+        public String canonicalOrgName;
+        public List<String> discrepancies = new ArrayList<>();
+    }
+
+    public AiVerificationReport verifyPacketWithAi(List<Map<String, Object>> documents) {
+        if (!isConfigured() || documents == null || documents.isEmpty()) {
+            return null;
+        }
+
+        try {
+            String jsonInput = objectMapper.writeValueAsString(documents);
+            String prompt = String.format(
+                "You are an expert Indian NGO Document Fraud & Identity Verification Auditor. Analyze this collection of extracted documents uploaded by an applicant:\n" +
+                "%s\n\n" +
+                "Evaluate:\n" +
+                "1. Semantic Entity Convergence: Do all uploaded documents prove the legal identity of the SAME organization (e.g. 'CARE INDIA FOUNDATION', 'Care India Foundation', 'CAREINDIAFOUNDATION' are stylistic variants of the SAME entity)?\n" +
+                "2. Fraud Detection: Are any documents forged, fabricated, or belonging to completely distinct, unrelated organizations (e.g. 'Apex Healthcare Mission' mixed with 'Shree Ganesh Trust')?\n" +
+                "3. Geographic and Financial Validity: Are the addresses and PAN numbers consistent with each other?\n\n" +
+                "Scoring Criteria:\n" +
+                "- If genuine and consistent: isConverged = true, consistencyScore = 35.0, authenticityScore = 20.0.\n" +
+                "- If multi-entity forgery or major divergence detected: isConverged = false, consistencyScore = 0.0, authenticityScore = 4.0, provide detailed discrepancy reasons.\n\n" +
+                "Return ONLY a JSON object:\n" +
+                "{\n" +
+                "  \"isConverged\": true,\n" +
+                "  \"consistencyScore\": 35.0,\n" +
+                "  \"authenticityScore\": 20.0,\n" +
+                "  \"canonicalOrgName\": \"CARE INDIA FOUNDATION\",\n" +
+                "  \"discrepancies\": []\n" +
+                "}",
+                jsonInput
+            );
+
+            JsonNode res = callLlamaModel(prompt);
+            if (res != null && res.has("isConverged")) {
+                AiVerificationReport report = new AiVerificationReport();
+                report.isConverged = res.get("isConverged").asBoolean();
+                report.consistencyScore = res.has("consistencyScore") ? res.get("consistencyScore").asDouble() : (report.isConverged ? 35.0 : 0.0);
+                report.authenticityScore = res.has("authenticityScore") ? res.get("authenticityScore").asDouble() : (report.isConverged ? 20.0 : 4.0);
+                report.canonicalOrgName = res.has("canonicalOrgName") ? res.get("canonicalOrgName").asText() : "";
+                if (res.has("discrepancies") && res.get("discrepancies").isArray()) {
+                    res.get("discrepancies").forEach(d -> report.discrepancies.add(d.asText()));
+                }
+                return report;
+            }
+        } catch (Exception e) {
+            log.warn("[OpenRouter AI] Packet verification error: {}", e.getMessage());
         }
         return null;
     }
