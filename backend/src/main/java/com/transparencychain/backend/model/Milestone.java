@@ -50,6 +50,15 @@ public class Milestone {
     @Column(columnDefinition = "TEXT")
     private String verificationRequirements;
 
+    @Column(name = "funds_transferred")
+    private Boolean fundsTransferred = false;
+
+    @Column(name = "funds_transferred_at")
+    private java.time.LocalDateTime fundsTransferredAt;
+
+    @Column(name = "disbursement_tx_hash")
+    private String disbursementTxHash;
+
     /**
      * Points to the currently accepted/active MilestoneVersion for this milestone.
      * Null until the first MilestoneVersion is created (i.e., while the milestone

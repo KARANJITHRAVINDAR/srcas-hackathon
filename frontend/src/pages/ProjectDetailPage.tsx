@@ -835,10 +835,22 @@ export default function ProjectDetailPage() {
                                                         </button>
                                                     )}
 
-                                                    {(m.status === 'VERIFIED' || m.status === 'DISBURSED' || m.status === 'COMPLETED') && (
-                                                        <span className="text-xs font-bold text-center text-[#00A875] bg-emerald-50 border border-emerald-200 rounded-lg py-1 px-3 flex items-center justify-center gap-1">
-                                                            <CheckCircle2 size={13} /> Funds Disbursed
-                                                        </span>
+                                                    {(m.status === 'VERIFIED' || m.status === 'DISBURSED' || m.status === 'COMPLETED' || m.fundsTransferred) && (
+                                                        <div className="flex flex-col items-end gap-1">
+                                                            <span className="text-xs font-bold text-center text-[#00A875] bg-emerald-50 border border-emerald-200 rounded-lg py-1 px-3 flex items-center justify-center gap-1">
+                                                                <CheckCircle2 size={13} /> Funds Transferred ✓
+                                                            </span>
+                                                            {m.disbursementTxHash && m.disbursementTxHash.startsWith('0x') && (
+                                                                <a
+                                                                    href={`https://amoy.polygonscan.com/tx/${m.disbursementTxHash}`}
+                                                                    target="_blank"
+                                                                    rel="noreferrer"
+                                                                    className="text-[11px] font-semibold text-emerald-700 hover:text-emerald-800 hover:underline flex items-center gap-1 bg-emerald-100/50 px-2 py-0.5 rounded"
+                                                                >
+                                                                    View On-Chain Record ↗
+                                                                </a>
+                                                            )}
+                                                        </div>
                                                     )}
                                                 </div>
                                             </div>

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.core.methods.response.EthSendTransaction;
 import org.web3j.utils.Convert;
 
 import java.math.BigDecimal;
@@ -147,32 +148,182 @@ public class BlockchainService {
     }
 
     // ─────────────────────────────────────────────────────────────────────────
+    @Value("${blockchain.polygon.contract-address:0xb0f1b1e8805f7a90da89a4476c741b95de201d4e}")
+    private String contractAddress;
+
+    private static final Object TX_MUTEX = new Object();
+
+    /**
+     * Nonce-safe, thread-synchronized transaction sender.
+     * Prevents nonce collision across concurrent Merkle commits, disbursement anchors, and retries.
+     */
+    public EthSendTransaction sendSynchronizedTransaction(String to, String encodedData, BigInteger value, BigInteger gasLimit) throws Exception {
+        if (web3j == null || credentials == null) {
+            throw new IllegalStateException("Web3j or Credentials not configured");
+        }
+        synchronized (TX_MUTEX) {
+            BigInteger gasPrice = BigInteger.valueOf(30_000_000_000L); // 30 Gwei default
+            try {
+                BigInteger fetchedPrice = web3j.ethGasPrice().send().getGasPrice();
+                if (fetchedPrice != null && fetchedPrice.compareTo(BigInteger.ZERO) > 0) {
+                    gasPrice = fetchedPrice.multiply(BigInteger.valueOf(125)).divide(BigInteger.valueOf(100)); // +25% buffer
+                }
+            } catch (Exception ignored) {}
+
+            org.web3j.tx.RawTransactionManager txManager = new org.web3j.tx.RawTransactionManager(web3j, credentials, EXPECTED_CHAIN_ID);
+            return txManager.sendTransaction(
+                    gasPrice,
+                    gasLimit != null ? gasLimit : BigInteger.valueOf(250_000L),
+                    to,
+                    encodedData,
+                    value != null ? value : BigInteger.ZERO
+            );
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Disbursement & Escrow Anchoring
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Non-blocking disbursement anchor.
+     * 1. Creates a local tracking record immediately.
+     * 2. Fires an asynchronous on-chain anchor transaction.
+     * 3. Never blocks or rolls back the financial disbursement DB commit.
+     */
+    public String anchorDisbursement(UUID projectId, UUID milestoneId, BigDecimal amount, String verifier) {
+        log.info("[BLOCKCHAIN] anchorDisbursement requested for project={}, milestone={}, amount={}", projectId, milestoneId, amount);
+
+        String trackingRef = "DISB-" + (milestoneId != null ? milestoneId.toString().substring(0, 8) : UUID.randomUUID().toString().substring(0, 8)) + "-" + System.currentTimeMillis();
+
+        BlockchainRecord record = new BlockchainRecord();
+        record.setProjectId(projectId != null ? projectId.toString() : "");
+        record.setMilestoneId(milestoneId != null ? milestoneId.toString() : "");
+        record.setRecordType(BlockchainRecord.RecordType.DISBURSEMENT_ANCHOR);
+        record.setDisbursementAmount(amount != null ? amount : BigDecimal.ZERO);
+        record.setVerifierId(verifier != null ? verifier : "SYSTEM");
+        record.setDisbursementReference(trackingRef);
+        record.setContractAddress(contractAddress);
+        record.setNetwork("Polygon Amoy");
+        record.setChainId(EXPECTED_CHAIN_ID);
+        record.setStatus(BlockchainRecord.BlockchainStatus.PENDING);
+        record.setTimestamp(LocalDateTime.now());
+        blockchainRecordRepository.save(record);
+
+        // Asynchronously broadcast on-chain anchor
+        java.util.concurrent.CompletableFuture.runAsync(() -> {
+            executeOnChainDisbursementAnchor(record, projectId, milestoneId, amount, verifier);
+        });
+
+        return trackingRef;
+    }
+
+    public void executeOnChainDisbursementAnchor(BlockchainRecord record, UUID projectId, UUID milestoneId, BigDecimal amount, String verifier) {
+        try {
+            if (!isConfigured()) {
+                log.warn("[BLOCKCHAIN] Web3j/Credentials not configured; marking disbursement anchor SIMULATED");
+                record.setStatus(BlockchainRecord.BlockchainStatus.SIMULATED);
+                record.setTransactionHash("0x" + UUID.randomUUID().toString().replace("-", "") + UUID.randomUUID().toString().replace("-", ""));
+                blockchainRecordRepository.save(record);
+                return;
+            }
+
+            assertCorrectNetwork();
+
+            // Compute payload hash representing the immutable disbursement audit record
+            String payloadString = String.format("DISBURSEMENT|proj:%s|ms:%s|amt:%s|ver:%s|time:%d",
+                    projectId != null ? projectId.toString() : "",
+                    milestoneId != null ? milestoneId.toString() : "",
+                    amount != null ? amount.toPlainString() : "0",
+                    verifier != null ? verifier : "SYSTEM",
+                    System.currentTimeMillis() / 1000);
+            String payloadHash = computeSha256Hex(payloadString.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            byte[] hashBytes32 = org.web3j.utils.Numeric.hexStringToByteArray(payloadHash);
+            if (hashBytes32.length != 32) {
+                byte[] padded = new byte[32];
+                System.arraycopy(hashBytes32, 0, padded, Math.max(0, 32 - hashBytes32.length), Math.min(32, hashBytes32.length));
+                hashBytes32 = padded;
+            }
+
+            // Encode transaction against the deployed anchor contract
+            org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
+                    "commitMerkleRoot",
+                    java.util.Arrays.asList(
+                            new org.web3j.abi.datatypes.Utf8String("DISBURSEMENT:" + (projectId != null ? projectId.toString() : "")),
+                            new org.web3j.abi.datatypes.Utf8String(milestoneId != null ? milestoneId.toString() : ""),
+                            new org.web3j.abi.datatypes.generated.Bytes32(hashBytes32)
+                    ),
+                    java.util.Collections.emptyList()
+            );
+            String encodedFunction = org.web3j.abi.FunctionEncoder.encode(function);
+
+            EthSendTransaction sendTx = sendSynchronizedTransaction(contractAddress, encodedFunction, BigInteger.ZERO, BigInteger.valueOf(250_000L));
+            if (sendTx.hasError()) {
+                log.error("[BLOCKCHAIN] Disbursement anchor send error: {}", sendTx.getError().getMessage());
+                record.setStatus(BlockchainRecord.BlockchainStatus.PENDING_ANCHOR);
+                blockchainRecordRepository.save(record);
+                return;
+            }
+
+            String txHash = sendTx.getTransactionHash();
+            record.setTransactionHash(txHash);
+            record.setMerkleRoot(payloadHash);
+            record.setStatus(BlockchainRecord.BlockchainStatus.PENDING);
+            blockchainRecordRepository.save(record);
+            log.info("[BLOCKCHAIN] Disbursement anchor broadcast successfully! TxHash: {}", txHash);
+
+            // Wait for receipt
+            org.web3j.tx.response.PollingTransactionReceiptProcessor receiptProcessor =
+                    new org.web3j.tx.response.PollingTransactionReceiptProcessor(web3j, 1500, 30);
+            org.web3j.protocol.core.methods.response.TransactionReceipt receipt = receiptProcessor.waitForTransactionReceipt(txHash);
+
+            if ("0x1".equals(receipt.getStatus()) || "1".equals(receipt.getStatus())) {
+                record.setBlockNumber(receipt.getBlockNumber().longValue());
+                record.setStatus(BlockchainRecord.BlockchainStatus.CONFIRMED);
+                blockchainRecordRepository.save(record);
+                log.info("[BLOCKCHAIN] Disbursement anchor confirmed in block: {}", receipt.getBlockNumber());
+            } else {
+                record.setStatus(BlockchainRecord.BlockchainStatus.FAILED);
+                blockchainRecordRepository.save(record);
+                log.warn("[BLOCKCHAIN] Disbursement anchor transaction reverted on-chain");
+            }
+        } catch (Exception e) {
+            log.error("[BLOCKCHAIN] Non-blocking disbursement anchor failure (will be retryable): {}", sanitizeError(e.getMessage()));
+            record.setStatus(BlockchainRecord.BlockchainStatus.PENDING_ANCHOR);
+            blockchainRecordRepository.save(record);
+        }
+    }
+
+    public boolean retryAnchor(UUID recordId) {
+        Optional<BlockchainRecord> opt = blockchainRecordRepository.findById(recordId);
+        if (opt.isEmpty()) return false;
+        BlockchainRecord record = opt.get();
+        if (record.getStatus() == BlockchainRecord.BlockchainStatus.CONFIRMED) return true;
+
+        java.util.concurrent.CompletableFuture.runAsync(() -> {
+            UUID projId = null;
+            UUID msId = null;
+            try {
+                if (record.getProjectId() != null && !record.getProjectId().isBlank()) projId = UUID.fromString(record.getProjectId());
+                if (record.getMilestoneId() != null && !record.getMilestoneId().isBlank()) msId = UUID.fromString(record.getMilestoneId());
+            } catch (Exception ignored) {}
+            executeOnChainDisbursementAnchor(record, projId, msId, record.getDisbursementAmount(), record.getVerifierId());
+        });
+        return true;
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
     // Legacy anchor methods (kept for backward compatibility with existing calls)
     // ─────────────────────────────────────────────────────────────────────────
 
     public String deployEscrow(UUID projectId, BigDecimal amount, String ngoAddress) {
         log.info("[BLOCKCHAIN] deployEscrow — projectId={}", projectId);
-        return anchorRecordOnChain(
-                projectId != null ? projectId.toString() : "",
-                "", "",
-                "ESCROW_DEPLOYED",
-                ngoAddress,
-                System.currentTimeMillis() / 1000,
-                amount != null ? amount.toString() : "0"
-        );
+        return anchorDisbursement(projectId, null, amount, "FUNDER_ESCROW_LOCK");
     }
 
     public String releaseFunds(UUID projectId, UUID milestoneId, BigDecimal amount) {
         log.info("[BLOCKCHAIN] releaseFunds — projectId={}, milestoneId={}", projectId, milestoneId);
-        return anchorRecordOnChain(
-                projectId != null ? projectId.toString() : "",
-                milestoneId != null ? milestoneId.toString() : "",
-                "",
-                "FUNDS_RELEASED",
-                "BACKEND_AUTHORITY",
-                System.currentTimeMillis() / 1000,
-                amount != null ? amount.toString() : "0"
-        );
+        return anchorDisbursement(projectId, milestoneId, amount, "EVIDENCE_APPROVAL_FUNDER");
     }
 
     public String anchorEvidence(UUID milestoneId, String fileName, byte[] fileBytes) {
@@ -194,10 +345,9 @@ public class BlockchainService {
             String verificationResult, String verifierId,
             long timestamp, String disbursementRef
     ) {
-        // If contract not yet deployed, simulate and persist locally
         String simulatedHash = "0x" + UUID.randomUUID().toString().replace("-", "")
                 + UUID.randomUUID().toString().replace("-", "");
-        log.info("[BLOCKCHAIN] Simulated anchor (contract not yet deployed) — hash={}", simulatedHash);
+        log.info("[BLOCKCHAIN] Simulated anchor — hash={}", simulatedHash);
         saveRecordToDb(projectId, milestoneId, evidenceHash, verificationResult,
                 verifierId, timestamp, disbursementRef, simulatedHash);
         return simulatedHash;

@@ -15,8 +15,16 @@ public interface BlockchainRecordRepository extends JpaRepository<BlockchainReco
 
     List<BlockchainRecord> findByProjectIdAndMilestoneId(String projectId, String milestoneId);
 
+    List<BlockchainRecord> findByProjectIdAndRecordType(String projectId, BlockchainRecord.RecordType recordType);
+
+    List<BlockchainRecord> findByProjectIdAndMilestoneIdAndRecordType(
+            String projectId, String milestoneId, BlockchainRecord.RecordType recordType);
+
     Optional<BlockchainRecord> findTopByProjectIdAndMilestoneIdOrderByTimestampDesc(
             String projectId, String milestoneId);
+
+    Optional<BlockchainRecord> findTopByProjectIdAndMilestoneIdAndRecordTypeOrderByTimestampDesc(
+            String projectId, String milestoneId, BlockchainRecord.RecordType recordType);
 
     Optional<BlockchainRecord> findByTransactionHash(String transactionHash);
 

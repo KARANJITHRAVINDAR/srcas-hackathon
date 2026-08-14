@@ -40,7 +40,6 @@ public class BlockchainController {
      * Phase 3 / Health API: Returns network health and live status.
      */
     @GetMapping("/status")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Map<String, Object>> getBlockchainStatus() {
         try {
             Map<String, Object> status = blockchainService.getNetworkStatus();
@@ -137,6 +136,28 @@ public class BlockchainController {
         Optional<BlockchainRecord> record = blockchainRecordRepository.findByTransactionHash(txHash);
         if (record.isPresent()) {
             return ResponseEntity.ok(record.get());
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    /**
+     * Get all on-chain disbursement anchor records for a project.
+     */
+    @GetMapping("/projects/{projectId}/disbursements")
+    public ResponseEntity<?> getProjectDisbursementRecords(@PathVariable UUID projectId) {
+        return ResponseEntity.ok(blockchainRecordRepository.findByProjectIdAndRecordType(
+                projectId.toString(), BlockchainRecord.RecordType.DISBURSEMENT_ANCHOR));
+    }
+
+    /**
+     * Asynchronously retry a pending or failed blockchain anchor.
+     */
+    @PostMapping("/records/{recordId}/retry")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> retryAnchorRecord(@PathVariable UUID recordId) {
+        boolean queued = blockchainService.retryAnchor(recordId);
+        if (queued) {
+            return ResponseEntity.ok(Map.of("status", "RETRY_QUEUED", "message", "Anchor retry queued asynchronously."));
         }
         return ResponseEntity.notFound().build();
     }

@@ -68,6 +68,13 @@ public class BlockchainRecord {
     @Column(name = "verifier_id")
     private String verifierId;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "record_type")
+    private RecordType recordType = RecordType.EVIDENCE_MERKLE_ROOT;
+
+    @Column(name = "disbursement_amount")
+    private java.math.BigDecimal disbursementAmount;
+
     @Column(name = "disbursement_reference")
     private String disbursementReference;
 
@@ -95,6 +102,15 @@ public class BlockchainRecord {
         /** Transaction reverted or failed on-chain */
         FAILED,
         /** Used for locally simulated records when contract not yet deployed */
-        SIMULATED
+        SIMULATED,
+        /** Pending retry after network failure */
+        PENDING_ANCHOR
+    }
+
+    public enum RecordType {
+        EVIDENCE_MERKLE_ROOT,
+        DISBURSEMENT_ANCHOR,
+        ESCROW_DEPLOYED,
+        LOCATION_SURVEY
     }
 }

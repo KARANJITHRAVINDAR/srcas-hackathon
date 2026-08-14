@@ -193,8 +193,7 @@ public class MerkleBlockchainService {
             BigInteger gasLimit = BigInteger.valueOf(250_000L);
 
             log.info("[BLOCKCHAIN] Broadcasting transaction to contract: {}", contractAddress);
-            RawTransactionManager txManager = new RawTransactionManager(web3j, credentials, EXPECTED_CHAIN_ID);
-            EthSendTransaction sendTx = txManager.sendTransaction(gasPrice, gasLimit, contractAddress, encodedFunction, BigInteger.ZERO);
+            EthSendTransaction sendTx = blockchainService.sendSynchronizedTransaction(contractAddress, encodedFunction, BigInteger.ZERO, BigInteger.valueOf(250_000L));
 
             if (sendTx.hasError()) {
                 String errorMsg = sendTx.getError().getMessage();
@@ -209,6 +208,7 @@ public class MerkleBlockchainService {
             BlockchainRecord record = new BlockchainRecord();
             record.setProjectId(projectId.toString());
             record.setMilestoneId(milestoneId.toString());
+            record.setRecordType(BlockchainRecord.RecordType.EVIDENCE_MERKLE_ROOT);
             record.setMerkleRoot(merkleRootHex);
             record.setEvidenceCount(verifiedProofs.size());
             record.setTransactionHash(txHash);

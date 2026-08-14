@@ -39,6 +39,7 @@ public class MilestoneNegotiationService {
     @Autowired private AuditLogService auditLogService;
     @Autowired private DisbursementService disbursementService;
     @Autowired private NotificationService notificationService;
+    @Autowired private BlockchainService blockchainService;
 
     // =========================================================================
     // ORG-SIDE OPERATIONS
@@ -372,7 +373,7 @@ public class MilestoneNegotiationService {
                 });
 
         // Deploy/initialize escrow ledger update & trigger disbursement
-        String txHash = "0x" + UUID.randomUUID().toString().replace("-", "");
+        String txHash = blockchainService.releaseFunds(projectId, milestoneId, milestone.getAmountAllocated());
         disbursementService.executeDisbursement(
                 projectId,
                 milestoneId,
@@ -459,7 +460,7 @@ public class MilestoneNegotiationService {
         if (!milestones.isEmpty()) {
             Milestone m1 = milestones.get(0);
             if (m1.getAmountAllocated() != null && m1.getAmountAllocated().compareTo(java.math.BigDecimal.ZERO) > 0) {
-                String txHash = "0x" + UUID.randomUUID().toString().replace("-", "");
+                String txHash = blockchainService.releaseFunds(projectId, m1.getId(), m1.getAmountAllocated());
                 disbursementService.executeDisbursement(
                         projectId,
                         m1.getId(),

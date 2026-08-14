@@ -39,6 +39,11 @@ public class DisbursementService {
         // 1. Update Milestone Status to DISBURSED, update releasedAmount & unlock next sequential milestone
         if (milestone != null) {
             milestone.setStatus(Milestone.MilestoneStatus.DISBURSED);
+            milestone.setFundsTransferred(true);
+            milestone.setFundsTransferredAt(java.time.LocalDateTime.now());
+            if (txHash != null && !txHash.isBlank()) {
+                milestone.setDisbursementTxHash(txHash);
+            }
             BigDecimal prevReleased = milestone.getReleasedAmount() != null ? milestone.getReleasedAmount() : BigDecimal.ZERO;
             milestone.setReleasedAmount(prevReleased.add(amount));
             milestoneRepository.save(milestone);
