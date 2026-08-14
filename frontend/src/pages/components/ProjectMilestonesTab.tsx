@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle2, Circle, AlertCircle, Lock, ArrowRight, Upload, Clock, ShieldAlert, Check } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useAlert } from '../../context/AlertContext';
 
 export default function ProjectMilestonesTab({ project, milestones, onMilestoneClick, selectedMilestoneId }: { project: any, milestones: any[], onMilestoneClick: (id: string | null) => void, selectedMilestoneId?: string }) {
     const { user } = useAuth();
@@ -28,7 +29,7 @@ export default function ProjectMilestonesTab({ project, milestones, onMilestoneC
                     <div className="absolute left-[27px] top-4 bottom-4 w-0.5 bg-[#DDE3EA]"></div>
 
                     <div className="space-y-6">
-                        {milestones.map((m, idx) => (
+                        {[...milestones].sort((a, b) => (a.sequenceNumber || 0) - (b.sequenceNumber || 0)).map((m, idx) => (
                             <MilestoneTimelineCard key={m.id} milestone={m} index={idx} onClick={() => onMilestoneClick(m.id)} />
                         ))}
                     </div>
@@ -64,7 +65,7 @@ function MilestoneTimelineCard({ milestone, index, onClick }: { milestone: any, 
             <div className={`flex-1 bg-white border ${isLocked ? 'border-[#DDE3EA] opacity-70' : 'border-[#DDE3EA] hover:border-blue-300'} rounded-2xl p-6 shadow-sm transition-all cursor-pointer group`} onClick={onClick}>
                 <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-4">
                     <div>
-                        <h3 className="text-xl font-bold text-[#10172A] group-hover:text-blue-600 transition-colors">M{index + 1} — {milestone.title}</h3>
+                        <h3 className="text-xl font-bold text-[#10172A] group-hover:text-blue-600 transition-colors">M{milestone.sequenceNumber || index + 1} — {milestone.title}</h3>
                         <p className="text-sm font-semibold text-[#52627A] mt-1 line-clamp-1">{milestone.description}</p>
                     </div>
                     <div className="text-right">
@@ -104,11 +105,20 @@ function MilestoneTimelineCard({ milestone, index, onClick }: { milestone: any, 
 
 // Milestone Detail View
 function MilestoneDetailView({ project, milestoneId, onBack, user }: { project: any, milestoneId: string, onBack: () => void, user: any }) {
+    const { showAlert } = useAlert();
     const [milestone, setMilestone] = useState<any>(null);
     const [tasks, setTasks] = useState<any[]>([]);
+    const [changeRequests, setChangeRequests] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [showProposeModal, setShowProposeModal] = useState(false);
+    const [showProofModal, setShowProofModal] = useState(false);
     const [proposing, setProposing] = useState(false);
+    const [uploadingProof, setUploadingProof] = useState(false);
+    
+    const [proofFile, setProofFile] = useState<File | null>(null);
+    const [proofType, setProofType] = useState('INVOICE');
+    const [proofNote, setProofNote] = useState('');
+
     const [proposalForm, setProposalForm] = useState({
         name: '',
         budget: '',
@@ -118,13 +128,19 @@ function MilestoneDetailView({ project, milestoneId, onBack, user }: { project: 
 
     const loadData = () => {
         setLoading(true);
+        const crEndpoint = user?.role === 'FUNDER'
+            ? `http://localhost:8081/api/org/milestones/${milestoneId}/change-requests`
+            : `http://localhost:8081/api/ngo/milestones/${milestoneId}/change-requests`;
+
         Promise.all([
             axios.get(`http://localhost:8081/api/v1/projects/${project.id}/milestones`),
-            axios.get(`http://localhost:8081/api/v1/projects/${project.id}/milestones/${milestoneId}/tasks`)
-        ]).then(([msRes, tasksRes]) => {
+            axios.get(`http://localhost:8081/api/v1/projects/${project.id}/milestones/${milestoneId}/tasks`),
+            axios.get(crEndpoint).catch(() => ({ data: [] }))
+        ]).then(([msRes, tasksRes, crRes]) => {
             const m = msRes.data.find((x: any) => x.id === milestoneId);
             setMilestone(m);
             setTasks(tasksRes.data.sort((a: any, b: any) => a.sequenceNumber - b.sequenceNumber));
+            setChangeRequests(crRes.data || []);
         }).catch(console.error).finally(() => setLoading(false));
     };
 
@@ -132,11 +148,13 @@ function MilestoneDetailView({ project, milestoneId, onBack, user }: { project: 
         loadData();
     }, [milestoneId]);
 
-    const canPropose = milestone && (milestone.status === 'PENDING' || milestone.status === 'MODIFIED');
+    const canPropose = milestone && (milestone.status === 'PENDING' || milestone.status === 'MODIFIED' || milestone.status === 'IN_PROGRESS' || milestone.status === 'AVAILABLE');
+    const canSubmitProof = milestone && milestone.status !== 'VERIFIED';
+    const pendingFunderCR = changeRequests.find(cr => cr.status === 'PENDING' && cr.proposed?.proposedBy === 'FUNDER');
 
     const handlePropose = async () => {
         if (!proposalForm.reason.trim()) {
-            alert('A reason is required for auditability.');
+            showAlert({ type: 'warning', message: 'A reason is required for auditability.' });
             return;
         }
         const body: any = { reason: proposalForm.reason };
@@ -145,7 +163,7 @@ function MilestoneDetailView({ project, milestoneId, onBack, user }: { project: 
         if (proposalForm.dueDate.trim()) body.dueDate = proposalForm.dueDate;
 
         if (!body.name && !body.budget && !body.dueDate) {
-            alert('At least one field (name, budget, or due date) must be changed.');
+            showAlert({ type: 'warning', message: 'At least one field (name, budget, or due date) must be changed.' });
             return;
         }
 
@@ -155,13 +173,56 @@ function MilestoneDetailView({ project, milestoneId, onBack, user }: { project: 
                 `http://localhost:8081/api/ngo/projects/${project.id}/milestones/${milestoneId}/change-request`,
                 body
             );
+            showAlert({ type: 'success', message: 'Change proposal submitted successfully!' });
             setShowProposeModal(false);
             setProposalForm({ name: '', budget: '', dueDate: '', reason: '' });
             loadData();
         } catch (err: any) {
-            alert(err.response?.data?.message || 'Failed to submit change request');
+            showAlert({ type: 'error', message: err.response?.data?.message || 'Failed to submit change request' });
         } finally {
             setProposing(false);
+        }
+    };
+
+    const handleRespondCR = async (crId: string, decision: 'ACCEPT' | 'REJECT') => {
+        try {
+            await axios.post(`http://localhost:8081/api/ngo/change-requests/${crId}/respond`, {
+                decision,
+                responseNote: `NGO ${decision.toLowerCase()}ed the funder proposal.`
+            });
+            showAlert({ type: 'success', message: `Proposal ${decision.toLowerCase()}ed successfully.` });
+            loadData();
+        } catch (err: any) {
+            showAlert({ type: 'error', message: err.response?.data?.message || 'Failed to respond to change request' });
+        }
+    };
+
+    const handleDirectProofSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!proofFile) {
+            showAlert({ type: 'warning', message: 'Please select a proof/evidence file.' });
+            return;
+        }
+
+        setUploadingProof(true);
+        const formData = new FormData();
+        formData.append('file', proofFile);
+        formData.append('metadata', JSON.stringify({ note: proofNote, timestamp: new Date().toISOString() }));
+        formData.append('expectedType', proofType);
+
+        try {
+            await axios.post(`http://localhost:8081/api/v1/milestones/${milestoneId}/proofs`, formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            showAlert({ type: 'success', title: 'Evidence Uploaded', message: 'Evidence submitted successfully! Raised fund release verification ticket.' });
+            setShowProofModal(false);
+            setProofFile(null);
+            setProofNote('');
+            loadData();
+        } catch (err: any) {
+            showAlert({ type: 'error', message: err.response?.data?.message || 'Evidence submission failed.' });
+        } finally {
+            setUploadingProof(false);
         }
     };
 
@@ -178,6 +239,39 @@ function MilestoneDetailView({ project, milestoneId, onBack, user }: { project: 
                 <ArrowRight className="w-4 h-4 rotate-180" /> Back to Timeline
             </button>
 
+            {/* PENDING FUNDER PROPOSAL BANNER */}
+            {pendingFunderCR && (
+                <div className="bg-amber-50 border border-amber-300 rounded-2xl p-6 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <div className="flex items-center gap-2 text-amber-900 font-bold text-base mb-1">
+                            <AlertCircle className="w-5 h-5 text-amber-600" /> Funder Proposed Milestone Changes
+                        </div>
+                        <p className="text-xs text-amber-800 font-semibold">
+                            Reason: <span className="italic">"{pendingFunderCR.proposed?.changeReason}"</span>
+                        </p>
+                        <div className="flex flex-wrap gap-4 text-xs font-bold text-amber-900 mt-2">
+                            {pendingFunderCR.proposed?.name && <span>Proposed Name: {pendingFunderCR.proposed.name}</span>}
+                            {pendingFunderCR.proposed?.budget && <span>Proposed Budget: ₹{pendingFunderCR.proposed.budget.toLocaleString()}</span>}
+                            {pendingFunderCR.proposed?.dueDate && <span>Proposed Due Date: {pendingFunderCR.proposed.dueDate}</span>}
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => handleRespondCR(pendingFunderCR.id, 'REJECT')}
+                            className="px-4 py-2 bg-white border border-amber-300 text-amber-900 font-bold rounded-lg text-xs hover:bg-amber-100 transition"
+                        >
+                            Reject
+                        </button>
+                        <button
+                            onClick={() => handleRespondCR(pendingFunderCR.id, 'ACCEPT')}
+                            className="px-4 py-2 bg-amber-600 text-white font-bold rounded-lg text-xs hover:bg-amber-700 transition shadow-sm"
+                        >
+                            Accept Proposed Changes
+                        </button>
+                    </div>
+                </div>
+            )}
+
             <div className="bg-white border border-[#DDE3EA] rounded-2xl p-8 shadow-sm">
                 <div className="flex justify-between items-start mb-6">
                     <div>
@@ -185,6 +279,14 @@ function MilestoneDetailView({ project, milestoneId, onBack, user }: { project: 
                         <p className="text-[#52627A] font-medium max-w-3xl">{milestone.description}</p>
                     </div>
                     <div className="flex items-center gap-3">
+                        {canSubmitProof && (
+                            <button
+                                onClick={() => setShowProofModal(true)}
+                                className="px-4 py-2 bg-[#10172A] text-white rounded-lg text-sm font-bold hover:bg-slate-800 transition-colors flex items-center gap-2 shadow-sm"
+                            >
+                                <Upload className="w-4 h-4" /> Submit Evidence
+                            </button>
+                        )}
                         {canPropose && (
                             <button
                                 onClick={() => setShowProposeModal(true)}
@@ -225,32 +327,99 @@ function MilestoneDetailView({ project, milestoneId, onBack, user }: { project: 
                     ))}
                     {tasks.length === 0 && (
                         <div className="p-8 text-center bg-gray-50 rounded-xl border border-[#DDE3EA] text-[#52627A] font-medium">
-                            No tasks have been defined by the Funder for this milestone yet.
+                            No individual sub-tasks defined. You can submit milestone evidence directly using the <strong>"Submit Evidence"</strong> button above.
                         </div>
                     )}
                 </div>
             </div>
 
-            {/* Request Approval Action */}
+            {/* Request Approval / Submit Evidence Action */}
             <div className="mt-8 pt-8 border-t border-[#DDE3EA] flex justify-end">
-                {allCompleted ? (
+                {milestone.status === 'VERIFIED' ? (
                     <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-6 w-full flex justify-between items-center">
-                        <div>
-                            <div className="flex items-center gap-2 text-emerald-700 font-bold mb-1">
-                                <CheckCircle2 className="w-5 h-5" /> All milestone tasks completed
-                            </div>
-                            <p className="text-sm text-emerald-600">All required evidence has been submitted and validated. Milestone is ready for review.</p>
+                        <div className="flex items-center gap-2 text-emerald-700 font-bold">
+                            <CheckCircle2 className="w-5 h-5" /> Milestone Verified & Funds Released
                         </div>
-                        <button className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-lg font-bold transition shadow-sm">
-                            Request Milestone Approval
-                        </button>
                     </div>
                 ) : (
-                    <button className="bg-gray-100 text-gray-400 px-6 py-3 rounded-lg font-bold cursor-not-allowed">
-                        Complete all tasks to request approval
+                    <button
+                        onClick={() => setShowProofModal(true)}
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-lg font-bold transition shadow-sm flex items-center gap-2"
+                    >
+                        <Upload className="w-5 h-5" /> Submit Evidence for Milestone Verification
                     </button>
                 )}
             </div>
+
+            {/* Direct Milestone Evidence Upload Modal */}
+            {showProofModal && (
+                <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden">
+                        <form onSubmit={handleDirectProofSubmit}>
+                            <div className="p-6 border-b border-[#DDE3EA]">
+                                <h3 className="text-xl font-bold text-[#10172A] flex items-center gap-2">
+                                    <Upload className="w-5 h-5 text-blue-600" /> Submit Milestone Evidence
+                                </h3>
+                                <p className="text-sm text-[#52627A] mt-1">
+                                    Upload invoice, site photo, or progress report for <strong>{milestone.title}</strong>.
+                                </p>
+                            </div>
+                            <div className="p-6 space-y-4">
+                                <div>
+                                    <label className="block text-xs font-bold text-[#52627A] uppercase mb-1">Evidence Type</label>
+                                    <select
+                                        value={proofType}
+                                        onChange={e => setProofType(e.target.value)}
+                                        className="w-full bg-[#F8FAFC] border border-[#DDE3EA] rounded-lg p-2.5 outline-none text-sm font-bold text-[#10172A]"
+                                    >
+                                        <option value="INVOICE">Vendor Invoice / Receipt</option>
+                                        <option value="SITE_PHOTO">Site Location Photo</option>
+                                        <option value="GEO_REPORT">Geotagged Progress Report</option>
+                                        <option value="AUDIT_REPORT">Third-party Audit Certificate</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-[#52627A] uppercase mb-1">Select File (PDF, Image, Video)</label>
+                                    <input
+                                        type="file"
+                                        accept="image/*,video/*,application/pdf"
+                                        onChange={e => setProofFile(e.target.files?.[0] || null)}
+                                        className="w-full bg-[#F8FAFC] border border-[#DDE3EA] rounded-lg p-2 text-sm text-[#52627A]"
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-[#52627A] uppercase mb-1">Notes / Remarks</label>
+                                    <textarea
+                                        rows={3}
+                                        value={proofNote}
+                                        onChange={e => setProofNote(e.target.value)}
+                                        placeholder="Describe the proof being submitted..."
+                                        className="w-full bg-[#F8FAFC] border border-[#DDE3EA] rounded-lg p-2.5 outline-none text-sm resize-none"
+                                    />
+                                </div>
+                            </div>
+                            <div className="p-6 border-t border-[#DDE3EA] flex justify-end gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowProofModal(false)}
+                                    className="px-5 py-2 text-[#52627A] font-bold hover:bg-gray-50 rounded-lg transition"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={uploadingProof}
+                                    className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-lg font-bold shadow-sm transition flex items-center gap-2"
+                                >
+                                    {uploadingProof ? 'Uploading...' : 'Submit Evidence'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
 
             {/* Propose Changes Modal */}
             {showProposeModal && (
@@ -331,6 +500,7 @@ function MilestoneDetailView({ project, milestoneId, onBack, user }: { project: 
 }
 
 function TaskCard({ task, projectId, milestoneId, onUploadComplete }: { task: any, projectId: string, milestoneId: string, onUploadComplete: () => void }) {
+    const { showAlert } = useAlert();
     const fileInputRef = React.useRef<HTMLInputElement>(null);
     const [uploading, setUploading] = useState(false);
 
@@ -354,7 +524,7 @@ function TaskCard({ task, projectId, milestoneId, onUploadComplete }: { task: an
             onUploadComplete();
         } catch (error) {
             console.error("Upload failed", error);
-            alert("Upload failed. Please try again.");
+            showAlert({ type: 'error', message: "Upload failed. Please try again." });
         } finally {
             setUploading(false);
             if (fileInputRef.current) fileInputRef.current.value = '';

@@ -1,0 +1,9 @@
+.env
+.env.local
+*.log
+*.pid
+target/
+node_modules/
+dist/
+build/
+.DS_Store

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Edit3, DollarSign, Calendar, Trash2, Plus, Save } from 'lucide-react';
+import { useAlert } from '../context/AlertContext';
 
 /**
  * Milestone Editor — pre-populated with auto-generated milestones.
@@ -11,6 +12,7 @@ import { Edit3, DollarSign, Calendar, Trash2, Plus, Save } from 'lucide-react';
 export default function MilestoneCreationPage() {
     const { id } = useParams<{id: string}>();
     const navigate = useNavigate();
+    const { showAlert } = useAlert();
     const [project, setProject] = useState<any>(null);
     const [milestones, setMilestones] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -64,15 +66,16 @@ export default function MilestoneCreationPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (Math.abs(totalAllocated - budget) > 0.01) {
-            alert(`Total allocated (₹${totalAllocated.toLocaleString()}) must equal project budget (₹${budget.toLocaleString()})`);
+            showAlert({ type: 'warning', message: `Total allocated (₹${totalAllocated.toLocaleString()}) must equal project budget (₹${budget.toLocaleString()})` });
             return;
         }
         setSaving(true);
         try {
             await axios.post(`http://localhost:8081/api/v1/projects/${id}/milestones/bulk`, milestones);
+            showAlert({ type: 'success', message: 'Milestones saved successfully!' });
             navigate(`/projects/${id}`);
         } catch (err: any) {
-            alert(err.response?.data?.message || 'Failed to save milestones');
+            showAlert({ type: 'error', message: err.response?.data?.message || 'Failed to save milestones' });
         } finally {
             setSaving(false);
         }

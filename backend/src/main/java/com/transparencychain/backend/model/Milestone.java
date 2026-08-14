@@ -60,6 +60,18 @@ public class Milestone {
      */
     private UUID currentVersionId;
 
+    @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "VARCHAR(50)")
+    private MilestoneType milestoneType = MilestoneType.STANDARD;
+
+    public enum MilestoneType {
+        STANDARD, CLOSURE
+    }
+
+    public boolean isClosure() {
+        return milestoneType == MilestoneType.CLOSURE;
+    }
+
     public enum MilestoneStatus {
         PENDING, MODIFIED, LOCKED, AVAILABLE, IN_PROGRESS, EVIDENCE_SUBMITTED, TICKET_RAISED, UNDER_REVIEW, READY_FOR_APPROVAL, AWAITING_FUNDER_APPROVAL, CHANGES_REQUIRED, ACCEPTED, REJECTED, DISBURSED, CLOSED, IN_REVIEW, VERIFIED, COMPLETED
     }

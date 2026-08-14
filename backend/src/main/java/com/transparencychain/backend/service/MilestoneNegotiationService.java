@@ -334,8 +334,15 @@ public class MilestoneNegotiationService {
                     changeRequestRepository.save(cr);
                     
                     if (cr.getProposedVersion() != null) {
-                        cr.getProposedVersion().setStatus(MilestoneVersion.VersionStatus.ACCEPTED);
-                        versionRepository.save(cr.getProposedVersion());
+                        MilestoneVersion proposed = cr.getProposedVersion();
+                        proposed.setStatus(MilestoneVersion.VersionStatus.ACCEPTED);
+                        versionRepository.save(proposed);
+                        milestone.setCurrentVersionId(proposed.getId());
+                        if (proposed.getName() != null) milestone.setTitle(proposed.getName());
+                        if (proposed.getBudget() != null) milestone.setAmountAllocated(proposed.getBudget());
+                        if (proposed.getSequence() != null) milestone.setSequenceNumber(proposed.getSequence());
+                        if (proposed.getDueDate() != null) milestone.setDueDate(proposed.getDueDate());
+                        milestoneRepository.save(milestone);
                     }
                     if (cr.getOriginalVersion() != null) {
                         cr.getOriginalVersion().setStatus(MilestoneVersion.VersionStatus.SUPERSEDED);
@@ -356,6 +363,104 @@ public class MilestoneNegotiationService {
                 projectId,
                 "MILESTONE_ACCEPTED_AND_LOCKED",
                 "Milestone '" + milestone.getTitle() + "' accepted and locked by Funder. Disbursement triggered."
+        );
+    }
+
+    @Transactional
+    public void acceptAndLockAllMilestones(UUID projectId, UUID funderUserId) {
+        FunderProfile funder = funderProfileRepository.findByUserId(funderUserId)
+                .orElseThrow(() -> new RuntimeException("Funder profile not found for user: " + funderUserId));
+
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Project not found: " + projectId));
+
+        List<Milestone> milestones = milestoneRepository.findByProjectId(projectId);
+        if (milestones.isEmpty()) {
+            throw new IllegalStateException("No milestones found for this project.");
+        }
+
+        // Sort milestones by sequence number ascending
+        milestones.sort((m1, m2) -> {
+            int s1 = m1.getSequenceNumber() != null ? m1.getSequenceNumber() : 99;
+            int s2 = m2.getSequenceNumber() != null ? m2.getSequenceNumber() : 99;
+            return Integer.compare(s1, s2);
+        });
+
+        for (int i = 0; i < milestones.size(); i++) {
+            Milestone m = milestones.get(i);
+            // First milestone becomes IN_PROGRESS for work, others LOCKED
+            if (i == 0) {
+                m.setStatus(Milestone.MilestoneStatus.IN_PROGRESS);
+            } else {
+                m.setStatus(Milestone.MilestoneStatus.LOCKED);
+            }
+            milestoneRepository.save(m);
+
+            // Accept and close any open change requests
+            changeRequestRepository.findByMilestoneIdOrderByCreatedAtAsc(m.getId()).stream()
+                    .filter(cr -> cr.getStatus() == MilestoneChangeRequest.ChangeRequestStatus.PENDING)
+                    .forEach(cr -> {
+                        cr.setStatus(MilestoneChangeRequest.ChangeRequestStatus.ACCEPTED);
+                        cr.setRespondedAt(LocalDateTime.now());
+                        cr.setNgoResponseNote("Accepted via Accept & Lock All");
+                        changeRequestRepository.save(cr);
+
+                        if (cr.getProposedVersion() != null) {
+                            MilestoneVersion proposed = cr.getProposedVersion();
+                            proposed.setStatus(MilestoneVersion.VersionStatus.ACCEPTED);
+                            versionRepository.save(proposed);
+                            m.setCurrentVersionId(proposed.getId());
+                            if (proposed.getName() != null) m.setTitle(proposed.getName());
+                            if (proposed.getBudget() != null) m.setAmountAllocated(proposed.getBudget());
+                            if (proposed.getSequence() != null) m.setSequenceNumber(proposed.getSequence());
+                            if (proposed.getDueDate() != null) m.setDueDate(proposed.getDueDate());
+                            milestoneRepository.save(m);
+                        }
+                    });
+        }
+
+        // Section 3: Mobilization Advance - Disburse Milestone 1 immediately at commitment time
+        if (!milestones.isEmpty()) {
+            Milestone m1 = milestones.get(0);
+            if (m1.getAmountAllocated() != null && m1.getAmountAllocated().compareTo(java.math.BigDecimal.ZERO) > 0) {
+                String txHash = "0x" + UUID.randomUUID().toString().replace("-", "");
+                disbursementService.executeDisbursement(
+                        projectId,
+                        m1.getId(),
+                        m1.getAmountAllocated(),
+                        txHash
+                );
+                m1.setStatus(Milestone.MilestoneStatus.IN_PROGRESS);
+                milestoneRepository.save(m1);
+            }
+        }
+
+        // Set project status to ACTIVE so NGO can start work
+        project.setStatus(Project.ProjectStatus.ACTIVE);
+        projectRepository.save(project);
+
+        auditLogService.logAction(
+                projectId,
+                "ALL_MILESTONES_ACCEPTED_AND_LOCKED",
+                "All milestones accepted and locked by Funder. Milestone 1 mobilization advance disbursed. Project status set to ACTIVE."
+        );
+    }
+
+    @Transactional
+    public void declineNegotiation(UUID projectId, UUID funderUserId) {
+        FunderProfile funder = funderProfileRepository.findByUserId(funderUserId)
+                .orElseThrow(() -> new RuntimeException("Funder profile not found for user: " + funderUserId));
+
+        OrgProjectEngagement engagement = engagementRepository.findByFunderIdAndProjectId(funder.getId(), projectId)
+                .orElseThrow(() -> new RuntimeException("No active engagement found for project: " + projectId));
+
+        engagement.setStatus(OrgProjectEngagement.EngagementStatus.WITHDRAWN);
+        engagementRepository.save(engagement);
+
+        auditLogService.logAction(
+                projectId,
+                "NEGOTIATION_DECLINED",
+                "Funder " + funder.getId() + " declined negotiation and withdrew engagement. Project remains published for other funders."
         );
     }
 
@@ -511,9 +616,13 @@ public class MilestoneNegotiationService {
         versionRepository.save(proposed);
         versionRepository.save(original);
 
-        // Advance milestone pointer and lock it
+        // Advance milestone pointer, sync negotiated fields onto milestone, and lock it
         Milestone milestone = cr.getMilestone();
         milestone.setCurrentVersionId(proposed.getId());
+        if (proposed.getName() != null) milestone.setTitle(proposed.getName());
+        if (proposed.getBudget() != null) milestone.setAmountAllocated(proposed.getBudget());
+        if (proposed.getSequence() != null) milestone.setSequenceNumber(proposed.getSequence());
+        if (proposed.getDueDate() != null) milestone.setDueDate(proposed.getDueDate());
         milestone.setStatus(Milestone.MilestoneStatus.LOCKED);
         milestoneRepository.save(milestone);
 

@@ -125,4 +125,18 @@ public class OrgCommitmentController {
             return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
         }
     }
+
+    // -------------------------------------------------------------------------
+    // GET /api/org/commitments
+    // Retrieves all funding commitments for the current funder.
+    // -------------------------------------------------------------------------
+    @GetMapping("/commitments")
+    public ResponseEntity<?> getAllCommitments() {
+        UUID userId = getCallingUserId();
+        try {
+            return ResponseEntity.ok(fundingCommitmentService.getAllCommitmentsForFunder(userId));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
+        }
+    }
 }

@@ -48,60 +48,7 @@ public class ProjectController {
     @Autowired
     com.transparencychain.backend.service.MilestoneAutoGenerator milestoneAutoGenerator;
 
-    @PostMapping
-    @PreAuthorize("hasRole('FUNDER')")
-    public ResponseEntity<?> createProject(@RequestBody ProjectRequest request) {
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        FunderProfile funder = funderProfileRepository.findByUserId(userDetails.getId())
-                .orElseThrow(() -> new RuntimeException("Funder not found"));
-                
-        Project project = new Project();
-        project.setFunder(funder);
-        project.setTitle(request.getTitle());
-        project.setSdgGoal(request.getSdgGoal());
-        project.setDescription(request.getDescription());
-        project.setTotalBudget(request.getTotalBudget());
-        project.setGeography(request.getGeography());
-        project.setLatitude(request.getLatitude());
-        project.setLongitude(request.getLongitude());
-        
-        // New fields
-        project.setSdgTarget(request.getSdgTarget());
-        project.setProjectDuration(request.getProjectDuration());
-        project.setImpactKpi(request.getImpactKpi());
-        project.setExpectedBeneficiaries(request.getExpectedBeneficiaries());
-        
-        // Assign NGO if provided
-        if (request.getNgoId() != null) {
-            com.transparencychain.backend.model.NgoProfile ngo = ngoProfileRepository.findById(request.getNgoId())
-                    .orElseThrow(() -> new RuntimeException("NGO not found"));
-            project.setNgo(ngo);
-        }
 
-        project.setStatus(Project.ProjectStatus.DRAFT);
-        project = projectRepository.save(project);
-        
-        // Create Milestones
-        if (request.getMilestones() != null && !request.getMilestones().isEmpty()) {
-            for (com.transparencychain.backend.dto.MilestoneRequest milestoneReq : request.getMilestones()) {
-                com.transparencychain.backend.model.Milestone milestone = new com.transparencychain.backend.model.Milestone();
-                milestone.setProject(project);
-                milestone.setTitle(milestoneReq.getTitle());
-                milestone.setDescription(milestoneReq.getDescription());
-                milestone.setAmountAllocated(milestoneReq.getAmountAllocated());
-                milestone.setDueDate(milestoneReq.getDueDate());
-                milestone.setRequiredEvidence(milestoneReq.getRequiredEvidence());
-                milestone.setVerificationRequirements(milestoneReq.getVerificationRequirements());
-                milestone.setStatus(com.transparencychain.backend.model.Milestone.MilestoneStatus.AVAILABLE);
-                milestoneRepository.save(milestone);
-            }
-        }
-        
-        auditLogService.logAction(project.getId(), "PROJECT", "Project created in DRAFT status with budget " + project.getTotalBudget());
-        
-        return ResponseEntity.ok(project);
-    }
-    
     @PostMapping("/{id}/escrow")
     @PreAuthorize("hasRole('FUNDER')")
     public ResponseEntity<?> lockInEscrow(@PathVariable UUID id) {

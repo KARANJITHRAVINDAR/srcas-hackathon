@@ -6,13 +6,16 @@ import {
     CheckCircle2, Circle, AlertCircle, PlusCircle, CheckSquare, 
     History, Sparkles, Coins, Clock, ArrowRight, Lock, Unlock, 
     ShieldCheck, ShieldAlert, FileText, ChevronDown, ChevronUp, RefreshCw, Send, AlertTriangle,
-    QrCode, Link
+    QrCode, Link, Award
 } from 'lucide-react';
 import QRCode from 'react-qr-code';
+
+import { useAlert } from '../context/AlertContext';
 
 export default function ProjectDetailPage() {
     const { id } = useParams<{id: string}>();
     const { user } = useAuth();
+    const { showAlert } = useAlert();
     const navigate = useNavigate();
     
     const [project, setProject] = useState<any>(null);
@@ -54,8 +57,11 @@ export default function ProjectDetailPage() {
     const [commitTotal, setCommitTotal] = useState('');
     const [isSubmittingCommit, setIsSubmittingCommit] = useState(false);
 
+    // Closure status state
+    const [closureStatus, setClosureStatus] = useState<any>(null);
+
     // Escrow Released Amount Calc
-    const escrowReleased = milestones.filter(m => m.status === 'VERIFIED').reduce((sum, m) => sum + m.amountAllocated, 0);
+    const escrowReleased = milestones.filter(m => m.status === 'VERIFIED' || m.status === 'DISBURSED' || m.status === 'COMPLETED').reduce((sum, m) => sum + Number(m.amountAllocated || m.releasedAmount || 0), 0);
 
     const isFunder = user?.role === 'FUNDER';
 
@@ -87,6 +93,14 @@ export default function ProjectDetailPage() {
                 ]);
                 setProject(projRes.data);
                 setMilestones(msRes.data || []);
+            }
+
+            // Fetch Project Closure Status
+            try {
+                const closureRes = await axios.get(`http://localhost:8081/api/v1/projects/${id}/closure-status`);
+                setClosureStatus(closureRes.data);
+            } catch (e) {
+                console.error("Closure status fetch error", e);
             }
         } catch (err) {
             console.error("Error loading project data", err);
@@ -122,21 +136,28 @@ export default function ProjectDetailPage() {
     const markUnderReview = async () => {
         try {
             await axios.post(`http://localhost:8081/api/org/projects/${id}/review`);
-            alert("Project successfully marked as Under Review!");
+            showAlert({ type: 'success', message: "Project successfully marked as Under Review!" });
             fetchData();
         } catch (err: any) {
-            alert(err.response?.data?.message || "Failed to mark Under Review");
+            showAlert({ type: 'error', message: err.response?.data?.message || "Failed to mark Under Review" });
         }
+    };
+
+    const isMilestoneUnlockable = (m: any, list: any[]) => {
+        const seq = m.sequenceNumber || 1;
+        if (seq <= 1) return true;
+        const prior = list.filter((item: any) => (item.sequenceNumber || 1) < seq);
+        return prior.every((item: any) => item.status === 'DISBURSED' || item.status === 'VERIFIED' || item.status === 'COMPLETED');
     };
 
     // Funder Phase 2: Initiate Negotiations
     const initiateNegotiations = async () => {
         try {
             await axios.post(`http://localhost:8081/api/org/projects/${id}/negotiate`);
-            alert("Milestone negotiation initiated successfully!");
+            showAlert({ type: 'success', message: "Milestone negotiation initiated successfully!" });
             fetchData();
         } catch (err: any) {
-            alert(err.response?.data?.message || "Failed to initiate negotiations");
+            showAlert({ type: 'error', message: err.response?.data?.message || "Failed to initiate negotiations" });
         }
     };
 
@@ -151,12 +172,12 @@ export default function ProjectDetailPage() {
             if (changeDueDate) body.dueDate = changeDueDate;
 
             await axios.post(`http://localhost:8081/api/org/projects/${id}/milestones/${selectedMilestone.id}/change-request`, body);
-            alert("Change proposal submitted successfully!");
+            showAlert({ type: 'success', message: "Change proposal submitted successfully!" });
             setShowChangeModal(false);
             resetChangeForm();
             fetchData();
         } catch (err: any) {
-            alert(err.response?.data?.message || "Failed to submit change proposal");
+            showAlert({ type: 'error', message: err.response?.data?.message || "Failed to submit change proposal" });
         }
     };
 
@@ -171,13 +192,18 @@ export default function ProjectDetailPage() {
 
     // Funder Phase 2: Withdraw Change Request
     const handleWithdrawCR = async (crId: string) => {
-        if (!window.confirm("Are you sure you want to withdraw this change proposal?")) return;
+        const confirmed = await showAlert({
+            type: 'confirm',
+            title: 'Withdraw Change Proposal',
+            message: "Are you sure you want to withdraw this change proposal?"
+        });
+        if (!confirmed) return;
         try {
             await axios.post(`http://localhost:8081/api/org/change-requests/${crId}/withdraw`);
-            alert("Proposal withdrawn successfully.");
+            showAlert({ type: 'info', message: "Proposal withdrawn successfully." });
             fetchData();
         } catch (err: any) {
-            alert(err.response?.data?.message || "Failed to withdraw proposal");
+            showAlert({ type: 'error', message: err.response?.data?.message || "Failed to withdraw proposal" });
         }
     };
 
@@ -201,22 +227,69 @@ export default function ProjectDetailPage() {
                 : `http://localhost:8081/api/ngo/change-requests/${selectedCR.id}/respond`;
 
             await axios.post(endpoint, body);
-            alert(`Decision [${decision}] submitted successfully!`);
+            showAlert({ type: 'success', message: `Decision [${decision}] submitted successfully!` });
             setShowRespondModal(false);
             resetRespondForm();
             fetchData();
         } catch (err: any) {
-            alert(err.response?.data?.message || "Failed to submit decision");
+            showAlert({ type: 'error', message: err.response?.data?.message || "Failed to submit decision" });
         }
     };
 
     const handleAcceptLockMilestone = async (milestoneId: string) => {
         try {
             await axios.post(`http://localhost:8081/api/org/projects/${id}/milestones/${milestoneId}/accept-lock`);
-            alert("Milestone accepted and locked. Funds released for this milestone.");
+            showAlert({ type: 'success', title: 'Milestone Locked', message: "Milestone accepted and locked. Negotiation finalized for this milestone." });
             fetchData();
         } catch (err: any) {
-            alert(err.response?.data?.message || "Failed to accept and lock milestone");
+            showAlert({ type: 'error', message: err.response?.data?.message || "Failed to accept and lock milestone" });
+        }
+    };
+
+    const handleAcceptLockAllMilestones = async () => {
+        const confirmed = await showAlert({
+            type: 'confirm',
+            title: 'Accept & Lock All Milestones',
+            message: "Are you sure you want to accept and lock ALL milestones for this project? This will set project status to ACTIVE and allow the NGO to begin work immediately."
+        });
+        if (!confirmed) return;
+        try {
+            await axios.post(`http://localhost:8081/api/org/projects/${id}/milestones/accept-lock-all`);
+            showAlert({ type: 'success', title: 'Project Activated', message: "All milestones accepted and locked! Project status updated to ACTIVE." });
+            fetchData();
+        } catch (err: any) {
+            showAlert({ type: 'error', message: err.response?.data?.message || "Failed to accept and lock all milestones" });
+        }
+    };
+
+    const handleFinalizeClosure = async () => {
+        try {
+            const res = await axios.post(`http://localhost:8081/api/v1/projects/${id}/evaluate-closure`);
+            setClosureStatus(res.data);
+            if (res.data.closed) {
+                showAlert({ type: 'success', title: 'Project Closed', message: 'Project successfully verified and closed! All milestones complete and beneficiary feedback verified.' });
+                fetchData();
+            } else {
+                showAlert({ type: 'info', title: 'Closure Progress Updated', message: 'Evaluated closure status. Requirements pending.' });
+            }
+        } catch (err: any) {
+            showAlert({ type: 'error', message: err.response?.data?.message || 'Closure criteria not yet fully met.' });
+        }
+    };
+
+    const handleDeclineNegotiation = async () => {
+        const confirmed = await showAlert({
+            type: 'confirm',
+            title: 'Decline Negotiation',
+            message: 'Are you sure you want to decline this negotiation and withdraw? The project will remain published for other funders.'
+        });
+        if (!confirmed) return;
+        try {
+            await axios.post(`http://localhost:8081/api/org/projects/${id}/decline`);
+            showAlert({ type: 'info', message: 'Negotiation declined and engagement withdrawn.' });
+            fetchData();
+        } catch (err: any) {
+            showAlert({ type: 'error', message: err.response?.data?.message || 'Failed to decline negotiation' });
         }
     };
 
@@ -245,12 +318,12 @@ export default function ProjectDetailPage() {
             };
 
             await axios.post(`http://localhost:8081/api/org/projects/${id}/commit`, body);
-            alert("Funding commitment submitted successfully! Preview the simulated escrow ledger below.");
+            showAlert({ type: 'success', message: "Funding commitment submitted successfully! Preview the simulated escrow ledger below." });
             setShowCommitModal(false);
             setCommitTotal('');
             fetchData();
         } catch (err: any) {
-            alert(err.response?.data?.message || "Failed to submit funding commitment");
+            showAlert({ type: 'error', message: err.response?.data?.message || "Failed to submit funding commitment" });
         } finally {
             setIsSubmittingCommit(false);
         }
@@ -259,34 +332,44 @@ export default function ProjectDetailPage() {
     // Funder Phase 3: Activate Commitment / Deploy smart contract
     const handleActivateCommitment = async () => {
         if (!commitment) return;
-        if (!window.confirm("Are you sure you want to deploy the smart contract on-chain and lock funds?")) return;
+        const confirmed = await showAlert({
+            type: 'confirm',
+            title: 'Deploy Smart Contract Escrow',
+            message: "Are you sure you want to deploy the smart contract on-chain and lock funds in escrow?"
+        });
+        if (!confirmed) return;
         try {
             await axios.post(`http://localhost:8081/api/org/commitments/${commitment.id}/activate`);
-            alert("Simulated Blockchain Smart Contract Deployed! Funds are locked in escrow.");
+            showAlert({ type: 'success', message: "Simulated Blockchain Smart Contract Deployed! Funds are locked in escrow." });
             fetchData();
         } catch (err: any) {
-            alert(err.response?.data?.message || "Failed to activate commitment");
+            showAlert({ type: 'error', message: err.response?.data?.message || "Failed to activate commitment" });
         }
     };
 
     // Funder Phase 3: Cancel Pending Commitment
     const handleCancelCommitment = async () => {
         if (!commitment) return;
-        if (!window.confirm("Are you sure you want to cancel this funding commitment?")) return;
+        const confirmed = await showAlert({
+            type: 'confirm',
+            title: 'Cancel Commitment',
+            message: "Are you sure you want to cancel this funding commitment?"
+        });
+        if (!confirmed) return;
         try {
             await axios.post(`http://localhost:8081/api/org/commitments/${commitment.id}/cancel`);
-            alert("Funding commitment cancelled. Milestones negotiation reopened.");
+            showAlert({ type: 'info', message: "Funding commitment cancelled. Milestones negotiation reopened." });
             fetchData();
         } catch (err: any) {
-            alert(err.response?.data?.message || "Failed to cancel commitment");
+            showAlert({ type: 'error', message: err.response?.data?.message || "Failed to cancel commitment" });
         }
     };
 
-    // Milestone Evidence Upload (NGO) - Strictly Video-only
+    // Milestone Evidence Upload (NGO) - PDF, Image, Video
     const handleUploadProof = (milestoneId: string) => {
         const input = document.createElement('input');
         input.type = 'file';
-        input.accept = 'video/*';
+        input.accept = 'video/*,image/*,application/pdf';
         input.onchange = async (e: any) => {
             const file = e.target.files[0];
             if (!file) return;
@@ -299,10 +382,10 @@ export default function ProjectDetailPage() {
                 await axios.post(`http://localhost:8081/api/v1/milestones/${milestoneId}/proofs`, formData, {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 });
-                alert("Video proof submitted successfully and anchored to blockchain. AI verification in progress.");
+                showAlert({ type: 'success', title: 'Evidence Uploaded', message: "Proof submitted successfully and anchored to blockchain. AI verification ticket raised." });
                 fetchData();
             } catch (err: any) {
-                alert(err.response?.data?.message || 'Failed to submit proof');
+                showAlert({ type: 'error', message: err.response?.data?.message || 'Failed to submit proof' });
             }
         };
         input.click();
@@ -312,10 +395,10 @@ export default function ProjectDetailPage() {
     const handleActivateMilestone = async (milestoneId: string) => {
         try {
             await axios.post(`http://localhost:8081/api/v1/projects/${id}/milestones/${milestoneId}/activate`);
-            alert("Milestone activated successfully! You can now upload video proof and verify with beneficiaries.");
+            showAlert({ type: 'success', message: "Milestone activated successfully! You can now upload video proof and verify with beneficiaries." });
             fetchData();
         } catch (err: any) {
-            alert(err.response?.data?.message || 'Failed to activate milestone');
+            showAlert({ type: 'error', message: err.response?.data?.message || 'Failed to activate milestone' });
         }
     };
 
@@ -330,29 +413,34 @@ export default function ProjectDetailPage() {
                 setShowQrModal(true);
             }
         } catch (err: any) {
-            alert("Failed to retrieve or generate beneficiary form QR code.");
+            showAlert({ type: 'error', message: "Failed to retrieve or generate beneficiary form QR code." });
         }
     };
 
     // Submit Milestone for final approval (NGO)
     const requestApproval = async (milestoneId: string) => {
-        if (!window.confirm('Are you sure you want to submit this milestone for final Funder approval?')) return;
+        const confirmed = await showAlert({
+            type: 'confirm',
+            title: 'Submit for Funder Review',
+            message: 'Are you sure you want to submit this milestone evidence for Funder review and fund release?'
+        });
+        if (!confirmed) return;
         try {
             await axios.post(`http://localhost:8081/api/v1/projects/${id}/milestones/${milestoneId}/submit`);
-            alert('Milestone submitted to Funder for approval!');
+            showAlert({ type: 'success', message: 'Milestone submitted to Funder for approval!' });
             fetchData();
         } catch (err: any) {
-            alert(err.response?.data?.message || 'Failed to submit milestone');
+            showAlert({ type: 'error', message: err.response?.data?.message || 'Failed to submit milestone' });
         }
     };
 
     const handleReviewProposal = async (status: string) => {
         try {
             await axios.patch(`http://localhost:8081/api/v1/projects/${id}/status`, { status });
-            alert(`Project ${status} successfully!`);
+            showAlert({ type: 'success', message: `Project ${status} successfully!` });
             window.location.reload();
         } catch (err: any) {
-            alert(err.response?.data?.message || 'Failed to update project status');
+            showAlert({ type: 'error', message: err.response?.data?.message || 'Failed to update project status' });
         }
     };
 
@@ -419,22 +507,28 @@ export default function ProjectDetailPage() {
                             </div>
                         </div>
 
-                        {/* Milestones & Negotiation Section */}
                         <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                            <div className="flex justify-between items-center mb-6">
+                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                                 <div>
                                     <h3 className="text-lg font-black text-slate-900">Milestone Breakdown</h3>
                                     <p className="text-xs font-semibold text-slate-500 mt-0.5">Renegotiate milestone values, lock budgets, and verify evidence.</p>
                                 </div>
-                                {allMilestonesLocked && (
+                                {allMilestonesLocked ? (
                                     <span className="text-xs font-extrabold text-[#00A875] bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full flex items-center gap-1">
                                         <CheckCircle2 size={13} /> All Locked
                                     </span>
+                                ) : isFunder && (
+                                    <button 
+                                        onClick={handleAcceptLockAllMilestones}
+                                        className="bg-[#00A875] hover:bg-emerald-600 text-white text-xs font-bold px-4 py-2 rounded-xl transition shadow-sm flex items-center gap-1.5 shrink-0"
+                                    >
+                                        <Lock size={13} /> Accept & Lock All Milestones
+                                    </button>
                                 )}
                             </div>
 
                             <div className="space-y-4">
-                                {milestones.map((m: any, index: number) => {
+                                {[...milestones].sort((a: any, b: any) => (a.sequenceNumber || 0) - (b.sequenceNumber || 0)).map((m: any, index: number) => {
                                     const hasCRHistory = activeMilestoneCRs[m.id] && activeMilestoneCRs[m.id].length > 0;
                                     const isHistoryOpen = openHistoryMilestone === m.id;
                                     const latestCR = activeMilestoneCRs[m.id]?.[activeMilestoneCRs[m.id].length - 1];
@@ -578,7 +672,7 @@ export default function ProjectDetailPage() {
                                                     )}
 
                                                     {/* FUNDER CONTROLS FOR NEGOTIATION */}
-                                                    {isFunder && engagement?.status === 'NEGOTIATING' && m.status !== 'LOCKED' && !pendingCR && (
+                                                    {isFunder && (m.status === 'PENDING' || m.status === 'MODIFIED' || m.status === 'PROPOSED' || m.status === 'DRAFT' || m.status === 'AVAILABLE' || m.status === 'AWAITING_FUNDER_APPROVAL') && !pendingCR && (
                                                         <div className="flex flex-col gap-1.5">
                                                             <button 
                                                                 onClick={() => { setSelectedMilestone(m); setShowChangeModal(true); }}
@@ -595,52 +689,61 @@ export default function ProjectDetailPage() {
                                                         </div>
                                                     )}
 
-                                                    {/* NGO EVIDENCE CONTROLS */}
-                                                    {!isFunder && m.status === 'LOCKED' && (
+                                                    {/* NGO CONTROLS (LOCKED / IN_PROGRESS / REJECTED) */}
+                                                    {!isFunder && (m.status === 'LOCKED' || m.status === 'IN_PROGRESS' || m.status === 'REJECTED') && (
+                                                        !isMilestoneUnlockable(m, milestones) ? (
+                                                            <div className="bg-slate-100 border border-slate-200 text-slate-500 text-xs font-bold px-3 py-2 rounded-lg text-center flex items-center justify-center gap-1.5 cursor-not-allowed">
+                                                                <Lock size={13} /> Complete previous milestone first
+                                                            </div>
+                                                        ) : (
+                                                            <div className="flex flex-col gap-1.5">
+                                                                {m.status === 'LOCKED' && (
+                                                                    <button 
+                                                                        onClick={() => handleActivateMilestone(m.id)}
+                                                                        className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-4 py-2 rounded-lg transition"
+                                                                    >
+                                                                        Activate Milestone
+                                                                    </button>
+                                                                )}
+                                                                {(m.status === 'IN_PROGRESS' || m.status === 'REJECTED') && (
+                                                                    <>
+                                                                        <button 
+                                                                            onClick={() => handleUploadProof(m.id)}
+                                                                            className="border border-slate-300 hover:border-slate-800 text-slate-800 text-xs font-bold px-4 py-2 rounded-lg transition"
+                                                                        >
+                                                                            Upload Video Proof
+                                                                        </button>
+                                                                        <button 
+                                                                            onClick={() => handleShareQrCode(m.id, m.title)}
+                                                                            className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded-lg transition flex items-center justify-center gap-1"
+                                                                        >
+                                                                            <QrCode size={14} /> Share QR Code
+                                                                        </button>
+                                                                        <button 
+                                                                            onClick={() => requestApproval(m.id)}
+                                                                            className="bg-[#00A875] hover:bg-emerald-600 text-white text-xs font-bold px-4 py-2 rounded-lg transition"
+                                                                        >
+                                                                            Submit for Approval
+                                                                        </button>
+                                                                    </>
+                                                                )}
+                                                            </div>
+                                                        )
+                                                    )}
+
+                                                    {/* FUNDER EVIDENCE REVIEW ACTION */}
+                                                    {isFunder && (m.status === 'IN_REVIEW' || m.status === 'EVIDENCE_SUBMITTED' || m.status === 'TICKET_RAISED') && (
                                                         <button 
-                                                            onClick={() => handleActivateMilestone(m.id)}
-                                                            className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-4 py-2 rounded-lg transition"
+                                                            onClick={() => navigate(`/funder/verification?milestoneId=${m.id}`)}
+                                                            className="bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold px-4 py-2 rounded-lg transition flex items-center justify-center gap-1.5"
                                                         >
-                                                            Activate Milestone
+                                                            <ShieldCheck size={14} /> Review Evidence & Release
                                                         </button>
                                                     )}
 
-                                                    {!isFunder && (m.status === 'IN_PROGRESS' || m.status === 'REJECTED') && (
-                                                        <>
-                                                            <button 
-                                                                onClick={() => handleUploadProof(m.id)}
-                                                                className="border border-slate-300 hover:border-slate-800 text-slate-800 text-xs font-bold px-4 py-2 rounded-lg transition"
-                                                            >
-                                                                Upload Video Proof
-                                                            </button>
-                                                            <button 
-                                                                onClick={() => handleShareQrCode(m.id, m.title)}
-                                                                className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded-lg transition flex items-center justify-center gap-1"
-                                                            >
-                                                                <QrCode size={14} /> Share QR Code
-                                                            </button>
-                                                            <button 
-                                                                onClick={() => requestApproval(m.id)}
-                                                                className="bg-[#00A875] hover:bg-emerald-600 text-white text-xs font-bold px-4 py-2 rounded-lg transition"
-                                                            >
-                                                                Submit for Approval
-                                                            </button>
-                                                        </>
-                                                    )}
-
-                                                    {/* FUNDER PROOF RELEASE ACTION */}
-                                                    {isFunder && m.status === 'IN_REVIEW' && (
-                                                        <button 
-                                                            onClick={() => navigate('/funder/verification')}
-                                                            className="bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold px-4 py-2 rounded-lg transition"
-                                                        >
-                                                            Verify & Release
-                                                        </button>
-                                                    )}
-
-                                                    {m.status === 'VERIFIED' && (
-                                                        <span className="text-xs font-bold text-center text-[#00A875] bg-emerald-50 border border-emerald-200 rounded-lg py-1 px-3">
-                                                            Funds Disbursed
+                                                    {(m.status === 'VERIFIED' || m.status === 'DISBURSED' || m.status === 'COMPLETED') && (
+                                                        <span className="text-xs font-bold text-center text-[#00A875] bg-emerald-50 border border-emerald-200 rounded-lg py-1 px-3 flex items-center justify-center gap-1">
+                                                            <CheckCircle2 size={13} /> Funds Disbursed
                                                         </span>
                                                     )}
                                                 </div>
@@ -687,7 +790,7 @@ export default function ProjectDetailPage() {
                                 )}
 
                                 {engagement?.status === 'NEGOTIATING' && (
-                                    <>
+                                    <div className="space-y-2">
                                         {allMilestonesLocked ? (
                                             <button 
                                                 onClick={() => { setCommitTotal(computedNegotiatedBudget.toString()); setShowCommitModal(true); }}
@@ -698,10 +801,16 @@ export default function ProjectDetailPage() {
                                         ) : (
                                             <div className="text-xs font-semibold text-slate-500 bg-amber-50 border border-amber-200 rounded-lg p-3 flex gap-2">
                                                 <AlertCircle size={16} className="text-amber-600 shrink-0" />
-                                                <span>All milestones must be negotiated and locked by the NGO before you can commit funding.</span>
+                                                <span>Review or propose milestone changes, or click Accept & Lock All above to commit.</span>
                                             </div>
                                         )}
-                                    </>
+                                        <button
+                                            onClick={handleDeclineNegotiation}
+                                            className="w-full bg-red-50 hover:bg-red-100 text-red-600 font-bold py-2 rounded-xl border border-red-200 transition text-xs flex items-center justify-center gap-1"
+                                        >
+                                            Decline Negotiation & Exit
+                                        </button>
+                                    </div>
                                 )}
 
                                 {engagement?.status === 'COMMITTED' && commitment && (
@@ -743,6 +852,63 @@ export default function ProjectDetailPage() {
                                 )}
                             </div>
                         )}
+
+                        {/* Project Closure Gate Widget */}
+                        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                            <div className="flex justify-between items-center">
+                                <h3 className="text-lg font-black text-slate-900 flex items-center gap-2">
+                                    <Award className="text-[#00A875]" size={20} /> Project Closure Gates
+                                </h3>
+                                <span className={`text-xs font-black px-2.5 py-1 rounded-full ${closureStatus?.isClosed ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-amber-100 text-amber-800 border border-amber-300'}`}>
+                                    {closureStatus?.isClosed ? 'PROJECT CLOSED' : 'IN PROGRESS'}
+                                </span>
+                            </div>
+
+                            <div className="space-y-3">
+                                {/* Coverage Gate */}
+                                <div>
+                                    <div className="flex justify-between text-xs font-bold mb-1">
+                                        <span className="text-slate-600">Beneficiary Coverage (Target ≥ 20%)</span>
+                                        <span className={closureStatus?.coverageThresholdMet ? 'text-emerald-600 font-black' : 'text-slate-900'}>
+                                            {closureStatus?.totalFeedbackCount || 0} / {closureStatus?.targetBeneficiaries || 100} ({closureStatus?.coveragePercentage || 0}%)
+                                        </span>
+                                    </div>
+                                    <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                        <div className={`h-full transition-all duration-500 ${closureStatus?.coverageThresholdMet ? 'bg-emerald-500' : 'bg-amber-500'}`} style={{ width: `${Math.min(100, (closureStatus?.coveragePercentage || 0) * 5)}%` }}></div>
+                                    </div>
+                                </div>
+
+                                {/* Sentiment Gate */}
+                                <div>
+                                    <div className="flex justify-between text-xs font-bold mb-1">
+                                        <span className="text-slate-600">Positive Sentiment (Target ≥ 80%)</span>
+                                        <span className={closureStatus?.positiveThresholdMet ? 'text-emerald-600 font-black' : 'text-slate-900'}>
+                                            {closureStatus?.positiveFeedbackCount || 0} positive ({closureStatus?.positivePercentage || 0}%)
+                                        </span>
+                                    </div>
+                                    <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                        <div className={`h-full transition-all duration-500 ${closureStatus?.positiveThresholdMet ? 'bg-emerald-500' : 'bg-amber-500'}`} style={{ width: `${closureStatus?.positivePercentage || 0}%` }}></div>
+                                    </div>
+                                </div>
+
+                                {/* Closure Video Gate */}
+                                <div className="flex justify-between items-center pt-2 border-t border-slate-100 text-xs font-bold">
+                                    <span className="text-slate-600">NGO Geo-tagged Closure Video:</span>
+                                    <span className={closureStatus?.closureVideoSubmitted ? 'text-emerald-600 font-black flex items-center gap-1' : 'text-slate-400'}>
+                                        {closureStatus?.closureVideoSubmitted ? '✓ Submitted' : 'Pending Upload'}
+                                    </span>
+                                </div>
+
+                                {closureStatus?.eligibleForClosure && !closureStatus?.isClosed && (
+                                    <button 
+                                        onClick={handleFinalizeClosure}
+                                        className="w-full mt-2 bg-emerald-600 hover:bg-emerald-700 text-white font-black py-2.5 rounded-xl shadow-md transition text-xs flex items-center justify-center gap-1"
+                                    >
+                                        <CheckCircle2 size={16} /> Finalize & Close Project
+                                    </button>
+                                )}
+                            </div>
+                        </div>
 
                         {/* Multi-Dimensional NGO Trust Profile Panel */}
                         {isFunder && project.ngoTrustProfile && (
@@ -822,7 +988,7 @@ export default function ProjectDetailPage() {
                                 <div className="space-y-4">
                                     <div>
                                         <div className="text-[10px] text-slate-400 uppercase font-black tracking-wider">Escrow Balance</div>
-                                        <div className="text-3xl font-black text-emerald-400">₹{(project.totalBudget - escrowReleased).toLocaleString()}</div>
+                                        <div className="text-3xl font-black text-emerald-400">₹{(Math.max(0, (project.totalBudget || 0) - escrowReleased)).toLocaleString()}</div>
                                     </div>
 
                                     <div className="w-full bg-slate-800 rounded-full h-3 overflow-hidden relative">
@@ -1091,7 +1257,7 @@ export default function ProjectDetailPage() {
                                     <button 
                                         onClick={() => {
                                             navigator.clipboard.writeText(qrUrl);
-                                            alert("Link copied to clipboard!");
+                                            showAlert({ type: 'info', message: "Link copied to clipboard!" });
                                         }}
                                         className="bg-blue-50 text-blue-600 hover:bg-blue-100 p-2.5 rounded-lg transition"
                                         title="Copy Link"

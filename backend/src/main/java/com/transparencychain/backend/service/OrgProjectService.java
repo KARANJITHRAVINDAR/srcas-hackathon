@@ -314,4 +314,41 @@ public class OrgProjectService {
         if (value instanceof Number) return ((Number) value).intValue();
         return 0;
     }
+
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> getAllMilestonesForFunder(UUID funderId) {
+        List<OrgProjectEngagement> engagements = engagementRepository.findByFunderId(funderId);
+        
+        List<OrgProjectEngagement.EngagementStatus> activeStatuses = List.of(
+            OrgProjectEngagement.EngagementStatus.NEGOTIATING,
+            OrgProjectEngagement.EngagementStatus.COMMITTED,
+            OrgProjectEngagement.EngagementStatus.ACTIVE,
+            OrgProjectEngagement.EngagementStatus.COMPLETED
+        );
+
+        List<Project> activeProjects = engagements.stream()
+            .filter(e -> activeStatuses.contains(e.getStatus()))
+            .map(OrgProjectEngagement::getProject)
+            .collect(Collectors.toList());
+
+        List<Map<String, Object>> result = new java.util.ArrayList<>();
+        for (Project project : activeProjects) {
+            List<Milestone> milestones = milestoneRepository.findByProjectId(project.getId());
+            for (Milestone m : milestones) {
+                Map<String, Object> map = new java.util.HashMap<>();
+                map.put("milestoneId", m.getId());
+                map.put("milestoneTitle", m.getTitle());
+                map.put("milestoneDescription", m.getDescription());
+                map.put("milestoneStatus", m.getStatus().name());
+                map.put("amountAllocated", m.getAmountAllocated());
+                map.put("dueDate", m.getDueDate() != null ? m.getDueDate().toString() : null);
+                map.put("sequenceNumber", m.getSequenceNumber());
+                map.put("projectId", project.getId());
+                map.put("projectTitle", project.getTitle());
+                map.put("ngoName", project.getNgo() != null ? project.getNgo().getOrgName() : "NGO Partner");
+                result.add(map);
+            }
+        }
+        return result;
+    }
 }

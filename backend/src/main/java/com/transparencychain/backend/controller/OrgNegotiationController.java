@@ -144,4 +144,31 @@ public class OrgNegotiationController {
             return ResponseEntity.status(403).body(new MessageResponse(e.getMessage()));
         }
     }
+
+    @PostMapping("/projects/{projectId}/milestones/accept-lock-all")
+    public ResponseEntity<?> acceptAndLockAllMilestones(@PathVariable UUID projectId) {
+        UserDetailsImpl userDetails = (UserDetailsImpl)
+                SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        try {
+            negotiationService.acceptAndLockAllMilestones(projectId, userDetails.getId());
+            return ResponseEntity.ok(new MessageResponse("All milestones accepted and locked successfully. Project is now ACTIVE and NGO can start work."));
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
+        } catch (SecurityException e) {
+            return ResponseEntity.status(403).body(new MessageResponse(e.getMessage()));
+        }
+    }
+
+    @PostMapping("/projects/{projectId}/decline")
+    public ResponseEntity<?> declineNegotiation(@PathVariable UUID projectId) {
+        UserDetailsImpl userDetails = (UserDetailsImpl)
+                SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        try {
+            negotiationService.declineNegotiation(projectId, userDetails.getId());
+            return ResponseEntity.ok(new MessageResponse("Negotiation declined and engagement withdrawn. Project remains available to other funders."));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
+        }
+    }
 }
+

@@ -11,28 +11,38 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
  * Auto-generates sensible default milestones for a newly created project
- * based on its budget and duration.
- *
- * Template phases:
- *   2 milestones  (≤ 3 months)  — Planning & Setup, Implementation & Delivery
- *   3 milestones  (4–6 months)  — Planning, Implementation, Monitoring & Closure
- *   4 milestones  (7–12 months) — Planning, Core Implementation, Scaling, Monitoring & Closure
- *   5 milestones  (> 12 months) — Planning, Phase 1 Implementation, Phase 2 Expansion,
- *                                  Impact Assessment, Final Reporting & Closure
- *
- * Budget is split evenly across milestones (remainder added to the last one).
- * Due dates are spaced evenly across the project duration.
+ * based on its budget and duration using OpenRouter AI LLM.
  */
 @Service
 public class MilestoneAutoGenerator {
 
     @Autowired
     private MilestoneRepository milestoneRepository;
+
+    @Autowired
+    private OpenRouterAiService openRouterAiService;
+
+    private int extractPhaseNumber(Map<String, Object> map) {
+        if (map == null) return 99;
+        String title = (String) map.get("title");
+        if (title != null) {
+            Matcher matcher = Pattern.compile("Phase\\s*(\\d+)", Pattern.CASE_INSENSITIVE).matcher(title);
+            if (matcher.find()) {
+                return Integer.parseInt(matcher.group(1));
+            }
+        }
+        Object seqObj = map.get("sequenceNumber");
+        if (seqObj instanceof Number) {
+            return ((Number) seqObj).intValue();
+        }
+        return 99;
+    }
 
     /**
      * Parse a project-duration string like "12 Months", "6months", "24 MONTHS", "3"
@@ -49,13 +59,57 @@ public class MilestoneAutoGenerator {
     }
 
     /**
-     * Generates and persists auto-milestones for the given project.
-     * Returns the list of saved milestones.
+     * Generates and persists auto-milestones for the given project using AI.
+     * Falls back to standard template if AI generation fails or is offline.
      */
     public List<Milestone> generate(Project project) {
         int months = parseDurationMonths(project.getProjectDuration());
         BigDecimal budget = project.getTotalBudget() != null ? project.getTotalBudget() : BigDecimal.ZERO;
+        LocalDate startDate = LocalDate.now();
 
+        // 1. Try AI-powered custom milestone generation via OpenRouter
+        try {
+            String sdgStr = project.getSdgGoal() != null ? project.getSdgGoal().name() : "SDG1";
+            List<Map<String, Object>> aiMilestones = openRouterAiService.generateCustomMilestones(
+                project.getTitle(),
+                project.getDescription(),
+                budget,
+                project.getProjectDuration(),
+                sdgStr
+            );
+
+            if (aiMilestones != null && !aiMilestones.isEmpty()) {
+                // Sort aiMilestones by phase number extracted from title or sequenceNumber
+                aiMilestones.sort((a, b) -> {
+                    int phaseA = extractPhaseNumber(a);
+                    int phaseB = extractPhaseNumber(b);
+                    return Integer.compare(phaseA, phaseB);
+                });
+
+                List<Milestone> milestones = new ArrayList<>();
+                int count = aiMilestones.size();
+                int monthsPerPhase = Math.max(1, months / count);
+
+                for (int i = 0; i < count; i++) {
+                    Map<String, Object> aiMs = aiMilestones.get(i);
+                    Milestone ms = new Milestone();
+                    ms.setProject(project);
+                    ms.setTitle((String) aiMs.get("title"));
+                    ms.setDescription((String) aiMs.get("description"));
+                    ms.setSequenceNumber(i + 1);
+                    ms.setStatus(Milestone.MilestoneStatus.PENDING);
+                    ms.setAmountAllocated((BigDecimal) aiMs.get("suggestedBudget"));
+                    ms.setDueDate(startDate.plusMonths((long) monthsPerPhase * (i + 1)));
+                    milestones.add(ms);
+                }
+                appendClosureMilestone(project, milestones, startDate, months);
+                return milestoneRepository.saveAll(milestones);
+            }
+        } catch (Exception e) {
+            System.err.println("AI Milestone generation fallback to template: " + e.getMessage());
+        }
+
+        // 2. Template-based fallback generator
         List<MilestoneTemplate> templates = getTemplates(months);
         int count = templates.size();
 
@@ -65,7 +119,6 @@ public class MilestoneAutoGenerator {
                 : BigDecimal.ZERO;
         BigDecimal remainder = budget.subtract(perMilestone.multiply(BigDecimal.valueOf(count)));
 
-        LocalDate startDate = LocalDate.now();
         int monthsPerPhase = Math.max(1, months / count);
 
         List<Milestone> milestones = new ArrayList<>();
@@ -91,7 +144,21 @@ public class MilestoneAutoGenerator {
             milestones.add(ms);
         }
 
+        appendClosureMilestone(project, milestones, startDate, months);
         return milestoneRepository.saveAll(milestones);
+    }
+
+    private void appendClosureMilestone(Project project, List<Milestone> milestones, LocalDate startDate, int months) {
+        Milestone closureMs = new Milestone();
+        closureMs.setProject(project);
+        closureMs.setTitle("Phase " + (milestones.size() + 1) + ": Project Closure & Impact Assessment");
+        closureMs.setDescription("Final project closure gate: requires >= 20% beneficiary feedback coverage with >= 80% positive sentiment and NGO geo-tagged closure video.");
+        closureMs.setSequenceNumber(milestones.size() + 1);
+        closureMs.setStatus(Milestone.MilestoneStatus.PENDING);
+        closureMs.setAmountAllocated(BigDecimal.ZERO);
+        closureMs.setMilestoneType(Milestone.MilestoneType.CLOSURE);
+        closureMs.setDueDate(startDate.plusMonths(months > 0 ? months : 6));
+        milestones.add(closureMs);
     }
 
     // -----------------------------------------------------------------------

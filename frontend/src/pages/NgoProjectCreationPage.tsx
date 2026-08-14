@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { Target, MapPin, Users, DollarSign, FileText, Send, Building2, CheckCircle2, Milestone as MilestoneIcon, Calendar, ArrowRight, Edit3 } from 'lucide-react';
+import { Target, MapPin, Users, DollarSign, FileText, Send, Building2, CheckCircle2, Milestone as MilestoneIcon, Calendar, ArrowRight, Edit3, Sparkles } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useAlert } from '../context/AlertContext';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -41,10 +42,13 @@ interface AutoMilestone {
 export default function NgoProjectCreationPage() {
     const navigate = useNavigate();
     const { user } = useAuth();
+    const { showAlert } = useAlert();
     const [loading, setLoading] = useState(false);
     const [step, setStep] = useState<'FORM' | 'MILESTONES'>('FORM');
     const [projectId, setProjectId] = useState<string | null>(null);
     const [autoMilestones, setAutoMilestones] = useState<AutoMilestone[]>([]);
+    const [aiSuggestingSdg, setAiSuggestingSdg] = useState(false);
+    const [aiSdgInfo, setAiSdgInfo] = useState<{ goal: string; targets: string[]; confidence: number; reasoning: string } | null>(null);
 
     const [formData, setFormData] = useState({
         title: '',
@@ -65,6 +69,41 @@ export default function NgoProjectCreationPage() {
         'SDG1', 'SDG2', 'SDG3', 'SDG4', 'SDG5', 'SDG6', 'SDG7', 'SDG8', 'SDG9', 
         'SDG10', 'SDG11', 'SDG12', 'SDG13', 'SDG14', 'SDG15', 'SDG16', 'SDG17'
     ];
+
+    const handleSuggestSdg = async () => {
+        if (!formData.title && !formData.description) {
+            showAlert({ type: 'warning', message: 'Please enter a project title or description first.' });
+            return;
+        }
+        setAiSuggestingSdg(true);
+        try {
+            const res = await axios.post('http://localhost:8081/api/v1/ai/suggest-sdg', {
+                title: formData.title,
+                description: formData.description,
+                category: formData.geography
+            });
+            const data = res.data;
+            if (data && data.sdgGoal) {
+                setFormData(prev => ({
+                    ...prev,
+                    sdgGoal: data.sdgGoal,
+                    sdgTarget: data.sdgTargets ? data.sdgTargets.join(', ') : prev.sdgTarget
+                }));
+                setAiSdgInfo({
+                    goal: data.sdgGoal,
+                    targets: data.sdgTargets || [],
+                    confidence: Math.round(data.confidence * 100),
+                    reasoning: data.reasoning
+                });
+                showAlert({ type: 'success', message: `AI suggested ${data.sdgGoal} (${Math.round(data.confidence * 100)}% confidence)` });
+            }
+        } catch (err) {
+            console.error('AI SDG Suggestion failed:', err);
+            showAlert({ type: 'warning', message: 'AI SDG suggestion failed. Please select manually.' });
+        } finally {
+            setAiSuggestingSdg(false);
+        }
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -91,7 +130,7 @@ export default function NgoProjectCreationPage() {
             setStep('MILESTONES');
         } catch (error: any) {
             console.error(error);
-            alert(error.response?.data?.message || 'Failed to submit project proposal');
+            showAlert({ type: 'error', message: error.response?.data?.message || 'Failed to submit project proposal' });
         } finally {
             setLoading(false);
         }
@@ -113,10 +152,11 @@ export default function NgoProjectCreationPage() {
                 amountAllocated: ms.amountAllocated,
             }));
             await axios.post(`http://localhost:8081/api/v1/projects/${projectId}/milestones/bulk`, payload);
+            showAlert({ type: 'success', message: 'Project and milestones saved successfully!' });
             navigate('/ngo/projects');
         } catch (error: any) {
             console.error(error);
-            alert(error.response?.data?.message || 'Failed to save milestones');
+            showAlert({ type: 'error', message: error.response?.data?.message || 'Failed to save milestones' });
         } finally {
             setLoading(false);
         }
@@ -265,20 +305,50 @@ export default function NgoProjectCreationPage() {
                                     <label className="block text-sm font-bold text-[#10172A] mb-2">Project Title</label>
                                     <input required type="text" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full bg-[#F8FAFC] border border-[#DDE3EA] rounded-lg p-3 outline-none focus:border-[#00A875] focus:ring-1 focus:ring-[#00A875] font-bold" placeholder="e.g. Clean Water Initiative" />
                                 </div>
+                                <div className="md:col-span-2">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <label className="block text-sm font-bold text-[#10172A]">Problem Statement & Description</label>
+                                        <button
+                                            type="button"
+                                            onClick={handleSuggestSdg}
+                                            disabled={aiSuggestingSdg}
+                                            className="bg-emerald-50 hover:bg-emerald-100 text-[#00A875] border border-[#00A875]/30 text-xs font-bold px-3 py-1.5 rounded-lg transition flex items-center gap-1.5"
+                                        >
+                                            <Sparkles size={14} className={aiSuggestingSdg ? "animate-spin" : ""} />
+                                            {aiSuggestingSdg ? "Analyzing with AI..." : "AI Auto-Suggest SDG"}
+                                        </button>
+                                    </div>
+                                    <textarea required rows={4} value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="w-full bg-[#F8FAFC] border border-[#DDE3EA] rounded-lg p-3 outline-none focus:border-[#00A875] focus:ring-1 focus:ring-[#00A875]" placeholder="Describe the problem and how this project will solve it..."></textarea>
+                                </div>
+
                                 <div>
-                                    <label className="block text-sm font-bold text-[#10172A] mb-2">Primary SDG Goal</label>
+                                    <div className="flex items-center justify-between mb-2">
+                                        <label className="block text-sm font-bold text-[#10172A]">Primary SDG Goal</label>
+                                        {aiSdgInfo && (
+                                            <span className="text-[11px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full flex items-center gap-1">
+                                                <Sparkles size={10} /> AI Suggested ({aiSdgInfo.confidence}%)
+                                            </span>
+                                        )}
+                                    </div>
                                     <select value={formData.sdgGoal} onChange={e => setFormData({...formData, sdgGoal: e.target.value})} className="w-full bg-[#F8FAFC] border border-[#DDE3EA] rounded-lg p-3 outline-none focus:border-[#00A875] focus:ring-1 focus:ring-[#00A875] font-bold">
                                         {sdgGoals.map(goal => <option key={goal} value={goal}>{goal}</option>)}
                                     </select>
+                                    <p className="text-xs text-[#52627A] mt-1">You can manually change/override the AI suggestion anytime.</p>
                                 </div>
                                 <div>
                                     <label className="block text-sm font-bold text-[#10172A] mb-2">SDG Target Description</label>
                                     <input required type="text" value={formData.sdgTarget} onChange={e => setFormData({...formData, sdgTarget: e.target.value})} className="w-full bg-[#F8FAFC] border border-[#DDE3EA] rounded-lg p-3 outline-none focus:border-[#00A875] focus:ring-1 focus:ring-[#00A875]" placeholder="e.g. 6.1 Universal access to drinking water" />
                                 </div>
-                                <div className="md:col-span-2">
-                                    <label className="block text-sm font-bold text-[#10172A] mb-2">Problem Statement & Description</label>
-                                    <textarea required rows={4} value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="w-full bg-[#F8FAFC] border border-[#DDE3EA] rounded-lg p-3 outline-none focus:border-[#00A875] focus:ring-1 focus:ring-[#00A875]" placeholder="Describe the problem and how this project will solve it..."></textarea>
-                                </div>
+
+                                {aiSdgInfo && (
+                                    <div className="md:col-span-2 bg-emerald-50/60 border border-emerald-200 rounded-xl p-4 flex items-start gap-3">
+                                        <Sparkles className="w-5 h-5 text-[#00A875] mt-0.5 shrink-0" />
+                                        <div>
+                                            <p className="text-xs font-bold text-[#10172A]">AI Classification Reasoning</p>
+                                            <p className="text-xs text-[#52627A] mt-0.5">{aiSdgInfo.reasoning}</p>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
 

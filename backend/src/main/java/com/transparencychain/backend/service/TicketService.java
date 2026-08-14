@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.Comparator;
 import java.util.stream.Collectors;
 
 @Service
@@ -50,6 +51,22 @@ public class TicketService {
 
         User ngoUser = userRepository.findById(ngoUserId)
                 .orElseThrow(() -> new IllegalArgumentException("NGO User not found: " + ngoUserId));
+
+        // Enforce milestone sequence check
+        List<Milestone> projectMilestones = milestoneRepository.findByProjectId(milestone.getProject().getId());
+        projectMilestones.sort(Comparator.comparingInt(m -> m.getSequenceNumber() != null ? m.getSequenceNumber() : 1));
+
+        int currentSeq = milestone.getSequenceNumber() != null ? milestone.getSequenceNumber() : 1;
+        for (Milestone m : projectMilestones) {
+            int mSeq = m.getSequenceNumber() != null ? m.getSequenceNumber() : 1;
+            if (mSeq < currentSeq) {
+                if (m.getStatus() != Milestone.MilestoneStatus.DISBURSED &&
+                    m.getStatus() != Milestone.MilestoneStatus.VERIFIED &&
+                    m.getStatus() != Milestone.MilestoneStatus.COMPLETED) {
+                    throw new IllegalStateException("Cannot raise ticket: Complete previous milestone (Phase " + mSeq + ") first.");
+                }
+            }
+        }
 
         // Get the latest proof submission for this milestone
         List<ProofSubmission> proofs = proofSubmissionRepository.findByMilestoneId(milestoneId);
@@ -216,31 +233,68 @@ public class TicketService {
             ticket.setResolvedAt(LocalDateTime.now());
             ticketRepository.save(ticket);
 
-            // Update Milestone status to VERIFIED (releases escrow funds)
+            // Update current Milestone status to COMPLETED / VERIFIED
             Milestone milestone = ticket.getMilestone();
-            milestone.setStatus(Milestone.MilestoneStatus.VERIFIED);
+            milestone.setStatus(Milestone.MilestoneStatus.COMPLETED);
             milestoneRepository.save(milestone);
-
-            // Execute simulated smart contract release on blockchain!
-            String txHash = blockchainService.releaseFunds(
-                    milestone.getProject().getId(),
-                    milestone.getId(),
-                    milestone.getAmountAllocated()
-            );
 
             auditLogService.logAction(
                     milestone.getProject().getId(),
                     "TICKET_ACCEPTED",
-                    "Ticket ACCEPTED. Funds released. Blockchain tx: " + txHash
+                    "Ticket ACCEPTED for milestone: " + milestone.getTitle() + ". Work verified."
             );
 
-            // Phase 5: Trigger Disbursement Engine & Escrow Ledger updates
-            disbursementService.executeDisbursement(
-                    milestone.getProject().getId(),
-                    milestone.getId(),
-                    milestone.getAmountAllocated(),
-                    txHash
-            );
+            // Rolling Advance Model: Disburse next milestone (N+1) budget if > 0 and unlock it
+            List<Milestone> projectMilestones = milestoneRepository.findByProjectId(milestone.getProject().getId());
+            projectMilestones.sort((m1, m2) -> {
+                int s1 = m1.getSequenceNumber() != null ? m1.getSequenceNumber() : 99;
+                int s2 = m2.getSequenceNumber() != null ? m2.getSequenceNumber() : 99;
+                return Integer.compare(s1, s2);
+            });
+
+            int currentIndex = -1;
+            for (int i = 0; i < projectMilestones.size(); i++) {
+                if (projectMilestones.get(i).getId().equals(milestone.getId())) {
+                    currentIndex = i;
+                    break;
+                }
+            }
+
+            if (currentIndex != -1 && currentIndex + 1 < projectMilestones.size()) {
+                Milestone nextMs = projectMilestones.get(currentIndex + 1);
+                if (nextMs.getAmountAllocated() != null && nextMs.getAmountAllocated().compareTo(java.math.BigDecimal.ZERO) > 0) {
+                    // Disburse advance for next phase
+                    String txHash = blockchainService.releaseFunds(
+                            milestone.getProject().getId(),
+                            nextMs.getId(),
+                            nextMs.getAmountAllocated()
+                    );
+                    disbursementService.executeDisbursement(
+                            milestone.getProject().getId(),
+                            nextMs.getId(),
+                            nextMs.getAmountAllocated(),
+                            txHash
+                    );
+                    nextMs.setStatus(Milestone.MilestoneStatus.IN_PROGRESS);
+                    milestoneRepository.save(nextMs);
+
+                    auditLogService.logAction(
+                            milestone.getProject().getId(),
+                            "ROLLING_ADVANCE_DISBURSED",
+                            "Disbursed advance ₹" + nextMs.getAmountAllocated() + " for next milestone '" + nextMs.getTitle() + "'. Unlocked for execution."
+                    );
+                } else {
+                    // Next milestone is ₹0 closure milestone — unlock without disbursement
+                    nextMs.setStatus(Milestone.MilestoneStatus.IN_PROGRESS);
+                    milestoneRepository.save(nextMs);
+
+                    auditLogService.logAction(
+                            milestone.getProject().getId(),
+                            "CLOSURE_MILESTONE_UNLOCKED",
+                            "Project closure milestone '" + nextMs.getTitle() + "' unlocked for final beneficiary feedback and closure video submission."
+                    );
+                }
+            }
 
         } else if (reviewDecision == TicketReview.TicketReviewDecision.REQUEST_CLARIFICATION) {
             ticket.setStatus(Ticket.TicketStatus.CLARIFICATION_REQUESTED);

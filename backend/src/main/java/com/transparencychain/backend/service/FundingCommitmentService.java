@@ -294,4 +294,11 @@ public class FundingCommitmentService {
         return escrowAccountRepository.findByProjectId(projectId)
                 .orElseThrow(() -> new IllegalArgumentException("No escrow account found for project: " + projectId));
     }
+
+    @Transactional(readOnly = true)
+    public List<FundingCommitment> getAllCommitmentsForFunder(UUID funderUserId) {
+        FunderProfile funder = funderProfileRepository.findByUserId(funderUserId)
+                .orElseThrow(() -> new IllegalArgumentException("Funder profile not found for user ID: " + funderUserId));
+        return fundingCommitmentRepository.findByFunderId(funder.getId());
+    }
 }

@@ -99,48 +99,46 @@ export default function NgoDashboardPage() {
                             <button onClick={() => navigate('/ngo/projects')} className="text-sm font-bold text-[#00A875] hover:underline">View All</button>
                         </div>
                         <div className="divide-y divide-[#DDE3EA]">
-                            {/* Dummy Active Project Row */}
-                            <div className="p-6 hover:bg-gray-50 transition cursor-pointer" onClick={() => navigate('/ngo/projects/dummy-id')}>
-                                <div className="flex justify-between items-start mb-4">
-                                    <div>
-                                        <h3 className="text-lg font-bold text-[#10172A]">Clean Water Initiative</h3>
-                                        <p className="text-sm font-semibold text-[#52627A] mt-1">M2 — Construction</p>
+                            {(!stats?.projects || stats.projects.length === 0) ? (
+                                <div className="p-12 text-center text-[#52627A]">
+                                    <FolderKanban className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                                    <h4 className="text-lg font-bold text-[#10172A] mb-1">No active projects found</h4>
+                                    <p className="text-sm text-[#52627A] mb-4">Propose a new project to start tracking milestones and receiving funds.</p>
+                                    <button 
+                                        onClick={() => navigate('/ngo/projects/create')} 
+                                        className="bg-[#00A875] text-white px-5 py-2.5 rounded-lg font-bold hover:bg-[#00A875]/90 transition"
+                                    >
+                                        Propose New Project
+                                    </button>
+                                </div>
+                            ) : (
+                                stats.projects.map((p: any) => (
+                                    <div key={p.id} className="p-6 hover:bg-gray-50 transition cursor-pointer" onClick={() => navigate(`/projects/${p.id}`)}>
+                                        <div className="flex justify-between items-start mb-4">
+                                            <div>
+                                                <h3 className="text-lg font-bold text-[#10172A]">{p.title}</h3>
+                                                <p className="text-sm font-semibold text-[#52627A] mt-1">{p.currentMilestone}</p>
+                                            </div>
+                                            <span className={`px-3 py-1 rounded-md text-xs font-bold ${p.status === 'ACTIVE' || p.status === 'IN_PROGRESS' ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700'}`}>
+                                                {p.status}
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between text-sm mb-2">
+                                            <span className="font-semibold text-[#52627A]">₹{(p.spent || 0).toLocaleString()} spent of ₹{(p.totalBudget || 0).toLocaleString()}</span>
+                                            <span className="font-bold text-[#10172A]">{p.progress || 0}%</span>
+                                        </div>
+                                        <div className="w-full bg-gray-200 rounded-full h-2">
+                                            <div className="bg-[#00A875] h-2 rounded-full transition-all duration-500" style={{ width: `${Math.min(100, p.progress || 0)}%` }}></div>
+                                        </div>
                                     </div>
-                                    <span className="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-md text-xs font-bold">ACTIVE</span>
-                                </div>
-                                <div className="flex justify-between text-sm mb-2">
-                                    <span className="font-semibold text-[#52627A]">₹2,85,000 spent of ₹5,00,000</span>
-                                    <span className="font-bold text-[#10172A]">62%</span>
-                                </div>
-                                <div className="w-full bg-gray-200 rounded-full h-2">
-                                    <div className="bg-[#00A875] h-2 rounded-full" style={{ width: '62%' }}></div>
-                                </div>
-                            </div>
-                            
-                            {/* Dummy Active Project Row 2 */}
-                            <div className="p-6 hover:bg-gray-50 transition cursor-pointer" onClick={() => navigate('/ngo/projects/dummy-id-2')}>
-                                <div className="flex justify-between items-start mb-4">
-                                    <div>
-                                        <h3 className="text-lg font-bold text-[#10172A]">Digital Literacy for Women</h3>
-                                        <p className="text-sm font-semibold text-[#52627A]">M1 — Equipment Procurement</p>
-                                    </div>
-                                    <span className="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-md text-xs font-bold">ACTIVE</span>
-                                </div>
-                                <div className="flex justify-between text-sm mb-2">
-                                    <span className="font-semibold text-[#52627A]">₹1,20,000 spent of ₹4,00,000</span>
-                                    <span className="font-bold text-[#10172A]">30%</span>
-                                </div>
-                                <div className="w-full bg-gray-200 rounded-full h-2">
-                                    <div className="bg-[#00A875] h-2 rounded-full" style={{ width: '30%' }}></div>
-                                </div>
-                            </div>
+                                ))
+                            )}
                         </div>
                     </div>
                 </div>
 
                 {/* Right Column: Action Required & Recent Activity */}
                 <div className="space-y-6">
-                    
                     {/* Action Required */}
                     <div className="bg-white rounded-xl shadow-sm border-2 border-amber-200 overflow-hidden relative">
                         <div className="absolute top-0 left-0 w-1 h-full bg-amber-500"></div>
@@ -150,27 +148,23 @@ export default function NgoDashboardPage() {
                             </h2>
                         </div>
                         <div className="p-5 space-y-4">
-                            <div className="flex gap-3 text-sm font-semibold text-[#10172A] items-start cursor-pointer hover:bg-gray-50 p-2 -mx-2 rounded-lg transition">
-                                <span className="w-2 h-2 rounded-full bg-red-500 mt-1.5 shrink-0"></span>
-                                <div>
-                                    <p>Evidence requires resubmission</p>
-                                    <p className="text-xs text-[#52627A] font-medium mt-0.5">Clean Water Initiative</p>
-                                </div>
-                            </div>
-                            <div className="flex gap-3 text-sm font-semibold text-[#10172A] items-start cursor-pointer hover:bg-gray-50 p-2 -mx-2 rounded-lg transition">
-                                <span className="w-2 h-2 rounded-full bg-amber-500 mt-1.5 shrink-0"></span>
-                                <div>
-                                    <p>Funder requested clarification</p>
-                                    <p className="text-xs text-[#52627A] font-medium mt-0.5">Digital Literacy Project</p>
-                                </div>
-                            </div>
-                            <div className="flex gap-3 text-sm font-semibold text-[#10172A] items-start cursor-pointer hover:bg-gray-50 p-2 -mx-2 rounded-lg transition">
-                                <Clock className="w-4 h-4 text-blue-500 shrink-0" />
-                                <div>
-                                    <p>Milestone awaiting approval</p>
-                                    <p className="text-xs text-[#52627A] font-medium mt-0.5">M2 — Construction</p>
-                                </div>
-                            </div>
+                            {(!stats?.actionRequired || stats.actionRequired.length === 0) ? (
+                                <p className="text-xs text-[#52627A] font-semibold text-center py-4">No pending actions required.</p>
+                            ) : (
+                                stats.actionRequired.map((act: any, i: number) => (
+                                    <div 
+                                        key={i} 
+                                        onClick={() => act.projectId && navigate(`/projects/${act.projectId}`)}
+                                        className="flex gap-3 text-sm font-semibold text-[#10172A] items-start cursor-pointer hover:bg-gray-50 p-2 -mx-2 rounded-lg transition"
+                                    >
+                                        <span className="w-2 h-2 rounded-full bg-amber-500 mt-1.5 shrink-0"></span>
+                                        <div>
+                                            <p>{act.title}</p>
+                                            <p className="text-xs text-[#52627A] font-medium mt-0.5">{act.subtitle}</p>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
                         </div>
                         <div className="p-4 bg-gray-50 border-t border-gray-100">
                             <button onClick={() => navigate('/ngo/projects')} className="w-full bg-[#10172A] text-white py-2.5 rounded-lg font-bold shadow-md hover:bg-slate-800 transition">
@@ -184,27 +178,24 @@ export default function NgoDashboardPage() {
                         <div className="p-5 border-b border-[#DDE3EA]">
                             <h2 className="text-lg font-bold text-[#10172A]">Recent Activity</h2>
                         </div>
-                        <div className="p-5 space-y-4">
-                            <div className="flex gap-3 text-sm">
-                                <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
-                                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                                </div>
-                                <div>
-                                    <p className="font-bold text-[#10172A]">Project milestone approved</p>
-                                    <p className="text-xs text-[#52627A] font-medium mt-0.5">M1 for Clean Water Initiative was approved by ABC Foundation.</p>
-                                    <p className="text-xs text-gray-400 mt-1">2 hours ago</p>
-                                </div>
-                            </div>
-                            <div className="flex gap-3 text-sm">
-                                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
-                                    <FileUp className="w-4 h-4 text-blue-600" />
-                                </div>
-                                <div>
-                                    <p className="font-bold text-[#10172A]">Evidence uploaded</p>
-                                    <p className="text-xs text-[#52627A] font-medium mt-0.5">Invoice submitted for Material Procurement task.</p>
-                                    <p className="text-xs text-gray-400 mt-1">1 day ago</p>
-                                </div>
-                            </div>
+                        <div className="p-5 space-y-4 max-h-[350px] overflow-y-auto">
+                            {(!stats?.recentActivity || stats.recentActivity.length === 0) ? (
+                                <p className="text-xs text-[#52627A] font-semibold text-center py-4">No recent activity recorded.</p>
+                            ) : (
+                                stats.recentActivity.map((act: any) => (
+                                    <div key={act.id} className="flex gap-3 text-sm">
+                                        <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center shrink-0">
+                                            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                                        </div>
+                                        <div>
+                                            <p className="font-bold text-[#10172A]">{act.message}</p>
+                                            <p className="text-xs text-gray-400 mt-1">
+                                                {act.timestamp ? new Date(act.timestamp).toLocaleString() : ''}
+                                            </p>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
                         </div>
                     </div>
                 </div>

@@ -1,11 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { useSearchParams } from 'react-router-dom';
 import { 
     ShieldCheck, AlertCircle, ArrowRight, Play, CheckCircle2, XCircle, 
     MessageSquare, AlertTriangle, Coins, Sparkles, HelpCircle, Film, RefreshCw
 } from 'lucide-react';
 
+import { useAlert } from '../context/AlertContext';
+
 export default function FunderVerificationPage() {
+    const { showAlert } = useAlert();
+    const [searchParams] = useSearchParams();
+    const milestoneIdParam = searchParams.get('milestoneId');
+    const ticketIdParam = searchParams.get('ticketId');
+
     const [tickets, setTickets] = useState<any[]>([]);
     const [selectedTicket, setSelectedTicket] = useState<any>(null);
     const [ticketReviews, setTicketReviews] = useState<any[]>([]);
@@ -56,7 +64,23 @@ export default function FunderVerificationPage() {
         try {
             setLoading(true);
             const res = await axios.get('http://localhost:8081/api/org/tickets');
-            setTickets(res.data);
+            const ticketList = res.data || [];
+            setTickets(ticketList);
+
+            if (ticketList.length > 0 && (milestoneIdParam || ticketIdParam)) {
+                const target = ticketList.find((t: any) => 
+                    (ticketIdParam && t.id === ticketIdParam) ||
+                    (milestoneIdParam && t.milestone && t.milestone.id === milestoneIdParam)
+                );
+                if (target) {
+                    if (target.status === 'ACCEPTED' || target.status === 'REJECTED') {
+                        setActiveTab('RESOLVED');
+                    } else {
+                        setActiveTab('PENDING');
+                    }
+                    handleSelectTicket(target);
+                }
+            }
         } catch (error) {
             console.error("Failed to fetch tickets", error);
         } finally {
@@ -67,7 +91,7 @@ export default function FunderVerificationPage() {
     const handleDecision = async (decisionType: 'ACCEPT' | 'REJECT' | 'REQUEST_CLARIFICATION') => {
         if (!selectedTicket) return;
         if (!comment.trim()) {
-            alert("Please provide a review comment for audit log compliance.");
+            showAlert({ type: 'warning', message: "Please provide a review comment for audit log compliance." });
             return;
         }
 
@@ -77,14 +101,18 @@ export default function FunderVerificationPage() {
                 decision: decisionType,
                 comment: comment
             });
-            alert(`Decision: ${decisionType} submitted successfully.`);
+            showAlert({
+                type: 'success',
+                title: 'Decision Recorded',
+                message: `Evidence verification decision: ${decisionType === 'ACCEPT' ? 'Approve & Release Funds' : decisionType} submitted successfully.`
+            });
             setComment('');
             
             // Reload tickets
             const res = await axios.get('http://localhost:8081/api/org/tickets');
             setTickets(res.data);
         } catch (error: any) {
-            alert(error.response?.data?.message || "Failed to submit decision");
+            showAlert({ type: 'error', message: error.response?.data?.message || "Failed to submit decision" });
         } finally {
             setSubmitting(false);
         }

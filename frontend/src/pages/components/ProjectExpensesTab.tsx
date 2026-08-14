@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { PlusCircle, Search, Filter, AlertTriangle, CheckCircle, Clock, Wallet, Upload } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useAlert } from '../../context/AlertContext';
 
 export default function ProjectExpensesTab({ project, milestones }: { project: any, milestones: any[] }) {
     const { user } = useAuth();
@@ -130,6 +131,7 @@ export default function ProjectExpensesTab({ project, milestones }: { project: a
 }
 
 function AddExpenseModal({ project, milestones, onClose, onSuccess }: { project: any, milestones: any[], onClose: () => void, onSuccess: () => void }) {
+    const { showAlert } = useAlert();
     const [loading, setLoading] = useState(false);
     const [file, setFile] = useState<File | null>(null);
     const [formData, setFormData] = useState({
@@ -155,10 +157,11 @@ function AddExpenseModal({ project, milestones, onClose, onSuccess }: { project:
             await axios.post('http://localhost:8081/api/v1/ngo/expenses', formDataObj, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
+            showAlert({ type: 'success', message: "Expense logged successfully!" });
             onSuccess();
         } catch (error: any) {
             console.error(error);
-            alert(error.response?.data?.message || "Failed to submit expense. Check milestone allocation and data.");
+            showAlert({ type: 'error', message: error.response?.data?.message || "Failed to submit expense. Check milestone allocation and data." });
         } finally {
             setLoading(false);
         }

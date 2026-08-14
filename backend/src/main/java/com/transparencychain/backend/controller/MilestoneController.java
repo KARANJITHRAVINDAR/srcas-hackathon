@@ -72,7 +72,28 @@ public class MilestoneController {
     
     @GetMapping
     public ResponseEntity<?> getMilestones(@PathVariable UUID projectId) {
-        return ResponseEntity.ok(milestoneRepository.findByProjectId(projectId));
+        List<Milestone> milestones = milestoneRepository.findByProjectId(projectId);
+        boolean modified = false;
+        for (Milestone m : milestones) {
+            if (m.getTitle() != null) {
+                java.util.regex.Matcher matcher = java.util.regex.Pattern.compile("Phase\\s*(\\d+)", java.util.regex.Pattern.CASE_INSENSITIVE).matcher(m.getTitle());
+                if (matcher.find()) {
+                    int phaseNum = Integer.parseInt(matcher.group(1));
+                    if (m.getSequenceNumber() == null || m.getSequenceNumber() != phaseNum) {
+                        m.setSequenceNumber(phaseNum);
+                        modified = true;
+                    }
+                }
+            }
+        }
+        if (modified) {
+            milestoneRepository.saveAll(milestones);
+        }
+        milestones.sort((a, b) -> Integer.compare(
+            a.getSequenceNumber() != null ? a.getSequenceNumber() : 99,
+            b.getSequenceNumber() != null ? b.getSequenceNumber() : 99
+        ));
+        return ResponseEntity.ok(milestones);
     }
 
     @GetMapping("/{milestoneId}/progress")

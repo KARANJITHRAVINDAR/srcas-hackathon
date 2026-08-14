@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useAlert } from '../context/AlertContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShieldCheck, CheckCircle2, Cpu, Database, Users, Building, ArrowRight, ArrowLeft, UploadCloud, Link as LinkIcon, FileText } from 'lucide-react';
 
 export default function RegisterPage() {
     const { login } = useAuth();
     const navigate = useNavigate();
+    const { showAlert } = useAlert();
 
     const [role, setRole] = useState('NGO');
     const [step, setStep] = useState(1);
@@ -44,10 +46,10 @@ export default function RegisterPage() {
                     await doLogin();
                     return;
                 } catch (loginErr: any) {
-                    alert('Email is already in use, and the password you provided was incorrect. Please use the correct password to continue, or try a different email.');
+                    showAlert({ type: 'warning', title: 'Account Exists', message: 'Email is already in use, and the password you provided was incorrect. Please use the correct password to continue, or try a different email.' });
                 }
             } else {
-                alert(msg || 'Registration failed');
+                showAlert({ type: 'error', message: msg || 'Registration failed' });
             }
         } finally {
             setIsLoading(false);
@@ -90,7 +92,7 @@ export default function RegisterPage() {
             setDraftId(res.data.draftId);
             setStep(3); // Move to Extracting
         } catch (err: any) {
-            alert('Document upload failed');
+            showAlert({ type: 'error', message: 'Document upload failed' });
             setUploading(false);
         }
     };
@@ -136,17 +138,17 @@ export default function RegisterPage() {
             const res = await axios.get(`http://localhost:8081/api/v1/ngo/register/draft/${draftId}`);
             setExtractedFields(res.data.fields);
         } catch (err) {
-            alert('Failed to resolve field');
+            showAlert({ type: 'error', message: 'Failed to resolve field' });
         }
     };
 
     const handleConfirmRegistration = async () => {
         try {
             await axios.post(`http://localhost:8081/api/v1/ngo/register/draft/${draftId}/confirm`);
-            alert('Registration submitted — under review');
+            showAlert({ type: 'success', title: 'Submitted', message: 'Registration submitted — under review' });
             navigate('/dashboard');
         } catch (err: any) {
-            alert(err.response?.data?.message || 'Failed to submit registration. Please ensure all amber fields are resolved.');
+            showAlert({ type: 'error', message: err.response?.data?.message || 'Failed to submit registration. Please ensure all amber fields are resolved.' });
         }
     };
 

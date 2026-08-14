@@ -16,4 +16,7 @@ public interface TicketRepository extends JpaRepository<Ticket, UUID> {
     List<Ticket> findByProjectId(@Param("projectId") UUID projectId);
 
     List<Ticket> findByMilestoneId(UUID milestoneId);
+
+    @Query("SELECT COUNT(t) FROM Ticket t WHERE t.milestone.project.id IN (SELECT e.project.id FROM OrgProjectEngagement e WHERE e.funder.id = :funderId) AND (t.status = 'OPEN' OR t.status = 'UNDER_ORG_REVIEW')")
+    long countOpenTicketsForFunder(@Param("funderId") UUID funderId);
 }

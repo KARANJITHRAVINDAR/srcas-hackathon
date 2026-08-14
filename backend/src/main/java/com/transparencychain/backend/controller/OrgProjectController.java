@@ -118,4 +118,18 @@ public class OrgProjectController {
                     .body(new MessageResponse(e.getMessage()));
         }
     }
+
+    // -------------------------------------------------------------------------
+    // GET /api/org/milestones
+    // Cross-project milestones list for the Funder
+    // -------------------------------------------------------------------------
+    @GetMapping("/milestones")
+    public ResponseEntity<?> getAllMilestones() {
+        UUID funderId = currentFunder().getId();
+        try {
+            return ResponseEntity.ok(orgProjectService.getAllMilestonesForFunder(funderId));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
+        }
+    }
 }

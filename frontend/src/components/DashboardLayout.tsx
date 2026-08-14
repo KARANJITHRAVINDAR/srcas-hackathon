@@ -20,7 +20,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     const funderLinks = [
         { name: 'Dashboard', path: '/funder/dashboard', icon: <LayoutDashboard size={20} /> },
         { name: 'Projects', path: '/funder/projects', icon: <FolderKanban size={20} /> },
-        { name: 'Create Grant', path: '/funder/projects/new', icon: <PlusCircle size={20} /> },
         { name: 'Funding', path: '/funder/funding', icon: <Wallet size={20} /> },
         { name: 'Milestones', path: '/funder/milestones', icon: <CheckSquare size={20} /> },
         { name: 'Evidence & Verification', path: '/funder/verification', icon: <FileCheck size={20} /> },

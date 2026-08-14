@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { AlertProvider } from './context/AlertContext';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -21,6 +22,10 @@ import NgoGlobalImpactPage from './pages/NgoGlobalImpactPage';
 import NgoGlobalBeneficiariesPage from './pages/NgoGlobalBeneficiariesPage';
 import PublicBeneficiaryFormPage from './pages/PublicBeneficiaryFormPage';
 import FunderVerificationPage from './pages/FunderVerificationPage';
+import FunderLedgerPage from './pages/FunderLedgerPage';
+import FunderMilestonesPage from './pages/FunderMilestonesPage';
+import FunderImpactPage from './pages/FunderImpactPage';
+import FunderProfilePage from './pages/FunderProfilePage';
 
 import NgoExpensesPage from './pages/NgoExpensesPage';
 import AddExpensePage from './pages/AddExpensePage';
@@ -119,6 +124,22 @@ function AppRoutes() {
         path="/funder/verification" 
         element={<ProtectedRoute role="FUNDER"><DashboardWrapper><FunderVerificationPage /></DashboardWrapper></ProtectedRoute>} 
       />
+      <Route 
+        path="/funder/funding" 
+        element={<ProtectedRoute role="FUNDER"><DashboardWrapper><FunderLedgerPage /></DashboardWrapper></ProtectedRoute>} 
+      />
+      <Route 
+        path="/funder/milestones" 
+        element={<ProtectedRoute role="FUNDER"><DashboardWrapper><FunderMilestonesPage /></DashboardWrapper></ProtectedRoute>} 
+      />
+      <Route 
+        path="/funder/impact" 
+        element={<ProtectedRoute role="FUNDER"><DashboardWrapper><FunderImpactPage /></DashboardWrapper></ProtectedRoute>} 
+      />
+      <Route 
+        path="/funder/profile" 
+        element={<ProtectedRoute role="FUNDER"><DashboardWrapper><FunderProfilePage /></DashboardWrapper></ProtectedRoute>} 
+      />
 
       {/* Shared Authenticated Routes */}
       <Route 
@@ -133,7 +154,9 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-        <AppRoutes />
+        <AlertProvider>
+          <AppRoutes />
+        </AlertProvider>
       </AuthProvider>
     </Router>
   );

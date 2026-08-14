@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.UUID;
 import java.util.Map;
 
@@ -38,13 +39,37 @@ public class ProofController {
     @Autowired
     com.transparencychain.backend.service.BlockchainService blockchainService;
     
+    @Autowired
+    com.transparencychain.backend.service.TicketService ticketService;
+    
     @PostMapping("/milestones/{milestoneId}/proofs")
     @PreAuthorize("hasRole('NGO')")
+    @Transactional
     public ResponseEntity<?> submitProof(@PathVariable UUID milestoneId, 
                                          @RequestParam("file") org.springframework.web.multipart.MultipartFile file,
                                          @RequestParam("metadata") String metadata,
                                          @RequestParam(value = "expectedType", defaultValue = "INVOICE") String expectedType) {
         Milestone milestone = milestoneRepository.findById(milestoneId).orElseThrow();
+
+        // Enforce milestone sequence check
+        Project project = milestone.getProject();
+        java.util.List<Milestone> projectMilestones = milestoneRepository.findByProjectId(project.getId());
+        projectMilestones.sort(java.util.Comparator.comparingInt(m -> m.getSequenceNumber() != null ? m.getSequenceNumber() : 1));
+
+        int currentSeq = milestone.getSequenceNumber() != null ? milestone.getSequenceNumber() : 1;
+        for (Milestone m : projectMilestones) {
+            int mSeq = m.getSequenceNumber() != null ? m.getSequenceNumber() : 1;
+            if (mSeq < currentSeq) {
+                if (m.getStatus() != Milestone.MilestoneStatus.DISBURSED &&
+                    m.getStatus() != Milestone.MilestoneStatus.VERIFIED &&
+                    m.getStatus() != Milestone.MilestoneStatus.COMPLETED) {
+                    return ResponseEntity.badRequest().body(new MessageResponse(
+                        "Cannot submit evidence: Complete previous milestone (Phase " + mSeq + ") first."
+                    ));
+                }
+            }
+        }
+
         String contentType = file.getContentType();
         String originalFilename = file.getOriginalFilename();
         boolean isValid = (contentType != null && (contentType.startsWith("video/") || contentType.equals("application/pdf") || contentType.startsWith("image/"))) ||
@@ -67,10 +92,10 @@ public class ProofController {
         proof.setFileType(file.getContentType());
         proof.setMetadata(metadata);
         proof.setStatus(ProofSubmission.ProofStatus.PENDING_AI_CHECK);
-        proofRepository.save(proof);
+        proofRepository.saveAndFlush(proof);
         
         milestone.setStatus(Milestone.MilestoneStatus.EVIDENCE_SUBMITTED);
-        milestoneRepository.save(milestone);
+        milestoneRepository.saveAndFlush(milestone);
         
         String txHash = "0xhash";
         try {
@@ -80,6 +105,16 @@ public class ProofController {
         }
         
         auditLogService.logAction(milestone.getId(), "MILESTONE", "Evidence submitted and anchored. ID: " + proof.getId() + ", Tx Hash: " + txHash);
+        
+        // Automatically raise fund release verification ticket if NGO user is available
+        try {
+            if (milestone.getProject().getNgo() != null && milestone.getProject().getNgo().getUser() != null) {
+                ticketService.raiseTicket(milestone.getId(), milestone.getProject().getNgo().getUser().getId());
+            }
+        } catch (Exception e) {
+            System.err.println("Auto ticket creation failed: " + e.getMessage());
+            e.printStackTrace();
+        }
         
         try {
             // Trigger async AI analysis
