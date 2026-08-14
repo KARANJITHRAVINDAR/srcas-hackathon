@@ -69,9 +69,12 @@ public class NgoRegistrationController {
 
         // Classify documents and perform OCR extraction
         Set<DocumentType> uploadedDocTypes = new HashSet<>();
+        List<String> fileNames = new ArrayList<>();
         Map<String, List<OcrExtractionService.OcrResult>> allResults = new HashMap<>();
 
         for (MultipartFile file : files) {
+            String originalFilename = file.getOriginalFilename() != null ? file.getOriginalFilename() : "";
+            fileNames.add(originalFilename);
             DocumentType docType = classifierService.classifyDocument(file);
             uploadedDocTypes.add(docType);
 
@@ -79,8 +82,8 @@ public class NgoRegistrationController {
             NgoRegistrationDocument regDoc = new NgoRegistrationDocument();
             regDoc.setSubmissionId(submission.getId());
             regDoc.setDocumentType(docType);
-            regDoc.setFileName(file.getOriginalFilename());
-            regDoc.setFileReference(file.getOriginalFilename());
+            regDoc.setFileName(originalFilename);
+            regDoc.setFileReference(originalFilename);
             regDoc.setIsMandatoryForThisSubmission(docType != DocumentType.DARPAN && (docType != DocumentType.BANK_ACCOUNT || hasBankAccount));
             documentRepository.save(regDoc);
 
@@ -91,9 +94,10 @@ public class NgoRegistrationController {
             }
         }
 
-        // Run 4-part scoring model & cross-document consistency
+        // Run 4-part scoring model & anti-fraud verification
         NgoVerificationScoringService.ScoringResult scoring = scoringService.evaluateSubmission(
                 uploadedDocTypes,
+                fileNames,
                 hasBankAccount,
                 allResults,
                 submission.getId()
@@ -156,6 +160,7 @@ public class NgoRegistrationController {
 
     /**
      * Resolve / edit final values for fields on Review & Confirm screen.
+     * Manually entered/edited fields receive UNVERIFIED_MANUAL_ENTRY status with capped confidence.
      */
     @PatchMapping("/submission/{id}/fields")
     public ResponseEntity<?> resolveField(@PathVariable UUID id, @RequestBody Map<String, String> request) {
@@ -167,17 +172,19 @@ public class NgoRegistrationController {
         if (fieldOpt.isPresent()) {
             NgoRegistrationField field = fieldOpt.get();
             field.setFinalValue(finalValue);
-            field.setFieldStatus(NgoRegistrationField.FieldStatus.VERIFIED);
+            field.setFieldStatus(NgoRegistrationField.FieldStatus.UNVERIFIED_MANUAL_ENTRY);
+            field.setConfidenceScore(new java.math.BigDecimal("50.00"));
             fieldRepository.save(field);
             return ResponseEntity.ok(field);
         }
 
-        // If field doesn't exist yet, create it
+        // If field doesn't exist yet, create it as unverified manual entry
         NgoRegistrationField newField = new NgoRegistrationField();
         newField.setSubmissionId(id);
         newField.setFieldName(fieldName);
         newField.setFinalValue(finalValue);
-        newField.setFieldStatus(NgoRegistrationField.FieldStatus.VERIFIED);
+        newField.setFieldStatus(NgoRegistrationField.FieldStatus.UNVERIFIED_MANUAL_ENTRY);
+        newField.setConfidenceScore(new java.math.BigDecimal("50.00"));
         fieldRepository.save(newField);
         return ResponseEntity.ok(newField);
     }

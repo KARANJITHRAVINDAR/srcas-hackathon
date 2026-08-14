@@ -150,21 +150,55 @@ export default function RegisterPage() {
         if (!field) return { status: 'GRAY', value: '', msg: 'Not detected — enter manually' };
         
         const isResolved = field.finalValue !== null && field.finalValue !== undefined && field.finalValue !== '';
-        const confidence = parseFloat(field.confidenceScore || '0');
-        const isConflicting = field.fieldStatus === 'CONFLICTING';
         
-        if (field.fieldStatus === 'VERIFIED' || (isResolved && !isConflicting)) {
+        if (field.fieldStatus === 'SUSPECTED_FABRICATED') {
+            return {
+                status: 'RED',
+                value: field.finalValue || '',
+                msg: 'Suspected placeholder or fabricated format — verification failed',
+                raw: field
+            };
+        }
+
+        if (field.fieldStatus === 'UNVERIFIED_MANUAL_ENTRY') {
+            return {
+                status: 'BLUE',
+                value: field.finalValue || '',
+                msg: 'Manually entered — unverified by AI extraction',
+                raw: field
+            };
+        }
+
+        if (field.fieldStatus === 'CONFLICTING') {
+            return { 
+                status: 'AMBER', 
+                value: field.finalValue || '', 
+                msg: 'Conflicting values across documents — please confirm/correct', 
+                raw: field 
+            };
+        }
+
+        if (field.fieldStatus === 'LOW_CONFIDENCE') {
+            return { 
+                status: 'AMBER', 
+                value: field.finalValue || '', 
+                msg: 'Low OCR confidence — please verify carefully', 
+                raw: field 
+            };
+        }
+
+        if (field.fieldStatus === 'VERIFIED') {
             return { 
                 status: 'GREEN', 
                 value: field.finalValue || '', 
                 msg: `Verified from ${field.sourceDocumentType || 'document'}` 
             };
         }
+
         return { 
-            status: 'AMBER', 
+            status: isResolved ? 'GREEN' : 'GRAY', 
             value: field.finalValue || '', 
-            msg: isConflicting ? 'Conflicting values across documents — please confirm/correct' : 'Low OCR confidence — please confirm', 
-            raw: field 
+            msg: isResolved ? `Verified from ${field.sourceDocumentType || 'document'}` : 'Not detected — enter manually' 
         };
     };
 
@@ -194,7 +228,7 @@ export default function RegisterPage() {
     };
 
     const isConfirmDisabled = () => {
-        return extractedFields.some(f => f.fieldStatus === 'CONFLICTING' && (!f.finalValue || f.finalValue.trim() === ''));
+        return extractedFields.some(f => (f.fieldStatus === 'CONFLICTING' || f.fieldStatus === 'SUSPECTED_FABRICATED') && (!f.finalValue || f.finalValue.trim() === ''));
     };
 
     // Rendering Helpers
@@ -205,26 +239,38 @@ export default function RegisterPage() {
         let borderColor = 'border-[#DDE3EA]';
         let icon = null;
         let textColor = 'text-[#52627A]';
+        let badge = null;
 
         if (fieldData.status === 'GREEN') {
             bgColor = 'bg-emerald-50/50';
             borderColor = 'border-emerald-200';
             textColor = 'text-[#00A875] font-semibold';
             icon = <CheckCircle2 className="w-4 h-4 mr-1 text-[#00A875]" />;
+        } else if (fieldData.status === 'RED') {
+            bgColor = 'bg-red-50';
+            borderColor = 'border-red-400 border-2';
+            textColor = 'text-red-700 font-bold';
+            icon = <XCircle className="w-4 h-4 mr-1 text-red-600" />;
+            badge = <span className="text-[10px] uppercase font-extrabold bg-red-200 text-red-900 px-1.5 py-0.5 rounded">Suspected Fabricated</span>;
         } else if (fieldData.status === 'AMBER') {
             bgColor = 'bg-amber-50';
             borderColor = 'border-amber-400 border-2';
             textColor = 'text-amber-700 font-bold';
             icon = <AlertTriangle className="w-4 h-4 mr-1 text-amber-600" />;
+            badge = <span className="text-[10px] uppercase font-extrabold bg-amber-200 text-amber-900 px-1.5 py-0.5 rounded">Action Required</span>;
+        } else if (fieldData.status === 'BLUE') {
+            bgColor = 'bg-blue-50/50';
+            borderColor = 'border-blue-200';
+            textColor = 'text-blue-700 font-semibold';
+            icon = <HelpCircle className="w-4 h-4 mr-1 text-blue-500" />;
+            badge = <span className="text-[10px] uppercase font-extrabold bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded">Manual Entry</span>;
         }
 
         return (
             <div className={`p-3.5 rounded-xl border ${borderColor} ${bgColor} transition-all`}>
                 <div className="flex justify-between items-center mb-1">
                     <label className="block text-xs font-bold text-[#10172A]">{label}</label>
-                    {fieldData.status === 'AMBER' && (
-                        <span className="text-[10px] uppercase font-extrabold bg-amber-200 text-amber-900 px-1.5 py-0.5 rounded">Action Required</span>
-                    )}
+                    {badge}
                 </div>
                 <div className="flex items-center">
                     <input 

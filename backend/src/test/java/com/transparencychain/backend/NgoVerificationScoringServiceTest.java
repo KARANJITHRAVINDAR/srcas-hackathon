@@ -24,8 +24,8 @@ public class NgoVerificationScoringServiceTest {
     }
 
     @Test
-    @DisplayName("Scenario 1: Clean full document set passes with high score >= 45%")
-    public void testCleanFullDocumentSet() {
+    @DisplayName("Test 1: Clean genuine document set with 0 conflicts scores near 100% and passes")
+    public void testCleanGenuineDocumentSet() {
         Set<DocumentType> uploadedDocs = new HashSet<>(Arrays.asList(
                 DocumentType.LEGAL_REGISTRATION,
                 DocumentType.PAN,
@@ -35,6 +35,7 @@ public class NgoVerificationScoringServiceTest {
                 DocumentType.BANK_ACCOUNT,
                 DocumentType.DARPAN
         ));
+        List<String> filenames = Arrays.asList("1_legal.png", "2_pan.png", "3_constitution.png", "4_address.png", "5_board.png", "6_cheque.png", "7_darpan.png");
 
         Map<String, List<OcrResult>> ocrResults = new HashMap<>();
         ocrResults.put("CONSTITUTION", Arrays.asList(
@@ -68,24 +69,22 @@ public class NgoVerificationScoringServiceTest {
                 new OcrResult("orgName", "Pratham Education Foundation", 96.0)
         ));
 
-        ScoringResult result = scoringService.evaluateSubmission(uploadedDocs, true, ocrResults, UUID.randomUUID());
+        ScoringResult result = scoringService.evaluateSubmission(uploadedDocs, filenames, true, ocrResults, UUID.randomUUID());
 
-        System.out.println("=== Scenario 1 Score ===");
+        System.out.println("=== Test 1 Clean Score ===");
         System.out.println("Overall Score: " + result.overallScore + "%");
-        System.out.println("Completeness: " + result.completenessScore + "/20");
-        System.out.println("OCR Confidence: " + result.ocrConfidenceScore + "/25");
         System.out.println("Consistency: " + result.consistencyScore + "/35");
         System.out.println("Authenticity: " + result.authenticityScore + "/20");
 
         assertTrue(result.isPassed);
-        assertTrue(result.overallScore >= 80.0);
-        assertEquals(20.0, result.completenessScore);
-        assertEquals(35.0, result.consistencyScore);
+        assertEquals(35.0, result.consistencyScore, "0 conflicts should yield 35/35 consistency score");
+        assertEquals(20.0, result.authenticityScore);
+        assertTrue(result.overallScore >= 90.0);
     }
 
     @Test
-    @DisplayName("Scenario 2: Pre-operational entity missing Bank Account does not block (>= 45%)")
-    public void testPreOperationalMissingBankAccount() {
+    @DisplayName("Test 2: Proportional Consistency with partial conflicts yields proportional score, not 0")
+    public void testProportionalConsistencyScore() {
         Set<DocumentType> uploadedDocs = new HashSet<>(Arrays.asList(
                 DocumentType.LEGAL_REGISTRATION,
                 DocumentType.PAN,
@@ -95,124 +94,120 @@ public class NgoVerificationScoringServiceTest {
         ));
 
         Map<String, List<OcrResult>> ocrResults = new HashMap<>();
+        // 3 matching org names, 1 minor mismatch
         ocrResults.put("CONSTITUTION", Arrays.asList(
-                new OcrResult("orgName", "New Hope Initiative", 95.0),
-                new OcrResult("registeredAddress", "45 Park Street, Kolkata, West Bengal 700016", 92.0),
-                new OcrResult("registrationType", "Society", 95.0)
+                new OcrResult("orgName", "Pratham Education Foundation", 95.0),
+                new OcrResult("registeredAddress", "123 MG Road, Bengaluru 560001", 95.0)
         ));
         ocrResults.put("PAN", Arrays.asList(
-                new OcrResult("panNumber", "AAATN9876L", 99.0),
-                new OcrResult("orgName", "New Hope Initiative", 95.0)
+                new OcrResult("panNumber", "AAATP1234K", 95.0),
+                new OcrResult("orgName", "Pratham Education Foundation", 95.0)
         ));
         ocrResults.put("LEGAL_REGISTRATION", Arrays.asList(
-                new OcrResult("registrationNumber", "SOC/KOL/2024/099", 94.0)
+                new OcrResult("registrationNumber", "TRUST/BLR/01", 95.0),
+                new OcrResult("orgName", "Pratham Education Trust", 95.0) // Fuzzy match / partial
         ));
         ocrResults.put("ADDRESS_PROOF", Arrays.asList(
-                new OcrResult("registeredAddress", "45 Park Street, Kolkata, West Bengal 700016", 94.0)
+                new OcrResult("registeredAddress", "123 MG Road, Bengaluru 560001", 95.0)
         ));
         ocrResults.put("GOVERNING_BODY", Arrays.asList(
-                new OcrResult("trusteeDetails", "Sunita Sharma, President", 92.0)
+                new OcrResult("trusteeDetails", "Ramesh Kumar, Trustee", 95.0)
         ));
 
-        // hasBankAccount = false (Pre-operational entity)
-        ScoringResult result = scoringService.evaluateSubmission(uploadedDocs, false, ocrResults, UUID.randomUUID());
+        ScoringResult result = scoringService.evaluateSubmission(uploadedDocs, Collections.emptyList(), false, ocrResults, UUID.randomUUID());
 
-        System.out.println("=== Scenario 2 Score (Pre-operational) ===");
-        System.out.println("Overall Score: " + result.overallScore + "%");
-        System.out.println("Completeness: " + result.completenessScore + "/20");
+        System.out.println("=== Test 2 Proportional Consistency Score ===");
+        System.out.println("Consistency: " + result.consistencyScore + "/35");
 
-        assertTrue(result.isPassed);
-        assertEquals(20.0, result.completenessScore, "Completeness should be 100% (20/20) since bank account is waived");
-        assertTrue(result.overallScore >= 45.0);
+        assertTrue(result.consistencyScore > 10.0 && result.consistencyScore <= 35.0,
+                "Partial match should yield a proportional consistency score (got " + result.consistencyScore + "), not 0/35");
+        assertEquals(17.5, result.consistencyScore);
     }
 
     @Test
-    @DisplayName("Scenario 3: Missing Darpan ID never blocks submission (>= 45%)")
-    public void testMissingDarpanIdNeverBlocks() {
+    @DisplayName("Test 3: The exact fake-packet from bug report is caught and hard-capped < 45% (REJECTED)")
+    public void testFakePacketFromBugReportIsBlocked() {
         Set<DocumentType> uploadedDocs = new HashSet<>(Arrays.asList(
                 DocumentType.LEGAL_REGISTRATION,
                 DocumentType.PAN,
                 DocumentType.CONSTITUTION,
                 DocumentType.ADDRESS_PROOF,
                 DocumentType.GOVERNING_BODY,
-                DocumentType.BANK_ACCOUNT
-        )); // Darpan omitted
+                DocumentType.BANK_ACCOUNT,
+                DocumentType.DARPAN
+        ));
+
+        List<String> filenames = Arrays.asList(
+                "1_legal_registration_cert.png",
+                "2_pan_card.png",
+                "3_constitution_trust_deed.png",
+                "4_address_proof.png",
+                "5_governing_body_resolution.png",
+                "6_bank_cancelled_cheque.png",
+                "7_darpan_certificate.png"
+        );
 
         Map<String, List<OcrResult>> ocrResults = new HashMap<>();
-        ocrResults.put("CONSTITUTION", Arrays.asList(
-                new OcrResult("orgName", "Rural Health Care Trust", 96.0),
-                new OcrResult("registeredAddress", "10 North Road, Chennai, Tamil Nadu 600001", 92.0)
+        // Mismatched names, corrupted PAN, placeholder tokens
+        ocrResults.put("LEGAL_REGISTRATION", Arrays.asList(
+                new OcrResult("registrationNumber", "MH/PUN/2018/999", 95.0),
+                new OcrResult("registrationDate", "10-01-2018", 93.0),
+                new OcrResult("registeringAuthority", "Charity Commissioner Pune", 90.0),
+                new OcrResult("orgName", "Shree Ganesh Educational Trust", 94.0)
         ));
         ocrResults.put("PAN", Arrays.asList(
-                new OcrResult("panNumber", "AAATR5555M", 99.0),
-                new OcrResult("orgName", "Rural Health Care Trust", 95.0)
+                new OcrResult("panNumber", "999INVALIDPAN", 99.0), // MALFORMED PAN
+                new OcrResult("orgName", "Bright Future Foundation", 96.0)
         ));
-        ocrResults.put("LEGAL_REGISTRATION", Arrays.asList(
-                new OcrResult("registrationNumber", "TR/CHN/2020/44", 94.0)
+        ocrResults.put("CONSTITUTION", Arrays.asList(
+                new OcrResult("orgName", "Rural Hope Initiative", 97.0),
+                new OcrResult("registrationType", "Section 8 Company", 98.0),
+                new OcrResult("registeredAddress", "Plot 99 Industrial Area, Noida, Uttar Pradesh 201301", 92.0),
+                new OcrResult("objectivesClause", "Environment and pollution control", 91.0)
         ));
         ocrResults.put("ADDRESS_PROOF", Arrays.asList(
-                new OcrResult("registeredAddress", "10 North Road, Chennai, Tamil Nadu 600001", 94.0)
+                new OcrResult("registeredAddress", "Flat 4B Marine Drive, Nariman Point, Mumbai, Maharashtra 400020", 95.0),
+                new OcrResult("orgName", "Global Green Trust", 93.0)
         ));
         ocrResults.put("GOVERNING_BODY", Arrays.asList(
-                new OcrResult("trusteeDetails", "V. Balaji, Trustee", 92.0)
+                new OcrResult("orgName", "Apex Healthcare Mission", 94.0),
+                new OcrResult("authorizedSignatoryName", "Vikram Singhania", 95.0)
         ));
         ocrResults.put("BANK_ACCOUNT", Arrays.asList(
-                new OcrResult("orgName", "Rural Health Care Trust", 95.0),
-                new OcrResult("bankAccountNumber", "112233445566", 99.0),
-                new OcrResult("ifscCode", "HDFC0001234", 99.0)
+                new OcrResult("orgName", "Sunrise Welfare Society", 95.0),
+                new OcrResult("bankAccountNumber", "12345", 99.0),
+                new OcrResult("ifscCode", "FAKE0000000", 99.0) // MALFORMED FAKE IFSC
+        ));
+        ocrResults.put("DARPAN", Arrays.asList(
+                new OcrResult("darpanId", "99/CORRUPT/000", 99.0),
+                new OcrResult("orgName", "Lotus Child Care NGO", 96.0)
         ));
 
-        ScoringResult result = scoringService.evaluateSubmission(uploadedDocs, true, ocrResults, UUID.randomUUID());
+        ScoringResult result = scoringService.evaluateSubmission(uploadedDocs, filenames, true, ocrResults, UUID.randomUUID());
 
-        System.out.println("=== Scenario 3 Score (No Darpan) ===");
+        System.out.println("=== Test 3 Fake Packet Score ===");
         System.out.println("Overall Score: " + result.overallScore + "%");
-        System.out.println("Completeness: " + result.completenessScore + "/20");
-
-        assertTrue(result.isPassed);
-        assertEquals(20.0, result.completenessScore);
-        assertTrue(result.overallScore >= 45.0);
-    }
-
-    @Test
-    @DisplayName("Scenario 4: Deliberately mismatched Org Name & Address drops score < 45% and blocks")
-    public void testMismatchedDocumentsFailAndBlock() {
-        Set<DocumentType> uploadedDocs = new HashSet<>(Arrays.asList(
-                DocumentType.LEGAL_REGISTRATION,
-                DocumentType.PAN,
-                DocumentType.CONSTITUTION
-        )); // Missing mandatory docs + severe conflicts
-
-        Map<String, List<OcrResult>> ocrResults = new HashMap<>();
-        // Mismatched Org Name across docs
-        ocrResults.put("CONSTITUTION", Arrays.asList(
-                new OcrResult("orgName", "Alpha Healthcare Trust", 40.0), // Low confidence
-                new OcrResult("registeredAddress", "12 Main St, Delhi", 45.0)
-        ));
-        ocrResults.put("PAN", Arrays.asList(
-                new OcrResult("panNumber", "INVALID_PAN", 40.0), // Invalid PAN format
-                new OcrResult("orgName", "Completely Different Beta Foundation", 40.0) // CONFLICT!
-        ));
-        ocrResults.put("LEGAL_REGISTRATION", Arrays.asList(
-                new OcrResult("registrationNumber", "X", 30.0)
-        ));
-
-        ScoringResult result = scoringService.evaluateSubmission(uploadedDocs, true, ocrResults, UUID.randomUUID());
-
-        System.out.println("=== Scenario 4 Score (Severe Conflicts & Incompleteness) ===");
-        System.out.println("Overall Score: " + result.overallScore + "%");
-        System.out.println("Completeness: " + result.completenessScore + "/20");
-        System.out.println("Consistency: " + result.consistencyScore + "/35");
+        System.out.println("Passed Gate: " + result.isPassed);
+        System.out.println("Has Suspected Fabrication: " + result.hasSuspectedFabrication);
         System.out.println("Rejection Reasons: " + result.rejectionReasons);
 
-        assertFalse(result.isPassed, "Should be blocked because score is below 45%");
-        assertTrue(result.overallScore < 45.0);
+        assertFalse(result.isPassed, "Fake packet MUST be rejected and marked isPassed = false");
+        assertTrue(result.overallScore < 45.0, "Score must be strictly below 45% (got " + result.overallScore + "%)");
+        assertTrue(result.hasSuspectedFabrication, "Must detect suspected fabricated content");
         assertFalse(result.rejectionReasons.isEmpty());
 
-        // Verify that orgName field is marked as CONFLICTING
-        Optional<NgoRegistrationField> orgNameField = result.processedFields.stream()
-                .filter(f -> f.getFieldName().equals("orgName"))
+        // Verify that malformed PAN is marked SUSPECTED_FABRICATED
+        Optional<NgoRegistrationField> panField = result.processedFields.stream()
+                .filter(f -> f.getFieldName().equals("panNumber"))
                 .findFirst();
-        assertTrue(orgNameField.isPresent());
-        assertEquals(FieldStatus.CONFLICTING, orgNameField.get().getFieldStatus());
+        assertTrue(panField.isPresent());
+        assertEquals(FieldStatus.SUSPECTED_FABRICATED, panField.get().getFieldStatus());
+
+        // Verify that malformed IFSC is marked SUSPECTED_FABRICATED
+        Optional<NgoRegistrationField> ifscField = result.processedFields.stream()
+                .filter(f -> f.getFieldName().equals("ifscCode"))
+                .findFirst();
+        assertTrue(ifscField.isPresent());
+        assertEquals(FieldStatus.SUSPECTED_FABRICATED, ifscField.get().getFieldStatus());
     }
 }

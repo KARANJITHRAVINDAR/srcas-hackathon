@@ -55,6 +55,8 @@ public class NgoRegistrationField {
     public enum FieldStatus {
         VERIFIED,
         CONFLICTING,
-        LOW_CONFIDENCE
+        LOW_CONFIDENCE,
+        SUSPECTED_FABRICATED,
+        UNVERIFIED_MANUAL_ENTRY
     }
 }

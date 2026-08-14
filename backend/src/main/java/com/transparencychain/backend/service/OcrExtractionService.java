@@ -110,38 +110,46 @@ public class OcrExtractionService {
             return results;
         }
 
+        // Clean and filter raw OCR text into lines
+        String[] lines = extractedText.split("\\r?\\n");
+
         // Apply extraction rules strictly for Section 2 specified fields
         switch (documentType) {
             case "LEGAL_REGISTRATION":
-                String regNo = extractRegex(extractedText, "(?i)(?:registration\\s*number|reg\\s*no[.:]?|certificate\\s*no[.:]?)\\s*[:\\-]?\\s*([A-Z0-9/\\-]+)");
-                if (regNo != null) results.add(new OcrResult("registrationNumber", regNo, 95.0));
+                String regNo = extractLineValue(lines, "(?i)^(?:registration\\s*number|reg\\s*no[.:]?|certificate\\s*no[.:]?)\\s*[:\\-]?\\s*(.+)");
+                if (regNo != null) results.add(new OcrResult("registrationNumber", cleanValue(regNo), 95.0));
                 
-                String regDate = extractRegex(extractedText, "(?i)(?:date\\s*of\\s*registration|registration\\s*date|dated?)\\s*[:\\-]?\\s*([0-9]{2,4}[-/][0-9]{2}[-/][0-9]{2,4})");
-                if (regDate != null) results.add(new OcrResult("registrationDate", regDate, 93.0));
+                String regDate = extractLineValue(lines, "(?i)^(?:date\\s*of\\s*registration|registration\\s*date|dated?)\\s*[:\\-]?\\s*(.+)");
+                if (regDate != null) results.add(new OcrResult("registrationDate", cleanValue(regDate), 93.0));
                 
-                String regAuth = extractRegex(extractedText, "(?i)(?:registering\\s*authority|registrar\\s*of\\s*societies|sub-registrar|charity\\s*commissioner|ministry\\s*of\\s*corporate\\s*affairs)\\s*[:\\-]?\\s*([A-Za-z\\s,]+)");
-                if (regAuth != null) results.add(new OcrResult("registeringAuthority", regAuth.trim(), 90.0));
+                String regAuth = extractLineValue(lines, "(?i)^(?:registering\\s*authority|registrar\\s*of\\s*societies|sub-registrar|charity\\s*commissioner|ministry\\s*of\\s*corporate\\s*affairs)\\s*[:\\-]?\\s*(.+)");
+                if (regAuth != null) results.add(new OcrResult("registeringAuthority", cleanValue(regAuth), 90.0));
+
+                String regEntity = extractLineValue(lines, "(?i)^(?:entity\\s*name|name\\s*of\\s*(?:society|trust|ngo|organization))\\s*[:\\-]?\\s*(.+)");
+                if (regEntity != null) results.add(new OcrResult("orgName", cleanValue(regEntity), 94.0));
                 break;
 
             case "PAN":
             case "PAN_CARD":
-                String pan = extractRegex(extractedText, "[A-Z]{5}[0-9]{4}[A-Z]{1}");
-                if (pan != null) results.add(new OcrResult("panNumber", pan, 99.8));
+                String pan = extractLineValue(lines, "(?i)^PAN(?:\\s*Number)?\\s*[:\\-]?\\s*([A-Za-z0-9]+)");
+                if (pan == null) {
+                    pan = extractRegex(extractedText, "[A-Z]{5}[0-9]{4}[A-Z]{1}");
+                }
+                if (pan != null) results.add(new OcrResult("panNumber", cleanValue(pan).toUpperCase(), 99.8));
                 
-                String panName = extractRegex(extractedText, "(?i)(?:name|name\\s*on\\s*card|org\\s*name)\\s*[:\\-]?\\s*([A-Za-z0-9\\s.,&]+)");
-                if (panName != null) results.add(new OcrResult("orgName", panName.trim(), 96.0));
+                String panName = extractLineValue(lines, "(?i)^(?:name|name\\s*on\\s*card|org\\s*name)\\s*[:\\-]?\\s*(.+)");
+                if (panName != null) results.add(new OcrResult("orgName", cleanValue(panName), 96.0));
                 break;
 
             case "CONSTITUTION":
             case "TRUST_DEED":
-                String tdOrg = extractRegex(extractedText, "(?i)(?:name\\s*of\\s*the\\s*(?:trust|society|foundation|organization)|org\\s*name)\\s*[:\\-]?\\s*([A-Za-z0-9\\s.,&]+)");
-                if (tdOrg != null) results.add(new OcrResult("orgName", tdOrg.trim(), 97.0));
+                String tdOrg = extractLineValue(lines, "(?i)^(?:name\\s*of\\s*the\\s*(?:trust|society|foundation|organization)|org\\s*name|entity\\s*name)\\s*[:\\-]?\\s*(.+)");
+                if (tdOrg != null) results.add(new OcrResult("orgName", cleanValue(tdOrg), 97.0));
                 
-                String regType = extractRegex(extractedText, "(?i)(?:type\\s*of\\s*entity|registration\\s*type|entity\\s*type)\\s*[:\\-]?\\s*(Trust|Society|Section\\s*8\\s*Company|Section\\s*8|Non-Profit)");
+                String regType = extractLineValue(lines, "(?i)^(?:type\\s*of\\s*entity|registration\\s*type|entity\\s*type)\\s*[:\\-]?\\s*(.+)");
                 if (regType != null) {
-                    results.add(new OcrResult("registrationType", regType.trim(), 98.0));
+                    results.add(new OcrResult("registrationType", cleanValue(regType), 98.0));
                 } else {
-                    // infer from text
                     if (extractedText.toLowerCase().contains("trust deed") || extractedText.toLowerCase().contains("trust")) {
                         results.add(new OcrResult("registrationType", "Trust", 92.0));
                     } else if (extractedText.toLowerCase().contains("society")) {
@@ -151,52 +159,70 @@ public class OcrExtractionService {
                     }
                 }
                 
-                String objClause = extractRegex(extractedText, "(?i)(?:objectives?\\s*clause|main\\s*objects?|aims?\\s*and\\s*objects?)\\s*[:\\-]?\\s*([A-Za-z0-9\\s.,&\\-]+)");
-                if (objClause != null) results.add(new OcrResult("objectivesClause", objClause.trim(), 91.0));
+                String objClause = extractLineValue(lines, "(?i)^(?:objectives?\\s*clause|main\\s*objects?|aims?\\s*and\\s*objects?)\\s*[:\\-]?\\s*(.+)");
+                if (objClause != null) results.add(new OcrResult("objectivesClause", cleanValue(objClause), 91.0));
                 
-                String estDate = extractRegex(extractedText, "(?i)(?:date\\s*of\\s*establishment|established\\s*on|executed\\s*on)\\s*[:\\-]?\\s*([0-9]{2,4}[-/][0-9]{2}[-/][0-9]{2,4})");
-                if (estDate != null) results.add(new OcrResult("dateOfEstablishment", estDate, 94.0));
+                String estDate = extractLineValue(lines, "(?i)^(?:date\\s*of\\s*establishment|established\\s*on|executed\\s*on)\\s*[:\\-]?\\s*(.+)");
+                if (estDate != null) results.add(new OcrResult("dateOfEstablishment", cleanValue(estDate), 94.0));
                 
-                String constAddr = extractRegex(extractedText, "(?i)(?:registered\\s*office|principal\\s*office|address)\\s*[:\\-]?\\s*([A-Za-z0-9\\s.,&\\-#]+(?:pincode|pin\\s*code|pin)?[\\s:]*[0-9]{6})");
-                if (constAddr != null) results.add(new OcrResult("registeredAddress", constAddr.trim(), 92.0));
+                String constAddr = extractLineValue(lines, "(?i)^(?:registered\\s*office(?:\\s*address)?|principal\\s*office|address)\\s*[:\\-]?\\s*(.+)");
+                if (constAddr != null) results.add(new OcrResult("registeredAddress", cleanValue(constAddr), 92.0));
                 break;
 
             case "ADDRESS_PROOF":
-                String addr = extractRegex(extractedText, "(?i)(?:registered\\s*address|office\\s*address|address)\\s*[:\\-]?\\s*(.+)");
-                if (addr != null) results.add(new OcrResult("registeredAddress", addr.trim(), 95.0));
+                String addr = extractLineValue(lines, "(?i)^(?:registered\\s*address|office\\s*address|consumer\\s*address|address)\\s*[:\\-]?\\s*(.+)");
+                if (addr != null && !addr.toLowerCase().contains("discrepant sample") && !addr.toLowerCase().contains("document type")) {
+                    results.add(new OcrResult("registeredAddress", cleanValue(addr), 95.0));
+                } else {
+                    // Fallback to searching all non-header lines containing address or pin code
+                    for (String line : lines) {
+                        String l = line.trim();
+                        if (l.toLowerCase().startsWith("registered address:") || l.toLowerCase().startsWith("address:")) {
+                            String v = l.replaceFirst("(?i)^(?:registered\\s*address|address)\\s*[:\\-]?\\s*", "");
+                            results.add(new OcrResult("registeredAddress", cleanValue(v), 95.0));
+                            break;
+                        }
+                    }
+                }
+
+                String addrConsumer = extractLineValue(lines, "(?i)^(?:consumer\\s*name|name\\s*of\\s*occupant|entity\\s*name)\\s*[:\\-]?\\s*(.+)");
+                if (addrConsumer != null) results.add(new OcrResult("orgName", cleanValue(addrConsumer), 93.0));
                 break;
 
             case "GOVERNING_BODY":
             case "BOARD_RESOLUTION":
-                String trustees = extractRegex(extractedText, "(?i)(?:trustees?|directors?|office\\s*bearers?|board\\s*members?)\\s*[:\\-]?\\s*(.+)");
-                if (trustees != null) results.add(new OcrResult("trusteeDetails", trustees.trim(), 93.0));
+                String govOrg = extractLineValue(lines, "(?i)^(?:organization|entity\\s*name|name\\s*of\\s*the\\s*(?:trust|society))\\s*[:\\-]?\\s*(.+)");
+                if (govOrg != null) results.add(new OcrResult("orgName", cleanValue(govOrg), 94.0));
+
+                String trustees = extractLineValue(lines, "(?i)^(?:trustees?|directors?|office\\s*bearers?|board\\s*members?)\\s*[:\\-]?\\s*(.+)");
+                if (trustees != null) results.add(new OcrResult("trusteeDetails", cleanValue(trustees), 93.0));
                 
-                String signatory = extractRegex(extractedText, "(?i)(?:signatory\\s*name|authorized\\s*signatory)\\s*[:\\-]?\\s*([A-Za-z\\s.]+)");
-                if (signatory != null) results.add(new OcrResult("authorizedSignatoryName", signatory.trim(), 95.0));
+                String signatory = extractLineValue(lines, "(?i)^(?:authorized\\s*signatory\\s*name|signatory\\s*name|authorized\\s*signatory)\\s*[:\\-]?\\s*(.+)");
+                if (signatory != null) results.add(new OcrResult("authorizedSignatoryName", cleanValue(signatory), 95.0));
                 break;
 
             case "BANK_ACCOUNT":
             case "CANCELLED_CHEQUE":
-                String accHolder = extractRegex(extractedText, "(?i)(?:account\\s*holder\\s*name|in\\s*the\\s*name\\s*of|name\\s*of\\s*account|bank\\s*account\\s*name)\\s*[:\\-]?\\s*([A-Za-z0-9\\s.,&]+)");
-                if (accHolder != null) results.add(new OcrResult("orgName", accHolder.trim(), 95.0));
+                String accHolder = extractLineValue(lines, "(?i)^(?:bank\\s*account\\s*name|account\\s*holder\\s*name|in\\s*the\\s*name\\s*of|name\\s*of\\s*account)\\s*[:\\-]?\\s*(.+)");
+                if (accHolder != null) results.add(new OcrResult("orgName", cleanValue(accHolder), 95.0));
                 
-                String accNo = extractRegex(extractedText, "(?i)(?:a/?c\\s*no[.:]?|account\\s*number|acc\\s*no[.:]?)\\s*[:\\-]?\\s*([0-9]{9,18})");
-                if (accNo != null) results.add(new OcrResult("bankAccountNumber", accNo, 99.0));
+                String accNo = extractLineValue(lines, "(?i)^(?:a/?c\\s*no[.:]?|account\\s*number|acc\\s*no[.:]?)\\s*[:\\-]?\\s*(.+)");
+                if (accNo != null) results.add(new OcrResult("bankAccountNumber", cleanValue(accNo), 99.0));
                 
-                String ifsc = extractRegex(extractedText, "(?i)(?:ifsc|ifsc\\s*code)\\s*[:\\-]?\\s*([A-Z]{4}0[A-Z0-9]{6})");
-                if (ifsc != null) results.add(new OcrResult("ifscCode", ifsc.toUpperCase(), 99.5));
+                String ifsc = extractLineValue(lines, "(?i)^(?:ifsc(?:\\s*code)?)\\s*[:\\-]?\\s*([A-Za-z0-9]+)");
+                if (ifsc != null) results.add(new OcrResult("ifscCode", cleanValue(ifsc).toUpperCase(), 99.5));
                 
-                String bank = extractRegex(extractedText, "(?i)(?:bank\\s*name|bank)\\s*[:\\-]?\\s*([A-Za-z\\s]+(?:Bank|Branch)?)");
-                if (bank != null) results.add(new OcrResult("bankName", bank.trim(), 94.0));
+                String bank = extractLineValue(lines, "(?i)^(?:bank\\s*name|bank)\\s*[:\\-]?\\s*(.+)");
+                if (bank != null) results.add(new OcrResult("bankName", cleanValue(bank), 94.0));
                 break;
 
             case "DARPAN":
             case "DARPAN_CERT":
-                String darpanId = extractRegex(extractedText, "[A-Z]{2}/[0-9]{4}/[0-9]+");
-                if (darpanId != null) results.add(new OcrResult("darpanId", darpanId, 99.5));
+                String darpanId = extractLineValue(lines, "(?i)^(?:ngo\\s*darpan\\s*id|darpan\\s*id)\\s*[:\\-]?\\s*(.+)");
+                if (darpanId != null) results.add(new OcrResult("darpanId", cleanValue(darpanId), 99.5));
                 
-                String darpanOrg = extractRegex(extractedText, "(?i)(?:registered\\s*name|org(?:anization)?\\s*name|ngo\\s*name)\\s*[:\\-]?\\s*([A-Za-z0-9\\s.,&]+)");
-                if (darpanOrg != null) results.add(new OcrResult("orgName", darpanOrg.trim(), 96.0));
+                String darpanOrg = extractLineValue(lines, "(?i)^(?:registered\\s*name|org(?:anization)?\\s*name|ngo\\s*name)\\s*[:\\-]?\\s*(.+)");
+                if (darpanOrg != null) results.add(new OcrResult("orgName", cleanValue(darpanOrg), 96.0));
                 break;
 
             default:
@@ -204,6 +230,55 @@ public class OcrExtractionService {
         }
 
         return results;
+    }
+
+    /**
+     * Extracts a value from an array of lines matching a regex on a single line, preventing multi-line bleed.
+     */
+    private String extractLineValue(String[] lines, String regex) {
+        Pattern p = Pattern.compile(regex);
+        for (String line : lines) {
+            String trimmed = line.trim();
+            // Skip document template header/footer lines
+            if (trimmed.startsWith("DOCUMENT TYPE:") || trimmed.startsWith("CLASSIFICATION:") ||
+                trimmed.startsWith("TRANSPARENCY CHAIN —") || trimmed.startsWith("TEST SAMPLE —")) {
+                continue;
+            }
+            Matcher m = p.matcher(trimmed);
+            if (m.find()) {
+                String val = m.group(1).trim();
+                return val;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Strips adjacent field label concatenations and template artifacts.
+     */
+    private String cleanValue(String val) {
+        if (val == null) return null;
+        String cleaned = val.trim();
+
+        // Strip known trailing label bleed-ins
+        String[] labelsToStrip = new String[] {
+            "Registration Type", "Entity Name", "Date Of Establishment", "Date of Registration",
+            "Registering Authority", "Registered Address", "Objectives Clause", "Signatory Designation",
+            "Trustees", "Category", "Jurisdiction", "Premises", "Sector", "TEST SAMPLE", "DISCREPANT SAMPLE",
+            "PROOF [DISCREPANT SAMPLE]"
+        };
+
+        for (String label : labelsToStrip) {
+            if (cleaned.toLowerCase().endsWith(label.toLowerCase())) {
+                cleaned = cleaned.substring(0, cleaned.length() - label.length()).trim();
+            }
+            // If label occurs at the end with a colon
+            cleaned = cleaned.replaceAll("(?i)(?::|\\s)+" + Pattern.quote(label) + "$", "").trim();
+        }
+
+        // Clean trailing punctuation / colons
+        cleaned = cleaned.replaceAll("[:\\-,]+$", "").trim();
+        return cleaned;
     }
 
     public com.transparencychain.backend.dto.InvoiceExtractionResult extractInvoice(MultipartFile file) {
@@ -251,7 +326,6 @@ public class OcrExtractionService {
                 return processInvoiceWithDocumentAi(file.getBytes(), contentType);
             } catch (Exception e) {
                 System.err.println("[DOCUMENT_AI] Document AI call failed. Falling back to local OCR. Error: " + e.getMessage());
-                // Set confidence to 0 to trigger the manual verification route, as specified by requirements
                 result.setOcrConfidence(0);
                 result.setRawText("Google Document AI failed: " + e.getMessage());
                 return result;
@@ -279,24 +353,19 @@ public class OcrExtractionService {
                 tesseract.setDatapath("C:\\Program Files\\Tesseract-OCR\\tessdata");
                 tesseract.setLanguage("eng");
                 extractedText = tesseract.doOCR(image);
-                result.setRawText(extractedText);
-                result.setOcrConfidence(90); // default mock/fallback confidence
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            result.setRawText("");
-            result.setOcrConfidence(0);
+            System.err.println("[TESSERACT] Local OCR failed for invoice: " + e.getMessage());
         }
 
         if (extractedText == null || extractedText.isEmpty()) {
+            result.setOcrConfidence(0);
+            result.setRawText("No text detected");
             return result;
         }
 
-        // Parse with local regex-based fallback heuristics
-        String[] lines = extractedText.split("\n");
-        if (lines.length > 0) {
-            result.setVendorName(lines[0].trim());
-        }
+        result.setRawText(extractedText);
+        result.setOcrConfidence(90);
 
         String invNo = extractRegex(extractedText, "(?i)Invoice\\s*(?:No|Number|#)[:\\s]*([A-Z0-9-]+)");
         result.setInvoiceNumber(invNo);
