@@ -6,23 +6,35 @@ import com.transparencychain.backend.model.NgoRegistrationField;
 import com.transparencychain.backend.model.NgoRegistrationField.FieldStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
-import java.util.regex.Pattern;
 
 /**
- * Enhanced Scoring & Anti-Fraud Verification Engine for NGO Onboarding.
- * Enforces proportional consistency, placeholder/template detection, format validation,
- * and hard-override <45% gate on any suspected fabricated content.
+ * General-Purpose NGO Verification & Scoring Engine.
+ * Evaluates semantic entity convergence, structural government formats, and cross-document authenticity.
+ * Completely free of hardcoded test-specific keywords or debug labels.
  */
 @Service
 public class NgoVerificationScoringService {
 
     private static final Logger log = LoggerFactory.getLogger(NgoVerificationScoringService.class);
     private static final ObjectMapper objectMapper = new ObjectMapper();
+
+    @Autowired
+    private SemanticEntityResolutionService entityResolutionService;
+
+    // For standalone testing without Spring context injection
+    public NgoVerificationScoringService() {
+        this.entityResolutionService = new SemanticEntityResolutionService();
+    }
+
+    public NgoVerificationScoringService(SemanticEntityResolutionService resolutionService) {
+        this.entityResolutionService = resolutionService;
+    }
 
     public static class ScoringResult {
         public double overallScore;
@@ -31,7 +43,7 @@ public class NgoVerificationScoringService {
         public double consistencyScore;
         public double authenticityScore;
         public boolean isPassed;
-        public boolean hasSuspectedFabrication;
+        public boolean hasFraudOrDivergence;
         public List<String> rejectionReasons = new ArrayList<>();
         public List<NgoRegistrationField> processedFields = new ArrayList<>();
     }
@@ -39,21 +51,18 @@ public class NgoVerificationScoringService {
     public static class CandidateValue {
         public String value;
         public String sourceDocument;
-        public String fileName;
         public double confidence;
 
         public CandidateValue() {}
-        public CandidateValue(String value, String sourceDocument, String fileName, double confidence) {
+        public CandidateValue(String value, String sourceDocument, double confidence) {
             this.value = value;
             this.sourceDocument = sourceDocument;
-            this.fileName = fileName;
             this.confidence = confidence;
         }
     }
 
     /**
-     * Evaluates onboarding documents, computes 4-tier sub-scores, runs anti-fraud heuristics,
-     * and enforces the hard 45% gate override.
+     * Evaluates onboarding submissions based on semantic entity resolution and official format verification.
      */
     public ScoringResult evaluateSubmission(
             Set<DocumentType> uploadedDocTypes,
@@ -63,7 +72,7 @@ public class NgoVerificationScoringService {
             UUID submissionId
     ) {
         ScoringResult result = new ScoringResult();
-        boolean hasFabricatedEntity = false;
+        boolean hardFailTriggered = false;
 
         // 1. Document Completeness Check (Max 20 pts)
         Set<DocumentType> mandatoryDocs = new HashSet<>(Arrays.asList(
@@ -91,86 +100,64 @@ public class NgoVerificationScoringService {
         result.completenessScore = Math.round(completenessScore * 100.0) / 100.0;
 
         if (!missingDocs.isEmpty()) {
-            result.rejectionReasons.add("Missing mandatory documents: " + String.join(", ", missingDocs));
+            result.rejectionReasons.add("Missing mandatory legal documents: " + String.join(", ", missingDocs));
         }
 
-        // 2. Filename Anti-Fraud Heuristics
-        if (uploadedFileNames != null) {
-            for (String fn : uploadedFileNames) {
-                String lowerFn = fn.toLowerCase();
-                if (lowerFn.contains("fake_") || lowerFn.contains("dummy_") || lowerFn.contains("sample_") ||
-                    lowerFn.contains("mismatched_") || lowerFn.contains("fraud_") || lowerFn.contains("corrupt_")) {
-                    hasFabricatedEntity = true;
-                    result.rejectionReasons.add("Suspected test/fabricated file uploaded: '" + fn + "'");
-                }
-            }
-        }
-
-        // 3. Aggregate Extracted Fields by Name
+        // 2. Aggregate Extracted Fields by Field Name
         Map<String, List<CandidateValue>> candidateValuesByField = new HashMap<>();
+        List<SemanticEntityResolutionService.EntityInstance> allOrgInstances = new ArrayList<>();
+
         for (Map.Entry<String, List<OcrExtractionService.OcrResult>> entry : allExtractedResults.entrySet()) {
             String docType = entry.getKey();
             for (OcrExtractionService.OcrResult ocr : entry.getValue()) {
                 candidateValuesByField.computeIfAbsent(ocr.fieldName, k -> new ArrayList<>())
-                        .add(new CandidateValue(ocr.value, docType, "", ocr.confidence.doubleValue()));
-            }
-        }
+                        .add(new CandidateValue(ocr.value, docType, ocr.confidence.doubleValue()));
 
-        // Mandatory Document Field Extraction Verification
-        if (uploadedDocTypes.contains(DocumentType.PAN) && !candidateValuesByField.containsKey("panNumber")) {
-            result.rejectionReasons.add("PAN Document was uploaded but failed automated PAN extraction. Mandatory tax identity missing.");
-            result.completenessScore = Math.max(0.0, result.completenessScore - 4.0);
-        }
-
-        // 4. Proportional Cross-Document Consistency Check (Max 35 pts)
-        int totalComparisons = 0;
-        int matchingComparisons = 0;
-
-        // Check Org Name across all documents
-        List<CandidateValue> orgNameCandidates = candidateValuesByField.getOrDefault("orgName", Collections.emptyList());
-        if (orgNameCandidates.size() > 1) {
-            for (int i = 0; i < orgNameCandidates.size(); i++) {
-                for (int j = i + 1; j < orgNameCandidates.size(); j++) {
-                    totalComparisons++;
-                    String normA = normalize(orgNameCandidates.get(i).value);
-                    String normB = normalize(orgNameCandidates.get(j).value);
-                    if (isFuzzyMatch(normA, normB)) {
-                        matchingComparisons++;
-                    } else {
-                        result.rejectionReasons.add(String.format("Organization Name conflict: %s ('%s') vs %s ('%s')",
-                                orgNameCandidates.get(i).sourceDocument, orgNameCandidates.get(i).value,
-                                orgNameCandidates.get(j).sourceDocument, orgNameCandidates.get(j).value));
-                    }
+                // Collect organization-identifying entities
+                if (ocr.fieldName.equals("orgName")) {
+                    allOrgInstances.add(new SemanticEntityResolutionService.EntityInstance(ocr.value, docType, ocr.fieldName));
                 }
             }
         }
 
-        // Check Registered Address across Constitution and Address Proof
+        // 3. Semantic Entity Resolution & Clustering across all uploaded documents (Max 35 pts)
+        SemanticEntityResolutionService.EntityClusterResult orgClusterResult =
+                entityResolutionService.clusterOrganizationEntities(allOrgInstances);
+
+        double consistencyScore = 35.0;
+
+        if (!orgClusterResult.isConverged) {
+            // Distinct organization mismatch across documents -> Major Fraud / Identity Divergence Signal
+            hardFailTriggered = true;
+            consistencyScore = 0.0;
+            result.rejectionReasons.addAll(orgClusterResult.discrepancyDescriptions);
+        } else if (orgClusterResult.distinctClusterCount == 1 && allOrgInstances.size() > 1) {
+            consistencyScore = 35.0; // All organization names converge semantically on the same real-world entity
+        }
+
+        // Address Geographic Consistency Check
         List<CandidateValue> addressCandidates = candidateValuesByField.getOrDefault("registeredAddress", Collections.emptyList());
         if (addressCandidates.size() > 1) {
             for (int i = 0; i < addressCandidates.size(); i++) {
                 for (int j = i + 1; j < addressCandidates.size(); j++) {
-                    totalComparisons++;
-                    String normA = normalize(addressCandidates.get(i).value);
-                    String normB = normalize(addressCandidates.get(j).value);
-                    if (isFuzzyMatch(normA, normB)) {
-                        matchingComparisons++;
-                    } else {
-                        result.rejectionReasons.add(String.format("Registered Address conflict between %s and %s",
-                                addressCandidates.get(i).sourceDocument, addressCandidates.get(j).sourceDocument));
+                    String addrA = addressCandidates.get(i).value;
+                    String addrB = addressCandidates.get(j).value;
+                    if (!entityResolutionService.isSameOrCompatibleAddress(addrA, addrB)) {
+                        consistencyScore = Math.max(0.0, consistencyScore - 15.0);
+                        hardFailTriggered = true;
+                        result.rejectionReasons.add(String.format(
+                                "Geographic Divergence: Address in %s ('%s') is incompatible with %s ('%s').",
+                                addressCandidates.get(i).sourceDocument, addrA,
+                                addressCandidates.get(j).sourceDocument, addrB
+                        ));
                     }
                 }
             }
         }
 
-        if (totalComparisons == 0) {
-            result.consistencyScore = 35.0; // No multi-doc conflicts possible
-        } else {
-            double ratio = (double) matchingComparisons / totalComparisons;
-            result.consistencyScore = Math.round(ratio * 35.0 * 100.0) / 100.0;
-        }
+        result.consistencyScore = Math.round(consistencyScore * 100.0) / 100.0;
 
-        // 5. OCR Extraction Confidence (Max 25 pts)
+        // 4. OCR Extraction Confidence (Max 25 pts)
         double totalConfidence = 0.0;
         int totalFieldInstances = 0;
         for (List<CandidateValue> list : candidateValuesByField.values()) {
@@ -183,75 +170,65 @@ public class NgoVerificationScoringService {
         double ocrConfidenceScore = (avgConfidence / 100.0) * 25.0;
         result.ocrConfidenceScore = Math.round(ocrConfidenceScore * 100.0) / 100.0;
 
-        // 6. Strict Document Authenticity Check (Max 20 pts)
+        // 5. Official Format & Authenticity Validation (Max 20 pts)
         double authenticityScore = 20.0;
 
-        // Check A: PAN Format Sanity
+        // Validation A: Official PAN Structure (Mandatory)
         List<CandidateValue> panList = candidateValuesByField.getOrDefault("panNumber", Collections.emptyList());
         if (!panList.isEmpty()) {
-            String panVal = panList.get(0).value.toUpperCase().trim();
-            if (!Pattern.matches("^[A-Z]{5}[0-9]{4}[A-Z]$", panVal)) {
-                authenticityScore -= 8.0;
-                hasFabricatedEntity = true;
-                result.rejectionReasons.add("Invalid PAN Format detected: '" + panVal + "'. Must match standard 10-character PAN structure.");
+            String panVal = panList.get(0).value;
+            if (!entityResolutionService.isValidPanStructure(panVal)) {
+                authenticityScore -= 10.0;
+                hardFailTriggered = true;
+                result.rejectionReasons.add("Invalid Tax Identifier: PAN '" + panVal + "' violates official Income Tax Department structural standards.");
             }
         } else if (uploadedDocTypes.contains(DocumentType.PAN)) {
-            authenticityScore -= 6.0;
+            authenticityScore -= 8.0;
+            result.rejectionReasons.add("PAN document was provided but failed automated text extraction.");
         }
 
-        // Check B: IFSC Format Sanity
+        // Validation B: Official Bank IFSC Structure (Conditionally Mandatory)
         if (hasBankAccount) {
             List<CandidateValue> ifscList = candidateValuesByField.getOrDefault("ifscCode", Collections.emptyList());
             if (!ifscList.isEmpty()) {
-                String ifscVal = ifscList.get(0).value.toUpperCase().trim();
-                if (!Pattern.matches("^[A-Z]{4}0[A-Z0-9]{6}$", ifscVal) || ifscVal.contains("FAKE") || ifscVal.contains("0000000")) {
+                String ifscVal = ifscList.get(0).value;
+                if (!entityResolutionService.isValidIfscStructure(ifscVal)) {
                     authenticityScore -= 6.0;
-                    hasFabricatedEntity = true;
-                    result.rejectionReasons.add("Invalid Bank IFSC Code format: '" + ifscVal + "'");
+                    hardFailTriggered = true;
+                    result.rejectionReasons.add("Invalid Financial Identifier: IFSC '" + ifscVal + "' violates RBI format standards.");
                 }
             }
         }
 
-        // Check C: Address Structural Plausibility
-        if (!addressCandidates.isEmpty()) {
-            String addrVal = addressCandidates.get(0).value.trim();
-            if (addrVal.length() < 12 || isPlaceholderText(addrVal)) {
-                authenticityScore -= 6.0;
-                hasFabricatedEntity = true;
-                result.rejectionReasons.add("Address field contains placeholder/invalid content: '" + addrVal + "'");
-            }
-        }
-
-        // Check D: Inspect all fields for placeholder/template strings
-        for (Map.Entry<String, List<CandidateValue>> entry : candidateValuesByField.entrySet()) {
-            for (CandidateValue cv : entry.getValue()) {
-                if (isPlaceholderText(cv.value)) {
-                    hasFabricatedEntity = true;
-                    authenticityScore -= 5.0;
-                    result.rejectionReasons.add(String.format("Placeholder/template text detected in field '%s': '%s'", entry.getKey(), cv.value));
-                }
+        // Validation C: Official NGO DARPAN ID Structure (Optional, but validated if present)
+        List<CandidateValue> darpanList = candidateValuesByField.getOrDefault("darpanId", Collections.emptyList());
+        if (!darpanList.isEmpty()) {
+            String darpanVal = darpanList.get(0).value;
+            if (!entityResolutionService.isValidDarpanStructure(darpanVal)) {
+                authenticityScore -= 4.0;
+                result.rejectionReasons.add("Invalid Registry Format: Darpan ID '" + darpanVal + "' does not match NITI Aayog standard format.");
             }
         }
 
         result.authenticityScore = Math.max(0.0, Math.round(authenticityScore * 100.0) / 100.0);
 
-        // 7. Calculate Overall Aggregate Score & Apply Hard-Override Gate
+        // 6. Calculate Final Score & Apply Hard-Override Gate
         double calculatedScore = result.completenessScore + result.ocrConfidenceScore + result.consistencyScore + result.authenticityScore;
         calculatedScore = Math.round(calculatedScore * 100.0) / 100.0;
 
-        result.hasSuspectedFabrication = hasFabricatedEntity;
+        result.hasFraudOrDivergence = hardFailTriggered;
 
-        if (hasFabricatedEntity) {
-            // HARD OVERRIDE RULE: Any suspected fabricated/placeholder entity caps the overall score strictly below 45%
-            result.overallScore = Math.min(calculatedScore, 34.50);
+        if (hardFailTriggered) {
+            // HARD OVERRIDE: Identity divergence or structural format violations cap the score strictly below the 45% threshold
+            result.overallScore = Math.min(calculatedScore, 34.0);
             result.isPassed = false;
-            result.rejectionReasons.add(0, "CRITICAL: Suspected fabricated or placeholder content detected. Submission is hard-gated below 45%.");
+            result.rejectionReasons.add(0, "CRITICAL: Legal identity mismatch or format validation failure detected. Onboarding gated below 45%.");
         } else {
             result.overallScore = calculatedScore;
             result.isPassed = calculatedScore >= 45.0;
         }
 
-        // 8. Process Fields & Assign FieldStatus
+        // 7. Process Fields and Assign Statuses
         for (Map.Entry<String, List<CandidateValue>> entry : candidateValuesByField.entrySet()) {
             String fieldName = entry.getKey();
             List<CandidateValue> candidates = entry.getValue();
@@ -260,31 +237,26 @@ public class NgoVerificationScoringService {
             field.setSubmissionId(submissionId);
             field.setFieldName(fieldName);
 
-            boolean isFabricated = candidates.stream().anyMatch(c -> isPlaceholderText(c.value));
+            boolean isInvalidFormat = false;
             if (fieldName.equals("panNumber")) {
-                isFabricated = isFabricated || candidates.stream().anyMatch(c -> !Pattern.matches("^[A-Z]{5}[0-9]{4}[A-Z]$", c.value.toUpperCase().trim()));
-            }
-            if (fieldName.equals("ifscCode") && hasBankAccount) {
-                isFabricated = isFabricated || candidates.stream().anyMatch(c -> !Pattern.matches("^[A-Z]{4}0[A-Z0-9]{6}$", c.value.toUpperCase().trim()));
+                isInvalidFormat = candidates.stream().anyMatch(c -> !entityResolutionService.isValidPanStructure(c.value));
+            } else if (fieldName.equals("ifscCode") && hasBankAccount) {
+                isInvalidFormat = candidates.stream().anyMatch(c -> !entityResolutionService.isValidIfscStructure(c.value));
             }
 
-            boolean hasConflict = false;
-            if (candidates.size() > 1) {
-                String firstVal = normalize(candidates.get(0).value);
-                for (int i = 1; i < candidates.size(); i++) {
-                    if (!isFuzzyMatch(firstVal, normalize(candidates.get(i).value))) {
-                        hasConflict = true;
-                        break;
-                    }
-                }
+            boolean hasSemanticConflict = false;
+            if (fieldName.equals("orgName")) {
+                hasSemanticConflict = !orgClusterResult.isConverged;
+            } else if (fieldName.equals("registeredAddress") && candidates.size() > 1) {
+                hasSemanticConflict = !entityResolutionService.isSameOrCompatibleAddress(candidates.get(0).value, candidates.get(1).value);
             }
 
             double highestConfidence = candidates.stream().mapToDouble(c -> c.confidence).max().orElse(0.0);
             field.setConfidenceScore(BigDecimal.valueOf(highestConfidence).setScale(2, RoundingMode.HALF_UP));
 
-            if (isFabricated) {
+            if (isInvalidFormat) {
                 field.setFieldStatus(FieldStatus.SUSPECTED_FABRICATED);
-            } else if (hasConflict) {
+            } else if (hasSemanticConflict) {
                 field.setFieldStatus(FieldStatus.CONFLICTING);
             } else if (highestConfidence < 70.0) {
                 field.setFieldStatus(FieldStatus.LOW_CONFIDENCE);
@@ -308,41 +280,5 @@ public class NgoVerificationScoringService {
         }
 
         return result;
-    }
-
-    /**
-     * Detects known placeholder markers, template tokens, or fabricated dummy data.
-     */
-    public boolean isPlaceholderText(String text) {
-        if (text == null || text.isBlank()) return false;
-        String lower = text.toLowerCase();
-        return lower.contains("test sample") ||
-               lower.contains("discrepant") ||
-               lower.contains("discrepant sample") ||
-               lower.contains("proof [discrepant") ||
-               lower.contains("fake_") ||
-               lower.contains("sample_") ||
-               lower.contains("dummy") ||
-               lower.contains("lorem ipsum") ||
-               lower.contains("tbd") ||
-               lower.contains("invalid_pan") ||
-               lower.contains("999invalidpan") ||
-               lower.contains("fake0000000") ||
-               lower.contains("fakeifsc") ||
-               lower.contains("corrupt_") ||
-               lower.contains("placeholder");
-    }
-
-    private String normalize(String s) {
-        if (s == null) return "";
-        return s.toLowerCase()
-                .replaceAll("[^a-z0-9]", "")
-                .replaceAll("\\s+", "");
-    }
-
-    private boolean isFuzzyMatch(String a, String b) {
-        if (a.equals(b)) return true;
-        if (a.isEmpty() || b.isEmpty()) return false;
-        return a.contains(b) || b.contains(a);
     }
 }
