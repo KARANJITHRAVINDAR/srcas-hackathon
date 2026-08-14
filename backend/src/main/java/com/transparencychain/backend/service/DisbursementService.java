@@ -36,9 +36,11 @@ public class DisbursementService {
         Project project = projectRepository.findById(projectId).orElse(null);
         Milestone milestone = milestoneRepository.findById(milestoneId).orElse(null);
 
-        // 1. Update Milestone Status to DISBURSED, update releasedAmount & unlock next sequential milestone
+        // 1. Update Milestone status & fundsTransferred, update releasedAmount & unlock next sequential milestone
         if (milestone != null) {
-            milestone.setStatus(Milestone.MilestoneStatus.DISBURSED);
+            if (milestone.getStatus() != Milestone.MilestoneStatus.COMPLETED && milestone.getStatus() != Milestone.MilestoneStatus.VERIFIED) {
+                milestone.setStatus(Milestone.MilestoneStatus.IN_PROGRESS);
+            }
             milestone.setFundsTransferred(true);
             milestone.setFundsTransferredAt(java.time.LocalDateTime.now());
             if (txHash != null && !txHash.isBlank()) {

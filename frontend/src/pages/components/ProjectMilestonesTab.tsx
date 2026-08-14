@@ -597,8 +597,37 @@ function MilestoneDetailView({ project, milestoneId, onBack, user }: { project: 
                 ) : (() => {
                     const sorted = [...allMilestones].sort((a, b) => (a.sequenceNumber || 0) - (b.sequenceNumber || 0));
                     const prev = sorted.find((m: any) => (m.sequenceNumber || 0) === (milestone.sequenceNumber || 0) - 1);
-                    const isSeqLocked = prev && prev.status !== 'COMPLETED';
+                    const isSeqLocked = prev && prev.status !== 'COMPLETED' && prev.status !== 'VERIFIED';
+                    const isFundsTransferred = milestone.fundsTransferred === true || milestone.funds_transferred === true;
 
+                    // 1. Closure milestones have separate closure-condition flow (beneficiary feedback + closure video)
+                    if (milestone.milestoneType === 'CLOSURE') {
+                        return null;
+                    }
+
+                    // 2. Completed / Verified milestones
+                    if (milestone.status === 'COMPLETED' || milestone.status === 'VERIFIED') {
+                        return (
+                            <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-6 w-full flex justify-between items-center">
+                                <div className="flex items-center gap-2 text-emerald-700 font-bold">
+                                    <CheckCircle2 className="w-5 h-5" /> Milestone Completed & Verified
+                                </div>
+                            </div>
+                        );
+                    }
+
+                    // 3. Evidence submitted, awaiting funder review & verification
+                    if (milestone.status === 'AWAITING_FUNDER_APPROVAL' || milestone.status === 'UNDER_REVIEW' || milestone.status === 'READY_FOR_APPROVAL') {
+                        return (
+                            <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 w-full flex justify-between items-center text-blue-800 font-bold text-sm">
+                                <div className="flex items-center gap-2">
+                                    <Clock className="w-5 h-5 text-blue-600" /> Evidence Submitted — Awaiting Funder Review & Verification
+                                </div>
+                            </div>
+                        );
+                    }
+
+                    // 4. Sequential locked or milestone locked
                     if (isSeqLocked || milestone.status === 'LOCKED') {
                         return (
                             <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 w-full flex justify-between items-center text-slate-500 font-bold text-sm">
@@ -609,24 +638,30 @@ function MilestoneDetailView({ project, milestoneId, onBack, user }: { project: 
                         );
                     }
 
-                    if (milestone.status === 'VERIFIED' || milestone.status === 'COMPLETED' || milestone.status === 'DISBURSED') {
+                    // 5. In progress but funds not yet transferred
+                    if (milestone.status === 'IN_PROGRESS' && !isFundsTransferred) {
                         return (
-                            <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-6 w-full flex justify-between items-center">
-                                <div className="flex items-center gap-2 text-emerald-700 font-bold">
-                                    <CheckCircle2 className="w-5 h-5" /> Milestone Verified & Funds Released
+                            <div className="bg-amber-50 border border-amber-200 rounded-xl p-6 w-full flex justify-between items-center text-amber-800 font-bold text-sm">
+                                <div className="flex items-center gap-2">
+                                    <Clock className="w-5 h-5 text-amber-600" /> Milestone In Progress — Awaiting Fund Disbursement Before Evidence Submission
                                 </div>
                             </div>
                         );
                     }
 
-                    return (
-                        <button
-                            onClick={() => setShowProofModal(true)}
-                            className={`${isClarificationPending ? 'bg-amber-600 hover:bg-amber-700' : 'bg-emerald-600 hover:bg-emerald-700'} text-white px-6 py-3 rounded-lg font-bold transition shadow-sm flex items-center gap-2`}
-                        >
-                            <Upload className="w-5 h-5" /> {isClarificationPending ? 'Submit Clarification & Updated Evidence' : 'Submit Evidence for Milestone Verification'}
-                        </button>
-                    );
+                    // 6. Active IN_PROGRESS milestone with funds transferred
+                    if (milestone.status === 'IN_PROGRESS' && isFundsTransferred) {
+                        return (
+                            <button
+                                onClick={() => setShowProofModal(true)}
+                                className={`${isClarificationPending ? 'bg-amber-600 hover:bg-amber-700' : 'bg-emerald-600 hover:bg-emerald-700'} text-white px-6 py-3 rounded-lg font-bold transition shadow-sm flex items-center gap-2`}
+                            >
+                                <Upload className="w-5 h-5" /> {isClarificationPending ? 'Submit Clarification & Updated Evidence' : 'Submit Evidence for Milestone Verification'}
+                            </button>
+                        );
+                    }
+
+                    return null;
                 })()}
             </div>
 

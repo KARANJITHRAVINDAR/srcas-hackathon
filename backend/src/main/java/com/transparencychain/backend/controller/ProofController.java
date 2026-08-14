@@ -81,15 +81,27 @@ public class ProofController {
         Milestone milestone = milestoneRepository.findById(milestoneId)
                 .orElseThrow(() -> new RuntimeException("Milestone not found"));
         
-        if (milestone.getStatus() == Milestone.MilestoneStatus.LOCKED) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Cannot submit evidence for a locked milestone. Please complete earlier milestones first."));
+        // 1. Closure milestone guard: Closure milestones use beneficiary feedback + geo-tagged closure video
+        if (milestone.getMilestoneType() == Milestone.MilestoneType.CLOSURE) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Closure milestones require beneficiary feedback and geo-tagged closure video, and cannot accept standard milestone evidence."));
         }
 
-        // Sequential progression guard: Milestone N can only receive evidence if all prior milestones 1..(N-1) are COMPLETED
-        if (milestone.getProject() != null && milestone.getSequenceNumber() > 1) {
+        // 2. Status guard: Milestone must be currently IN_PROGRESS
+        if (milestone.getStatus() != Milestone.MilestoneStatus.IN_PROGRESS) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Cannot submit evidence for milestone in status: " + milestone.getStatus() + ". Milestone must be IN_PROGRESS."));
+        }
+
+        // 3. Disbursement guard: Funds for this milestone must be disbursed before evidence can be submitted
+        if (!Boolean.TRUE.equals(milestone.getFundsTransferred())) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Cannot submit evidence for Milestone " + milestone.getSequenceNumber() + " ('" + milestone.getTitle() + "') because funds have not yet been disbursed for this milestone."));
+        }
+
+        // 4. Sequential progression guard: Milestone N can only receive evidence if all prior milestones 1..(N-1) are COMPLETED
+        if (milestone.getProject() != null && milestone.getSequenceNumber() != null && milestone.getSequenceNumber() > 1) {
             List<Milestone> projectMilestones = milestoneRepository.findByProjectId(milestone.getProject().getId());
             for (Milestone m : projectMilestones) {
-                if (m.getSequenceNumber() < milestone.getSequenceNumber() && m.getStatus() != Milestone.MilestoneStatus.COMPLETED) {
+                if (m.getSequenceNumber() != null && m.getSequenceNumber() < milestone.getSequenceNumber() 
+                        && m.getStatus() != Milestone.MilestoneStatus.COMPLETED && m.getStatus() != Milestone.MilestoneStatus.VERIFIED) {
                     return ResponseEntity.badRequest().body(new MessageResponse("Cannot submit evidence for Milestone " + milestone.getSequenceNumber() + ". Previous Milestone " + m.getSequenceNumber() + " ('" + m.getTitle() + "') must be COMPLETED first."));
                 }
             }
@@ -245,8 +257,16 @@ public class ProofController {
         Milestone milestone = milestoneRepository.findById(milestoneId).orElseThrow();
         MilestoneTask task = milestoneTaskRepository.findById(taskId).orElseThrow();
         
-        if (milestone.getStatus() == Milestone.MilestoneStatus.LOCKED) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Cannot submit evidence for a locked milestone. Please complete earlier milestones first."));
+        if (milestone.getMilestoneType() == Milestone.MilestoneType.CLOSURE) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Closure milestones require beneficiary feedback and geo-tagged closure video, and cannot accept standard milestone evidence."));
+        }
+
+        if (milestone.getStatus() != Milestone.MilestoneStatus.IN_PROGRESS) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Cannot submit evidence for milestone in status: " + milestone.getStatus() + ". Milestone must be IN_PROGRESS."));
+        }
+
+        if (!Boolean.TRUE.equals(milestone.getFundsTransferred())) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Cannot submit evidence for Milestone " + milestone.getSequenceNumber() + " ('" + milestone.getTitle() + "') because funds have not yet been disbursed for this milestone."));
         }
         
         String savedFileName;
