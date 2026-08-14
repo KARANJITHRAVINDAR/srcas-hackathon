@@ -34,6 +34,9 @@ public class PublicBeneficiaryFormController {
     @Autowired
     private com.transparencychain.backend.service.ImpactGenerationService impactGenerationService;
 
+    @Autowired
+    private com.transparencychain.backend.service.NotificationService notificationService;
+
     @GetMapping("/{secureToken}")
     public ResponseEntity<?> getForm(@PathVariable String secureToken) {
         BeneficiaryVerificationForm form = formRepository.findByShareToken(secureToken).orElse(null);
@@ -133,6 +136,33 @@ public class PublicBeneficiaryFormController {
                 auditLogService.logAction(milestone.getId(), "MILESTONE_AUTO_COMPLETE",
                         "Milestone automatically moved to IN_REVIEW due to beneficiary YES confirmation");
             }
+        }
+
+        // Notify NGO & Funders of beneficiary feedback
+        try {
+            if (form.getProject().getNgo() != null && form.getProject().getNgo().getUser() != null) {
+                notificationService.create(
+                        Notification.RecipientType.NGO,
+                        form.getProject().getNgo().getUser(),
+                        form.getProject(),
+                        form.getMilestone(),
+                        Notification.NotificationEventType.BENEFICIARY_FEEDBACK_SUBMITTED,
+                        "New Beneficiary Feedback Recorded",
+                        "Ground beneficiary submitted verification response (Status: " + (hasNo ? "Disputed" : "Confirmed") + ") for project '" + form.getProject().getTitle() + "'.",
+                        "/ngo/projects/" + form.getProject().getId()
+                );
+            }
+
+            notificationService.notifyProjectFunders(
+                    form.getProject(),
+                    form.getMilestone(),
+                    Notification.NotificationEventType.BENEFICIARY_FEEDBACK_SUBMITTED,
+                    "Beneficiary Verification Feedback Received",
+                    "A ground beneficiary submitted confirmation feedback for project '" + form.getProject().getTitle() + "'.",
+                    "/funder/projects"
+            );
+        } catch (Exception ex) {
+            System.err.println("Beneficiary notification dispatch warning: " + ex.getMessage());
         }
 
         return ResponseEntity.ok(Map.of("message", "Response submitted successfully"));

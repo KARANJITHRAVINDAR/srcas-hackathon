@@ -38,6 +38,7 @@ public class MilestoneNegotiationService {
     @Autowired private FundingCommitmentRepository fundingCommitmentRepository;
     @Autowired private AuditLogService auditLogService;
     @Autowired private DisbursementService disbursementService;
+    @Autowired private NotificationService notificationService;
 
     // =========================================================================
     // ORG-SIDE OPERATIONS
@@ -181,6 +182,20 @@ public class MilestoneNegotiationService {
                 + " | originalVersionId=" + originalVersion.getId()
                 + " | proposedVersionId=" + proposedVersion.getId()
                 + " | reason=" + body.getReason());
+
+        // Notify NGO
+        if (milestone.getProject() != null && milestone.getProject().getNgo() != null && milestone.getProject().getNgo().getUser() != null) {
+            notificationService.create(
+                    Notification.RecipientType.NGO,
+                    milestone.getProject().getNgo().getUser(),
+                    milestone.getProject(),
+                    milestone,
+                    Notification.NotificationEventType.CHANGE_REQUEST_PROPOSED,
+                    "Milestone Change Proposed",
+                    "Funder proposed changes to '" + milestone.getTitle() + "': \"" + body.getReason() + "\"",
+                    "/ngo/projects/" + milestone.getProject().getId()
+            );
+        }
 
         return toDto(cr);
     }
@@ -449,6 +464,20 @@ public class MilestoneNegotiationService {
         project.setStatus(Project.ProjectStatus.ACTIVE);
         projectRepository.save(project);
 
+        // Notify NGO of funding commitment & Phase 1 mobilization
+        if (project.getNgo() != null && project.getNgo().getUser() != null) {
+            notificationService.create(
+                    Notification.RecipientType.NGO,
+                    project.getNgo().getUser(),
+                    project,
+                    !milestones.isEmpty() ? milestones.get(0) : null,
+                    Notification.NotificationEventType.FUNDING_COMMITTED,
+                    "Project Funded & Phase 1 Mobilized! 🚀",
+                    "Funder committed full milestone funding to '" + project.getTitle() + "' and unlocked Phase 1.",
+                    "/ngo/projects/" + project.getId()
+            );
+        }
+
         auditLogService.logAction(
                 projectId,
                 "ALL_MILESTONES_ACCEPTED_AND_LOCKED",
@@ -609,6 +638,20 @@ public class MilestoneNegotiationService {
                 "NGO " + ngoUserId + " responded to CR " + crId
                 + " with decision: " + body.getDecision()
                 + (body.getResponseNote() != null ? " | note: " + body.getResponseNote() : ""));
+
+        // Notify Funder
+        if (cr.getRequestedByOrg() != null && cr.getRequestedByOrg().getUser() != null) {
+            notificationService.create(
+                    Notification.RecipientType.FUNDER,
+                    cr.getRequestedByOrg().getUser(),
+                    cr.getMilestone().getProject(),
+                    cr.getMilestone(),
+                    Notification.NotificationEventType.CHANGE_REQUEST_RESPONDED,
+                    "Milestone Proposal " + body.getDecision(),
+                    "NGO " + body.getDecision().name().toLowerCase() + "ed your proposed changes for '" + cr.getMilestone().getTitle() + "'.",
+                    "/funder/milestones"
+            );
+        }
 
         return toDto(cr);
     }

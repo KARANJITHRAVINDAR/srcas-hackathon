@@ -17,6 +17,7 @@ export default function FunderVerificationPage() {
     const [tickets, setTickets] = useState<any[]>([]);
     const [selectedTicket, setSelectedTicket] = useState<any>(null);
     const [ticketReviews, setTicketReviews] = useState<any[]>([]);
+    const [clarifications, setClarifications] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [comment, setComment] = useState('');
     const [submitting, setSubmitting] = useState(false);
@@ -29,11 +30,13 @@ export default function FunderVerificationPage() {
     const handleSelectTicket = async (ticket: any) => {
         setSelectedTicket(ticket);
         setTicketReviews([]);
+        setClarifications([]);
         if (!ticket) return;
         try {
             const res = await axios.get(`http://localhost:8081/api/org/tickets/${ticket.id}`);
-            if (res.data && res.data.reviews) {
-                setTicketReviews(res.data.reviews);
+            if (res.data) {
+                if (res.data.reviews) setTicketReviews(res.data.reviews);
+                if (res.data.clarifications) setClarifications(res.data.clarifications);
             }
         } catch (error) {
             console.error("Failed to fetch ticket reviews", error);
@@ -383,7 +386,68 @@ export default function FunderVerificationPage() {
                                     </div>
                                 )}
 
-                                {/* Section 3C: Historical Review History */}
+                                 {/* Section 3C: Clarification Rounds History */}
+                                 {clarifications.length > 0 && (
+                                     <div className="space-y-4 border-t border-[#DDE3EA] pt-6 animate-in fade-in duration-300">
+                                         <h3 className="text-sm font-bold uppercase tracking-wider text-amber-700 flex items-center gap-2">
+                                             <HelpCircle size={16} className="text-amber-600" />
+                                             Clarification Dialogue History ({clarifications.length})
+                                         </h3>
+                                         <div className="space-y-4">
+                                             {clarifications.map((c: any, index: number) => (
+                                                 <div key={c.id || index} className="border border-amber-200 rounded-2xl overflow-hidden shadow-sm bg-white">
+                                                     <div className="p-4 bg-amber-50/70 border-b border-amber-100 flex justify-between items-center">
+                                                         <div className="flex items-center gap-2">
+                                                             <span className="text-xs font-black text-amber-900 uppercase tracking-wider">Round {index + 1}</span>
+                                                             <span className="text-[11px] font-bold text-slate-500">
+                                                                 Asked by {c.funderUser?.fullName || 'Funder'} on {new Date(c.queryCreatedAt).toLocaleDateString()}
+                                                             </span>
+                                                         </div>
+                                                         <span className={`text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full ${
+                                                             c.status === 'ANSWERED' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800 animate-pulse'
+                                                         }`}>
+                                                             {c.status === 'ANSWERED' ? 'Clarification Answered' : 'Waiting for NGO Response'}
+                                                         </span>
+                                                     </div>
+                                                     <div className="p-4 space-y-3 text-xs">
+                                                         <div>
+                                                             <p className="font-bold text-slate-500 uppercase tracking-wider text-[10px]">Funder Query</p>
+                                                             <p className="font-semibold text-slate-800 mt-0.5 italic">"{c.funderQuery}"</p>
+                                                         </div>
+                                                         {c.status === 'ANSWERED' ? (
+                                                             <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                                                                 <div className="flex justify-between items-center">
+                                                                     <p className="font-bold text-emerald-700 uppercase tracking-wider text-[10px]">NGO Clarification Response</p>
+                                                                     <span className="text-[10px] text-slate-400 font-semibold">{new Date(c.answeredAt).toLocaleString()}</span>
+                                                                 </div>
+                                                                 <p className="text-slate-800 font-medium">{c.ngoAnswer || 'No written note attached.'}</p>
+                                                                 {c.ngoEvidence && (
+                                                                     <div className="pt-1">
+                                                                         <a
+                                                                             href={`http://localhost:8081/uploads/${c.ngoEvidence.fileUrl}`}
+                                                                             target="_blank"
+                                                                             rel="noopener noreferrer"
+                                                                             className="inline-flex items-center gap-1.5 bg-white border border-[#DDE3EA] hover:border-slate-400 text-slate-800 font-bold px-3 py-1.5 rounded-lg text-xs transition shadow-xs"
+                                                                         >
+                                                                             <FileText size={13} className="text-blue-600" />
+                                                                             View Re-uploaded Evidence: {c.ngoEvidence.fileUrl?.substring(c.ngoEvidence.fileUrl?.indexOf('_') + 1)}
+                                                                         </a>
+                                                                     </div>
+                                                                 )}
+                                                             </div>
+                                                         ) : (
+                                                             <div className="p-3 bg-amber-50/50 rounded-xl border border-dashed border-amber-300 text-amber-800 text-[11px] font-medium">
+                                                                 Pending NGO response & updated evidence upload.
+                                                             </div>
+                                                         )}
+                                                     </div>
+                                                 </div>
+                                             ))}
+                                         </div>
+                                     </div>
+                                 )}
+
+                                {/* Section 3D: Historical Review History */}
                                 {ticketReviews.length > 0 && (
                                     <div className="space-y-4 border-t border-[#DDE3EA] pt-6 animate-in fade-in duration-300">
                                         <h3 className="text-sm font-bold uppercase tracking-wider text-[#52627A] flex items-center gap-2">
@@ -423,16 +487,16 @@ export default function FunderVerificationPage() {
                                 )}
 
                                 {/* Action Buttons Panel (Only for Pending items) */}
-                                {(selectedTicket.status === 'OPEN' || selectedTicket.status === 'UNDER_ORG_REVIEW') && (
+                                {(selectedTicket.status === 'OPEN' || selectedTicket.status === 'UNDER_ORG_REVIEW' || selectedTicket.status === 'CLARIFICATION_REQUESTED') && (
                                     <div className="border-t border-[#DDE3EA] pt-6 space-y-4">
                                         <div className="space-y-1.5">
-                                            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wide">Review Comment *</label>
+                                            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wide">Review Comment / Clarification Query *</label>
                                             <textarea 
                                                 required
                                                 rows={3}
                                                 value={comment}
                                                 onChange={e => setComment(e.target.value)}
-                                                placeholder="Explain your verification finding or decision for compliance..."
+                                                placeholder="Explain your verification finding or specific query for the NGO..."
                                                 className="w-full border border-[#DDE3EA] rounded-xl p-3 text-sm focus:outline-none focus:border-indigo-600 transition"
                                             />
                                         </div>
@@ -452,14 +516,6 @@ export default function FunderVerificationPage() {
                                                 className="bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-white font-bold py-3 px-6 rounded-xl transition text-sm flex-1 flex items-center justify-center gap-2 shadow-sm"
                                             >
                                                 <HelpCircle size={16} /> Request Clarification
-                                            </button>
-
-                                            <button 
-                                                onClick={() => handleDecision('REJECT')}
-                                                disabled={submitting}
-                                                className="bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-white font-bold py-3 px-6 rounded-xl transition text-sm flex-1 flex items-center justify-center gap-2 shadow-sm"
-                                            >
-                                                <XCircle size={16} /> Reject Milestone
                                             </button>
                                         </div>
                                     </div>

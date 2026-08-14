@@ -62,6 +62,7 @@ public class OrgTicketController {
             Map<String, Object> response = new HashMap<>();
             response.put("ticket", ticket);
             response.put("reviews", reviews);
+            response.put("clarifications", ticketService.getClarificationsForTicket(id));
             if (ticket.getEvidence() != null && ticket.getEvidence().getEvidenceAnalysis() != null) {
                 response.put("analysis", ticket.getEvidence().getEvidenceAnalysis());
             }

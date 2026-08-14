@@ -30,6 +30,7 @@ import FunderProfilePage from './pages/FunderProfilePage';
 import NgoExpensesPage from './pages/NgoExpensesPage';
 import AddExpensePage from './pages/AddExpensePage';
 import ExpenseDetailPage from './pages/ExpenseDetailPage';
+import NotificationsPage from './pages/NotificationsPage';
 import DashboardLayout from './components/DashboardLayout';
 
 const ProtectedRoute = ({ children, role }: { children: React.ReactNode, role?: string }) => {
@@ -103,6 +104,10 @@ function AppRoutes() {
         path="/ngo/beneficiaries" 
         element={<ProtectedRoute role="NGO"><DashboardWrapper><NgoGlobalBeneficiariesPage /></DashboardWrapper></ProtectedRoute>} 
       />
+      <Route 
+        path="/ngo/notifications" 
+        element={<ProtectedRoute role="NGO"><DashboardWrapper><NotificationsPage /></DashboardWrapper></ProtectedRoute>} 
+      />
 
       <Route path="/verify/:token" element={<PublicBeneficiaryFormPage />} />
 
@@ -139,6 +144,16 @@ function AppRoutes() {
       <Route 
         path="/funder/profile" 
         element={<ProtectedRoute role="FUNDER"><DashboardWrapper><FunderProfilePage /></DashboardWrapper></ProtectedRoute>} 
+      />
+      <Route 
+        path="/funder/notifications" 
+        element={<ProtectedRoute role="FUNDER"><DashboardWrapper><NotificationsPage /></DashboardWrapper></ProtectedRoute>} 
+      />
+
+      {/* Shared Authenticated Routes */}
+      <Route 
+        path="/notifications" 
+        element={<ProtectedRoute><DashboardWrapper><NotificationsPage /></DashboardWrapper></ProtectedRoute>} 
       />
 
       {/* Shared Authenticated Routes */}

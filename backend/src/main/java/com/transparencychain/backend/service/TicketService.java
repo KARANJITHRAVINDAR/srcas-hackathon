@@ -45,7 +45,13 @@ public class TicketService {
     private DisbursementService disbursementService;
 
     @Autowired
+    private TicketClarificationRepository ticketClarificationRepository;
+
+    @Autowired
     private ImpactGenerationService impactGenerationService;
+
+    @Autowired
+    private NotificationService notificationService;
 
     @Transactional
     public Ticket raiseTicket(UUID milestoneId, UUID ngoUserId) {
@@ -308,9 +314,69 @@ public class TicketService {
                 }
             }
 
+            // Send notifications
+            if (milestone.getProject().getNgo() != null && milestone.getProject().getNgo().getUser() != null) {
+                notificationService.create(
+                        Notification.RecipientType.NGO,
+                        milestone.getProject().getNgo().getUser(),
+                        milestone.getProject(),
+                        milestone,
+                        Notification.NotificationEventType.FUNDS_RELEASED,
+                        "Milestone Verified & Funds Released",
+                        "Work on milestone '" + milestone.getTitle() + "' was verified and funds released.",
+                        "/ngo/projects/" + milestone.getProject().getId()
+                );
+            }
+            notificationService.notifyProjectFunders(
+                    milestone.getProject(),
+                    milestone,
+                    Notification.NotificationEventType.MILESTONE_COMPLETED,
+                    "Milestone Approved & Released",
+                    "Milestone '" + milestone.getTitle() + "' was approved and disbursed.",
+                    "/funder/verification"
+            );
+
+            // Check if all milestones are complete (100%)
+            boolean allDone = projectMilestones.stream().allMatch(m -> 
+                    m.getStatus() == Milestone.MilestoneStatus.COMPLETED || m.getStatus() == Milestone.MilestoneStatus.VERIFIED);
+            if (allDone) {
+                if (milestone.getProject().getNgo() != null && milestone.getProject().getNgo().getUser() != null) {
+                    notificationService.create(
+                            Notification.RecipientType.NGO,
+                            milestone.getProject().getNgo().getUser(),
+                            milestone.getProject(),
+                            null,
+                            Notification.NotificationEventType.PROJECT_COMPLETED,
+                            "Project 100% Completed! 🎉",
+                            "All milestones for '" + milestone.getProject().getTitle() + "' have been completed and verified.",
+                            "/ngo/projects/" + milestone.getProject().getId()
+                    );
+                }
+                notificationService.notifyProjectFunders(
+                        milestone.getProject(),
+                        null,
+                        Notification.NotificationEventType.PROJECT_COMPLETED,
+                        "Project 100% Completed! 🎉",
+                        "All milestones for '" + milestone.getProject().getTitle() + "' have been completed and verified.",
+                        "/funder/projects"
+                );
+            }
+
         } else if (reviewDecision == TicketReview.TicketReviewDecision.REQUEST_CLARIFICATION) {
+            if (comment == null || comment.trim().isEmpty()) {
+                throw new IllegalArgumentException("Clarification query cannot be empty. Please specify what needs to be clarified.");
+            }
+
             ticket.setStatus(Ticket.TicketStatus.CLARIFICATION_REQUESTED);
             ticketRepository.save(ticket);
+
+            // Record clarification round
+            TicketClarification clarification = new TicketClarification();
+            clarification.setTicket(ticket);
+            clarification.setFunderUser(reviewer);
+            clarification.setFunderQuery(comment.trim());
+            clarification.setStatus(TicketClarification.ClarificationStatus.PENDING_RESPONSE);
+            ticketClarificationRepository.save(clarification);
 
             // Revert Milestone to IN_PROGRESS so NGO can submit proof again
             Milestone milestone = ticket.getMilestone();
@@ -320,8 +386,22 @@ public class TicketService {
             auditLogService.logAction(
                     milestone.getProject().getId(),
                     "TICKET_CLARIFICATION",
-                    "Ticket clarification requested. Reverted milestone to IN_PROGRESS."
+                    "Ticket clarification requested: " + comment.trim()
             );
+
+            // Notify NGO
+            if (milestone.getProject().getNgo() != null && milestone.getProject().getNgo().getUser() != null) {
+                notificationService.create(
+                        Notification.RecipientType.NGO,
+                        milestone.getProject().getNgo().getUser(),
+                        milestone.getProject(),
+                        milestone,
+                        Notification.NotificationEventType.CLARIFICATION_REQUESTED,
+                        "Clarification Requested on " + milestone.getTitle(),
+                        "Funder requested clarification: \"" + comment.trim() + "\"",
+                        "/ngo/projects/" + milestone.getProject().getId() + "?tab=MILESTONES&milestoneId=" + milestone.getId()
+                );
+            }
 
         } else if (reviewDecision == TicketReview.TicketReviewDecision.REJECT) {
             ticket.setStatus(Ticket.TicketStatus.REJECTED);
@@ -339,6 +419,67 @@ public class TicketService {
                     "Ticket REJECTED by Funder."
             );
         }
+
+        return ticket;
+    }
+
+    @Transactional(readOnly = true)
+    public List<TicketClarification> getClarificationsForTicket(UUID ticketId) {
+        return ticketClarificationRepository.findByTicketIdOrderByQueryCreatedAtAsc(ticketId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<TicketClarification> getClarificationsForMilestone(UUID milestoneId) {
+        return ticketClarificationRepository.findByTicket_Milestone_IdOrderByQueryCreatedAtDesc(milestoneId);
+    }
+
+    @Transactional
+    public Ticket submitClarificationResponse(UUID milestoneId, UUID ngoUserId, String answer, ProofSubmission newProof) {
+        List<Ticket> tickets = ticketRepository.findByMilestoneId(milestoneId);
+        if (tickets.isEmpty()) {
+            throw new IllegalArgumentException("No ticket found for milestone: " + milestoneId);
+        }
+
+        Ticket ticket = tickets.get(0);
+
+        // Find pending clarification or create one
+        Optional<TicketClarification> pendingOpt = ticketClarificationRepository
+                .findFirstByTicketIdAndStatusOrderByQueryCreatedAtDesc(ticket.getId(), TicketClarification.ClarificationStatus.PENDING_RESPONSE);
+
+        if (pendingOpt.isPresent()) {
+            TicketClarification clarification = pendingOpt.get();
+            clarification.setNgoAnswer(answer != null ? answer.trim() : "");
+            clarification.setNgoEvidence(newProof);
+            clarification.setAnsweredAt(LocalDateTime.now());
+            clarification.setStatus(TicketClarification.ClarificationStatus.ANSWERED);
+            ticketClarificationRepository.save(clarification);
+        }
+
+        // Point ticket to the new evidence and transition back to OPEN
+        ticket.setEvidence(newProof);
+        ticket.setStatus(Ticket.TicketStatus.OPEN);
+        ticketRepository.save(ticket);
+
+        // Transition milestone back to AWAITING_FUNDER_APPROVAL
+        Milestone milestone = ticket.getMilestone();
+        milestone.setStatus(Milestone.MilestoneStatus.AWAITING_FUNDER_APPROVAL);
+        milestoneRepository.save(milestone);
+
+        auditLogService.logAction(
+                milestone.getProject().getId(),
+                "CLARIFICATION_RESPONDED",
+                "NGO responded to clarification request with new evidence and explanation: " + (answer != null ? answer : "")
+        );
+
+        // Notify Funders
+        notificationService.notifyProjectFunders(
+                milestone.getProject(),
+                milestone,
+                Notification.NotificationEventType.CLARIFICATION_RESPONDED,
+                "Clarification Response Received",
+                "NGO responded to clarification for '" + milestone.getTitle() + "' with updated evidence.",
+                "/funder/verification?milestoneId=" + milestone.getId()
+        );
 
         return ticket;
     }

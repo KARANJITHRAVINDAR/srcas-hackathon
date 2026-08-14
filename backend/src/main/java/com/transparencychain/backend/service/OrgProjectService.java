@@ -37,6 +37,7 @@ public class OrgProjectService {
     @Autowired private NgoProfileRepository ngoProfileRepository;
     @Autowired private TrustScoreService trustScoreService;
     @Autowired private AuditLogService auditLogService;
+    @Autowired private NotificationService notificationService;
 
     // -------------------------------------------------------------------------
     // 1. BROWSE PUBLISHED PROJECTS
@@ -155,6 +156,20 @@ public class OrgProjectService {
         auditLogService.logAction(
                 projectId, "ORG_ENGAGEMENT",
                 "Funder " + funderId + " moved engagement to UNDER_REVIEW (was: " + before + ")");
+
+        // Notify NGO
+        if (engagement.getProject() != null && engagement.getProject().getNgo() != null && engagement.getProject().getNgo().getUser() != null) {
+            notificationService.create(
+                    Notification.RecipientType.NGO,
+                    engagement.getProject().getNgo().getUser(),
+                    engagement.getProject(),
+                    null,
+                    Notification.NotificationEventType.PROJECT_UNDER_REVIEW,
+                    "Project Under Review",
+                    "A funder started reviewing your published project '" + engagement.getProject().getTitle() + "'.",
+                    "/ngo/projects/" + engagement.getProject().getId()
+            );
+        }
 
         // Return the refreshed detail view
         return getProjectDetail(projectId, funderId);

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle2, Circle, AlertCircle, Lock, ArrowRight, Upload, Clock, ShieldAlert, Check } from 'lucide-react';
+import { CheckCircle2, Circle, AlertCircle, Lock, ArrowRight, Upload, Clock, ShieldAlert, Check, HelpCircle } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useAlert } from '../../context/AlertContext';
 
@@ -109,6 +109,7 @@ function MilestoneDetailView({ project, milestoneId, onBack, user }: { project: 
     const [milestone, setMilestone] = useState<any>(null);
     const [tasks, setTasks] = useState<any[]>([]);
     const [changeRequests, setChangeRequests] = useState<any[]>([]);
+    const [clarifications, setClarifications] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [showProposeModal, setShowProposeModal] = useState(false);
     const [showProofModal, setShowProofModal] = useState(false);
@@ -135,12 +136,14 @@ function MilestoneDetailView({ project, milestoneId, onBack, user }: { project: 
         Promise.all([
             axios.get(`http://localhost:8081/api/v1/projects/${project.id}/milestones`),
             axios.get(`http://localhost:8081/api/v1/projects/${project.id}/milestones/${milestoneId}/tasks`),
-            axios.get(crEndpoint).catch(() => ({ data: [] }))
-        ]).then(([msRes, tasksRes, crRes]) => {
+            axios.get(crEndpoint).catch(() => ({ data: [] })),
+            axios.get(`http://localhost:8081/api/v1/milestones/${milestoneId}/clarifications`).catch(() => ({ data: [] }))
+        ]).then(([msRes, tasksRes, crRes, clarRes]) => {
             const m = msRes.data.find((x: any) => x.id === milestoneId);
             setMilestone(m);
             setTasks(tasksRes.data.sort((a: any, b: any) => a.sequenceNumber - b.sequenceNumber));
             setChangeRequests(crRes.data || []);
+            setClarifications(clarRes.data || []);
         }).catch(console.error).finally(() => setLoading(false));
     };
 
@@ -148,8 +151,11 @@ function MilestoneDetailView({ project, milestoneId, onBack, user }: { project: 
         loadData();
     }, [milestoneId]);
 
+    const latestClarification = clarifications.length > 0 ? clarifications[0] : null;
+    const isClarificationPending = latestClarification && latestClarification.status === 'PENDING_RESPONSE';
+
     const canPropose = milestone && (milestone.status === 'PENDING' || milestone.status === 'MODIFIED' || milestone.status === 'IN_PROGRESS' || milestone.status === 'AVAILABLE');
-    const canSubmitProof = milestone && (milestone.status === 'IN_PROGRESS' || milestone.status === 'AWAITING_FUNDER_APPROVAL' || milestone.status === 'REJECTED');
+    const canSubmitProof = milestone && (milestone.status === 'IN_PROGRESS' || milestone.status === 'AWAITING_FUNDER_APPROVAL' || milestone.status === 'REJECTED' || isClarificationPending);
     const pendingFunderCR = changeRequests.find(cr => cr.status === 'PENDING' && cr.proposed?.proposedBy === 'FUNDER');
 
     const handlePropose = async () => {
@@ -204,6 +210,11 @@ function MilestoneDetailView({ project, milestoneId, onBack, user }: { project: 
             return;
         }
 
+        if (isClarificationPending && !proofNote.trim()) {
+            showAlert({ type: 'warning', message: 'Please provide an answer/explanation in response to the funder query.' });
+            return;
+        }
+
         setUploadingProof(true);
         const formData = new FormData();
         formData.append('file', proofFile);
@@ -218,7 +229,13 @@ function MilestoneDetailView({ project, milestoneId, onBack, user }: { project: 
 
         try {
             await axios.post(`http://localhost:8081/api/v1/milestones/${milestoneId}/proofs`, formData, { headers });
-            showAlert({ type: 'success', title: 'Evidence Uploaded', message: 'Evidence submitted successfully! Raised fund release verification ticket.' });
+            showAlert({ 
+                type: 'success', 
+                title: isClarificationPending ? 'Clarification & Evidence Submitted' : 'Evidence Uploaded', 
+                message: isClarificationPending 
+                    ? 'Your clarification response and updated evidence have been submitted to the funder for verification.' 
+                    : 'Evidence submitted successfully! Raised fund release verification ticket.' 
+            });
             setShowProofModal(false);
             setProofFile(null);
             setProofNote('');
@@ -242,6 +259,35 @@ function MilestoneDetailView({ project, milestoneId, onBack, user }: { project: 
             <button onClick={onBack} className="flex items-center gap-2 text-sm font-bold text-[#52627A] hover:text-[#10172A] transition-colors">
                 <ArrowRight className="w-4 h-4 rotate-180" /> Back to Timeline
             </button>
+
+            {/* CLARIFICATION REQUESTED BANNER */}
+            {isClarificationPending && (
+                <div className="bg-amber-50 border-2 border-amber-400 rounded-2xl p-6 shadow-sm space-y-3 animate-in fade-in duration-300">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2 text-amber-900 font-extrabold text-base">
+                            <HelpCircle className="w-5 h-5 text-amber-600 shrink-0" /> Funder Requested Clarification
+                        </div>
+                        <span className="bg-amber-200 text-amber-900 text-xs font-black px-2.5 py-1 rounded-full uppercase tracking-wider">
+                            Action Required
+                        </span>
+                    </div>
+                    <div className="bg-white border border-amber-200 rounded-xl p-4 text-sm text-slate-800 font-medium">
+                        <p className="font-bold text-amber-900 mb-1">Funder Query:</p>
+                        <p className="text-slate-700 italic font-semibold">"{latestClarification.funderQuery}"</p>
+                        <div className="text-[11px] text-slate-400 mt-2">
+                            Asked by <strong>{latestClarification.funderUser?.fullName || 'Funder'}</strong> on {new Date(latestClarification.queryCreatedAt).toLocaleString()}
+                        </div>
+                    </div>
+                    <div className="flex justify-end pt-1">
+                        <button
+                            onClick={() => setShowProofModal(true)}
+                            className="bg-amber-600 hover:bg-amber-700 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition shadow-sm flex items-center gap-2"
+                        >
+                            <Upload className="w-4 h-4" /> Submit Clarification & Updated Evidence
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* PENDING FUNDER PROPOSAL BANNER */}
             {pendingFunderCR && (
@@ -283,14 +329,6 @@ function MilestoneDetailView({ project, milestoneId, onBack, user }: { project: 
                         <p className="text-[#52627A] font-medium max-w-3xl">{milestone.description}</p>
                     </div>
                     <div className="flex items-center gap-3">
-                        {canSubmitProof && (
-                            <button
-                                onClick={() => setShowProofModal(true)}
-                                className="px-4 py-2 bg-[#10172A] text-white rounded-lg text-sm font-bold hover:bg-slate-800 transition-colors flex items-center gap-2 shadow-sm"
-                            >
-                                <Upload className="w-4 h-4" /> Submit Evidence
-                            </button>
-                        )}
                         {canPropose && (
                             <button
                                 onClick={() => setShowProposeModal(true)}
@@ -299,8 +337,12 @@ function MilestoneDetailView({ project, milestoneId, onBack, user }: { project: 
                                 <AlertCircle className="w-4 h-4" /> Propose Changes
                             </button>
                         )}
-                        <span className="px-4 py-1.5 bg-blue-50 border border-blue-200 text-blue-700 rounded-lg text-sm font-bold tracking-wide">
-                            {milestone.status.replace('_', ' ')}
+                        <span className={`px-4 py-1.5 rounded-lg text-sm font-bold tracking-wide ${
+                            isClarificationPending 
+                                ? 'bg-amber-100 border border-amber-300 text-amber-800' 
+                                : 'bg-blue-50 border border-blue-200 text-blue-700'
+                        }`}>
+                            {isClarificationPending ? 'CLARIFICATION REQUESTED' : milestone.status.replace('_', ' ')}
                         </span>
                     </div>
                 </div>
@@ -331,7 +373,7 @@ function MilestoneDetailView({ project, milestoneId, onBack, user }: { project: 
                     ))}
                     {tasks.length === 0 && (
                         <div className="p-8 text-center bg-gray-50 rounded-xl border border-[#DDE3EA] text-[#52627A] font-medium">
-                            No individual sub-tasks defined. You can submit milestone evidence directly using the <strong>"Submit Evidence"</strong> button above.
+                            No individual sub-tasks defined. You can submit milestone evidence directly using the <strong>"Submit Evidence for Milestone Verification"</strong> button below.
                         </div>
                     )}
                 </div>
@@ -354,9 +396,9 @@ function MilestoneDetailView({ project, milestoneId, onBack, user }: { project: 
                 ) : (
                     <button
                         onClick={() => setShowProofModal(true)}
-                        className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-lg font-bold transition shadow-sm flex items-center gap-2"
+                        className={`${isClarificationPending ? 'bg-amber-600 hover:bg-amber-700' : 'bg-emerald-600 hover:bg-emerald-700'} text-white px-6 py-3 rounded-lg font-bold transition shadow-sm flex items-center gap-2`}
                     >
-                        <Upload className="w-5 h-5" /> Submit Evidence for Milestone Verification
+                        <Upload className="w-5 h-5" /> {isClarificationPending ? 'Submit Clarification & Updated Evidence' : 'Submit Evidence for Milestone Verification'}
                     </button>
                 )}
             </div>
@@ -368,10 +410,15 @@ function MilestoneDetailView({ project, milestoneId, onBack, user }: { project: 
                         <form onSubmit={handleDirectProofSubmit}>
                             <div className="p-6 border-b border-[#DDE3EA]">
                                 <h3 className="text-xl font-bold text-[#10172A] flex items-center gap-2">
-                                    <Upload className="w-5 h-5 text-blue-600" /> Submit Milestone Evidence
+                                    <Upload className={`w-5 h-5 ${isClarificationPending ? 'text-amber-600' : 'text-blue-600'}`} />
+                                    {isClarificationPending ? 'Submit Clarification & Evidence' : 'Submit Milestone Evidence'}
                                 </h3>
                                 <p className="text-sm text-[#52627A] mt-1">
-                                    Upload invoice, site photo, or progress report for <strong>{milestone.title}</strong>.
+                                    {isClarificationPending ? (
+                                        <span>Respond to funder query: <strong className="italic text-slate-800">"{latestClarification.funderQuery}"</strong></span>
+                                    ) : (
+                                        <span>Upload invoice, site photo, or progress report for <strong>{milestone.title}</strong>.</span>
+                                    )}
                                 </p>
                             </div>
                             <div className="p-6 space-y-4">
@@ -389,7 +436,7 @@ function MilestoneDetailView({ project, milestoneId, onBack, user }: { project: 
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold text-[#52627A] uppercase mb-1">Select File (PDF, Image, Video)</label>
+                                    <label className="block text-xs font-bold text-[#52627A] uppercase mb-1">Select File (PDF, Image, Video) *</label>
                                     <input
                                         type="file"
                                         accept="image/*,video/*,application/pdf"
@@ -399,12 +446,15 @@ function MilestoneDetailView({ project, milestoneId, onBack, user }: { project: 
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold text-[#52627A] uppercase mb-1">Notes / Remarks</label>
+                                    <label className="block text-xs font-bold text-[#52627A] uppercase mb-1">
+                                        {isClarificationPending ? 'Clarification Answer / Explanation *' : 'Notes / Remarks'}
+                                    </label>
                                     <textarea
                                         rows={3}
                                         value={proofNote}
                                         onChange={e => setProofNote(e.target.value)}
-                                        placeholder="Describe the proof being submitted..."
+                                        placeholder={isClarificationPending ? "Explain the details requested by the funder..." : "Describe the proof being submitted..."}
+                                        required={Boolean(isClarificationPending)}
                                         className="w-full bg-[#F8FAFC] border border-[#DDE3EA] rounded-lg p-2.5 outline-none text-sm resize-none"
                                     />
                                 </div>
@@ -420,9 +470,9 @@ function MilestoneDetailView({ project, milestoneId, onBack, user }: { project: 
                                 <button
                                     type="submit"
                                     disabled={uploadingProof}
-                                    className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-lg font-bold shadow-sm transition flex items-center gap-2"
+                                    className={`${isClarificationPending ? 'bg-amber-600 hover:bg-amber-700' : 'bg-emerald-600 hover:bg-emerald-700'} text-white px-6 py-2 rounded-lg font-bold shadow-sm transition flex items-center gap-2`}
                                 >
-                                    {uploadingProof ? 'Uploading...' : 'Submit Evidence'}
+                                    {uploadingProof ? 'Uploading...' : isClarificationPending ? 'Submit Clarification Response' : 'Submit Evidence'}
                                 </button>
                             </div>
                         </form>

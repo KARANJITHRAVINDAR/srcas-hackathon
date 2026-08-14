@@ -49,6 +49,12 @@ public class ProofController {
 
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    com.transparencychain.backend.service.TicketService ticketService;
+
+    @Autowired
+    com.transparencychain.backend.service.NotificationService notificationService;
     
     private final String UPLOAD_DIR = "uploads/";
 
@@ -67,9 +73,10 @@ public class ProofController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> submitProof(@PathVariable UUID milestoneId, 
                                          @RequestParam("file") org.springframework.web.multipart.MultipartFile file,
-                                         @RequestParam("metadata") String metadata,
+                                         @RequestParam(value = "metadata", required = false) String metadata,
                                          @RequestParam(value = "expectedType", defaultValue = "INVOICE") String expectedType) {
-        Milestone milestone = milestoneRepository.findById(milestoneId).orElseThrow();
+        Milestone milestone = milestoneRepository.findById(milestoneId)
+                .orElseThrow(() -> new RuntimeException("Milestone not found"));
         
         if (milestone.getStatus() == Milestone.MilestoneStatus.LOCKED) {
             return ResponseEntity.badRequest().body(new MessageResponse("Cannot submit evidence for a locked milestone. Please complete earlier milestones first."));
@@ -102,6 +109,16 @@ public class ProofController {
         
         auditLogService.logAction(milestone.getId(), "MILESTONE", "Evidence submitted. ID: " + proof.getId());
 
+        // Notify Funders of new evidence
+        notificationService.notifyProjectFunders(
+                milestone.getProject(),
+                milestone,
+                Notification.NotificationEventType.EVIDENCE_SUBMITTED,
+                "New Evidence Uploaded",
+                "NGO submitted milestone evidence for '" + milestone.getTitle() + "' in project '" + milestone.getProject().getTitle() + "'.",
+                "/funder/verification?milestoneId=" + milestone.getId()
+        );
+
         // Create or update Ticket for Funder Verification Center
         try {
             User ngoUser = null;
@@ -113,14 +130,34 @@ public class ProofController {
                 ngoUser = users.stream().filter(u -> u.getRole() == Role.NGO).findFirst().orElse(null);
             }
             if (ngoUser != null) {
-                Ticket ticket = new Ticket();
-                ticket.setMilestone(milestone);
-                ticket.setRaisedByNgo(ngoUser);
-                ticket.setEvidence(proof);
-                ticket.setStatus(Ticket.TicketStatus.OPEN);
-                ticket.setRiskLevel(Ticket.RiskLevel.LOW);
-                ticket.setRiskScore(java.math.BigDecimal.ZERO);
+                List<Ticket> existingTickets = ticketRepository.findByMilestoneId(milestone.getId());
+                Ticket ticket;
+                if (!existingTickets.isEmpty()) {
+                    ticket = existingTickets.get(0);
+                    ticket.setEvidence(proof);
+                    ticket.setStatus(Ticket.TicketStatus.OPEN);
+                } else {
+                    ticket = new Ticket();
+                    ticket.setMilestone(milestone);
+                    ticket.setRaisedByNgo(ngoUser);
+                    ticket.setEvidence(proof);
+                    ticket.setStatus(Ticket.TicketStatus.OPEN);
+                    ticket.setRiskLevel(Ticket.RiskLevel.LOW);
+                    ticket.setRiskScore(java.math.BigDecimal.ZERO);
+                }
                 ticketRepository.save(ticket);
+
+                // Update pending clarification if any
+                String noteText = "";
+                if (metadata != null && metadata.contains("\"note\"")) {
+                    try {
+                        com.fasterxml.jackson.databind.JsonNode node = new com.fasterxml.jackson.databind.ObjectMapper().readTree(metadata);
+                        if (node.has("note")) {
+                            noteText = node.get("note").asText();
+                        }
+                    } catch (Exception ignored) {}
+                }
+                ticketService.submitClarificationResponse(milestone.getId(), ngoUser.getId(), noteText, proof);
             }
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -141,6 +178,32 @@ public class ProofController {
                 
                 proofRepository.save(proof);
                 auditLogService.logAction(proof.getId(), "PROOF", "AI analysis completed. Result: " + analysis.getResult());
+
+                // Notify NGO and Auditor if high risk
+                if (milestone.getProject().getNgo() != null && milestone.getProject().getNgo().getUser() != null) {
+                    notificationService.create(
+                            Notification.RecipientType.NGO,
+                            milestone.getProject().getNgo().getUser(),
+                            milestone.getProject(),
+                            milestone,
+                            Notification.NotificationEventType.AI_VERIFICATION_COMPLETED,
+                            "AI Verification Result: " + analysis.getResult(),
+                            "Automated forensic verification completed for '" + milestone.getTitle() + "'. Result: " + analysis.getResult(),
+                            "/ngo/projects/" + milestone.getProject().getId()
+                    );
+                }
+
+                if (analysis.getResult() == EvidenceAnalysisResult.FLAGGED || 
+                    (analysis.getFraudScore() != null && analysis.getFraudScore().doubleValue() >= 70.0)) {
+                    notificationService.notifyAuditors(
+                            milestone.getProject(),
+                            milestone,
+                            Notification.NotificationEventType.AUDITOR_REVIEW_REQUIRED,
+                            "Auditor Review Required (High Risk)",
+                            "Evidence for '" + milestone.getTitle() + "' was flagged as " + analysis.getResult() + ". Requires second-level review.",
+                            "/funder/verification?milestoneId=" + milestone.getId()
+                    );
+                }
             }).start();
         } catch (Exception e) {
             e.printStackTrace();
@@ -263,12 +326,9 @@ public class ProofController {
         return ResponseEntity.ok(analysis);
     }
 
-    @GetMapping("/evidence/{evidenceId}/analysis")
-    public ResponseEntity<?> getAnalysis(@PathVariable UUID evidenceId) {
-        EvidenceAnalysis analysis = evidenceAnalysisRepository.findByProofId(evidenceId);
-        if (analysis == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(analysis);
+    @GetMapping("/milestones/{milestoneId}/clarifications")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> getMilestoneClarifications(@PathVariable UUID milestoneId) {
+        return ResponseEntity.ok(ticketService.getClarificationsForMilestone(milestoneId));
     }
 }
