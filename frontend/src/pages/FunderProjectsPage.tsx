@@ -49,6 +49,9 @@ export default function FunderProjectsPage() {
                 return <span className="text-[10px] font-bold text-teal-700 bg-teal-50 border border-teal-200 px-2 py-0.5 rounded">COMMITTED</span>;
             case 'ACTIVE':
                 return <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded">ACTIVE</span>;
+            case 'COMPLETED':
+            case 'CLOSED':
+                return <span className="text-[10px] font-bold text-emerald-800 bg-emerald-100 border border-emerald-300 px-2 py-0.5 rounded">CLOSED & AUDITED</span>;
             default:
                 return <span className="text-[10px] font-bold text-gray-700 bg-gray-50 border border-gray-200 px-2 py-0.5 rounded">{status}</span>;
         }

@@ -20,7 +20,7 @@ public interface ProjectRepository extends JpaRepository<Project, UUID> {
      */
     @Query("""
         SELECT p FROM Project p
-        WHERE p.status IN ('PUBLISHED', 'SUBMITTED', 'DRAFT', 'UNDER_REVIEW', 'APPROVED', 'FUNDED', 'ESCROWED', 'ACTIVE', 'IN_PROGRESS')
+        WHERE p.status IN ('PUBLISHED', 'SUBMITTED', 'DRAFT', 'UNDER_REVIEW', 'APPROVED', 'FUNDED', 'ESCROWED', 'ACTIVE', 'IN_PROGRESS', 'COMPLETED', 'CLOSED')
           AND (:sdgGoal    IS NULL OR p.sdgGoal    = :sdgGoal)
           AND (:geography  IS NULL OR LOWER(p.geography) LIKE LOWER(CONCAT('%', :geography, '%')))
           AND (:budgetMin  IS NULL OR p.totalBudget >= :budgetMin)

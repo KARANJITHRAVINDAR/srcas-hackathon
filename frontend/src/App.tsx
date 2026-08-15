@@ -26,6 +26,7 @@ import FunderLedgerPage from './pages/FunderLedgerPage';
 import FunderMilestonesPage from './pages/FunderMilestonesPage';
 import FunderImpactPage from './pages/FunderImpactPage';
 import FunderProfilePage from './pages/FunderProfilePage';
+import FunderReportsPage from './pages/FunderReportsPage';
 
 import NgoExpensesPage from './pages/NgoExpensesPage';
 import AddExpensePage from './pages/AddExpensePage';
@@ -144,6 +145,10 @@ function AppRoutes() {
       <Route 
         path="/funder/profile" 
         element={<ProtectedRoute role="FUNDER"><DashboardWrapper><FunderProfilePage /></DashboardWrapper></ProtectedRoute>} 
+      />
+      <Route 
+        path="/funder/reports" 
+        element={<ProtectedRoute role="FUNDER"><DashboardWrapper><FunderReportsPage /></DashboardWrapper></ProtectedRoute>} 
       />
       <Route 
         path="/funder/notifications" 

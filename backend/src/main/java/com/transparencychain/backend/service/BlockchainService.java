@@ -16,7 +16,10 @@ import org.web3j.utils.Convert;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -404,6 +407,41 @@ public class BlockchainService {
         // Remove any URL fragments that might contain embedded API keys
         return message.replaceAll("https?://[^\\s]+", "[RPC_URL_REDACTED]")
                       .replaceAll("0x[0-9a-fA-F]{40,}", "[ADDRESS_REDACTED]");
+    }
+
+    /**
+     * Live on-chain EVM read for Merkle Root from TransparencyChainAnchor.sol
+     */
+    public String getLiveMerkleRoot(String projectId, String milestoneId) {
+        if (!isConfigured()) {
+            return "SIMULATED";
+        }
+        try {
+            org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
+                    "getMerkleRoot",
+                    Arrays.asList(
+                            new org.web3j.abi.datatypes.Utf8String(projectId != null ? projectId : ""),
+                            new org.web3j.abi.datatypes.Utf8String(milestoneId != null ? milestoneId : "")
+                    ),
+                    Collections.singletonList(new org.web3j.abi.TypeReference<org.web3j.abi.datatypes.generated.Bytes32>() {})
+            );
+            String encodedFunction = org.web3j.abi.FunctionEncoder.encode(function);
+            org.web3j.protocol.core.methods.request.Transaction transaction =
+                    org.web3j.protocol.core.methods.request.Transaction.createEthCallTransaction(
+                            credentials.getAddress(), contractAddress, encodedFunction);
+
+            org.web3j.protocol.core.methods.response.EthCall response = web3j.ethCall(transaction, org.web3j.protocol.core.DefaultBlockParameterName.LATEST).send();
+            if (response != null && !response.hasError() && response.getValue() != null) {
+                List<org.web3j.abi.datatypes.Type> results = org.web3j.abi.FunctionReturnDecoder.decode(response.getValue(), function.getOutputParameters());
+                if (!results.isEmpty()) {
+                    byte[] rootBytes = (byte[]) results.get(0).getValue();
+                    return "0x" + org.web3j.utils.Numeric.toHexStringNoPrefix(rootBytes);
+                }
+            }
+        } catch (Exception e) {
+            log.warn("[BLOCKCHAIN] Live eth_call getMerkleRoot failed: {}", e.getMessage());
+        }
+        return "SIMULATED";
     }
 
     public Web3j getWeb3j() { return web3j; }
