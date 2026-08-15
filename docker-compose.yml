@@ -42,6 +42,7 @@ services:
       BLOCKCHAIN_CONTRACT_ADDRESS: ${BLOCKCHAIN_CONTRACT_ADDRESS:-0xb0f1b1e8805f7a90da89a4476c741b95de201d4e}
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
       SECOND_AI_PROVIDER_API_KEY: ${SECOND_AI_PROVIDER_API_KEY:-}
+      JAVA_OPTS: "-Xms256m -Xmx512m"
     volumes:
       - backend_uploads:/app/uploads
 
