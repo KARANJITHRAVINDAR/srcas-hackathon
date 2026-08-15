@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  # MySQL Database Service
+  mysql:
+    image: mysql:8.0
+    container_name: transparency_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-Ks@kbd23777}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-transparency_chain}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Spring Boot Backend Service (Java 17 + Web3j + PDFBox + Tesseract OCR)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: transparency_backend
+    restart: always
+    depends_on:
+      mysql:
+        condition: service_healthy
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-transparency_chain}?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD:-Ks@kbd23777}
+      POLYGON_RPC_URL: ${POLYGON_RPC_URL:-https://polygon-amoy.g.alchemy.com/v2/alch_xkq1H9kClPmrO7XVGVWrC}
+      BLOCKCHAIN_PRIVATE_KEY: ${BLOCKCHAIN_PRIVATE_KEY:-45c181d5ededa7e65c215f5ab629fcd7d93f669a36c94bb8d77f6047050892f1}
+      BLOCKCHAIN_WALLET_ADDRESS: ${BLOCKCHAIN_WALLET_ADDRESS:-0x0C33849740C0b6faf9Ad021508C6Ee27BCF2A66C}
+      BLOCKCHAIN_CHAIN_ID: ${BLOCKCHAIN_CHAIN_ID:-80002}
+      BLOCKCHAIN_CONTRACT_ADDRESS: ${BLOCKCHAIN_CONTRACT_ADDRESS:-0xb0f1b1e8805f7a90da89a4476c741b95de201d4e}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      SECOND_AI_PROVIDER_API_KEY: ${SECOND_AI_PROVIDER_API_KEY:-}
+    volumes:
+      - backend_uploads:/app/uploads
+
+  # React Frontend Service (Nginx)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: transparency_frontend
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+
+volumes:
+  mysql_data:
+  backend_uploads:
