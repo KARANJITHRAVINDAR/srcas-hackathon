@@ -32,7 +32,7 @@ export default function LoginPage() {
         <div className="min-h-screen bg-[#F8FAFC] flex flex-col md:flex-row font-sans selection:bg-[#00A875]/20">
             
             {/* LEFT SIDE: Login Form */}
-            <div className="w-full md:w-1/2 lg:w-[45%] flex flex-col justify-center px-8 md:px-16 lg:px-24 py-12 relative z-10 bg-white shadow-[10px_0_30px_rgba(0,0,0,0.02)]">
+            <div className="w-full md:w-1/2 lg:w-[45%] flex flex-col justify-center px-4 sm:px-8 md:px-16 lg:px-24 py-8 sm:py-12 relative z-10 bg-white shadow-[10px_0_30px_rgba(0,0,0,0.02)]">
                 <div className="max-w-md w-full mx-auto relative">
                     
                     {/* Back Button */}
@@ -118,9 +118,9 @@ export default function LoginPage() {
             </div>
 
             {/* RIGHT SIDE: Animated Trust Visualization */}
-            <div className="hidden md:flex md:w-1/2 lg:w-[55%] bg-[#F8FAFC] flex-col justify-center items-center p-12 relative overflow-hidden">
+            <div className="hidden md:flex md:w-1/2 lg:w-[55%] bg-[#061121] border-l border-slate-800 flex-col justify-center items-center p-12 relative overflow-hidden">
                 {/* Background Pattern */}
-                <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(#10172A_1px,transparent_1px)] [background-size:24px_24px]"></div>
+                <div className="absolute inset-0 opacity-[0.08] bg-[radial-gradient(#38bdf8_1px,transparent_1px)] [background-size:24px_24px]"></div>
                 
                 <div className="max-w-xl w-full relative z-10">
                     <motion.div 
@@ -129,17 +129,17 @@ export default function LoginPage() {
                         transition={{ duration: 0.6 }}
                         className="text-center mb-12"
                     >
-                        <h2 className="text-4xl font-extrabold text-[#10172A] tracking-tight mb-4">Trust, Verified at Every Step.</h2>
-                        <p className="text-lg text-[#52627A]">From funding to impact, every milestone is backed by cryptographically secure evidence.</p>
+                        <h2 className="text-4xl font-extrabold text-white tracking-tight mb-4" style={{ fontFamily: 'var(--font-heading)' }}>Trust, Verified at Every Step.</h2>
+                        <p className="text-lg text-slate-300 font-medium leading-relaxed">From funding to impact, every milestone is backed by cryptographically secure evidence.</p>
                     </motion.div>
 
                     {/* Animated Flow */}
-                    <div className="relative py-10 px-8 bg-white border border-[#DDE3EA] rounded-2xl shadow-xl shadow-[#10172A]/5">
+                    <div className="relative py-10 px-8 bg-slate-900/90 border border-slate-800 rounded-2xl shadow-2xl backdrop-blur-xl">
                         
                         {/* Connecting Line */}
-                        <div className="absolute left-1/2 top-10 bottom-10 w-0.5 bg-[#DDE3EA] -translate-x-1/2"></div>
+                        <div className="absolute left-1/2 top-10 bottom-10 w-0.5 bg-slate-800 -translate-x-1/2"></div>
                         <motion.div 
-                            className="absolute left-1/2 top-10 w-0.5 bg-[#00A875] -translate-x-1/2"
+                            className="absolute left-1/2 top-10 w-0.5 bg-emerald-400 -translate-x-1/2"
                             initial={{ height: 0 }}
                             animate={{ height: '80%' }}
                             transition={{ duration: 3, ease: "easeInOut" }}
@@ -163,60 +163,23 @@ export default function LoginPage() {
                                     className={`flex items-center gap-4 ${i % 2 === 0 ? 'flex-row-reverse text-right' : ''}`}
                                 >
                                     <div className={`w-1/2 flex ${i % 2 === 0 ? 'justify-start' : 'justify-end'} px-6`}>
-                                        <div className="bg-[#10172A] text-white px-4 py-2 rounded-lg font-bold text-sm shadow-md flex items-center gap-2">
+                                        <div className="bg-slate-950 text-white border border-slate-700/80 px-4 py-2 rounded-xl font-bold text-sm shadow-xl flex items-center gap-2">
                                             {step.text} {step.icon && <span className="text-base">{step.icon}</span>}
                                         </div>
                                     </div>
-                                    <div className="w-8 h-8 rounded-full bg-white border-2 border-[#00A875] flex items-center justify-center shadow-md relative z-20">
+                                    <div className="w-8 h-8 rounded-full bg-slate-950 border-2 border-emerald-400 flex items-center justify-center shadow-lg relative z-20">
                                         <motion.div
                                             initial={{ scale: 0 }}
                                             animate={{ scale: 1 }}
                                             transition={{ delay: i * 0.4 + 0.2 }}
                                         >
-                                            <CheckCircle2 className="w-5 h-5 text-[#00A875]" />
+                                            <CheckCircle2 className="w-5 h-5 text-emerald-400" />
                                         </motion.div>
                                     </div>
                                     <div className="w-1/2"></div>
                                 </motion.div>
                             ))}
                         </div>
-
-                        {/* Floating Cards */}
-                        <motion.div 
-                            animate={{ y: [0, -10, 0] }} 
-                            transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
-                            className="absolute -right-8 top-16 bg-white border border-[#DDE3EA] p-3 rounded-xl shadow-lg flex items-center gap-3"
-                        >
-                            <div className="bg-emerald-100 p-2 rounded-lg"><Cpu className="w-5 h-5 text-[#00A875]"/></div>
-                            <div>
-                                <div className="text-xs font-bold text-[#10172A]">AI Verified</div>
-                                <div className="text-[10px] font-bold text-[#52627A]">Invoice Risk: 8%</div>
-                            </div>
-                        </motion.div>
-
-                        <motion.div 
-                            animate={{ y: [0, 10, 0] }} 
-                            transition={{ repeat: Infinity, duration: 5, ease: "easeInOut", delay: 1 }}
-                            className="absolute -left-12 bottom-32 bg-white border border-[#DDE3EA] p-3 rounded-xl shadow-lg flex items-center gap-3"
-                        >
-                            <div className="bg-slate-100 p-2 rounded-lg"><Database className="w-5 h-5 text-[#10172A]"/></div>
-                            <div>
-                                <div className="text-xs font-bold text-[#10172A]">Blockchain Proof</div>
-                                <div className="text-[10px] font-bold text-[#52627A]">Merkle: 0x8a...91fd</div>
-                            </div>
-                        </motion.div>
-                        
-                        <motion.div 
-                            animate={{ y: [0, -8, 0] }} 
-                            transition={{ repeat: Infinity, duration: 4.5, ease: "easeInOut", delay: 2 }}
-                            className="absolute -right-6 bottom-10 bg-white border border-[#DDE3EA] p-3 rounded-xl shadow-lg flex items-center gap-3"
-                        >
-                            <div className="bg-blue-100 p-2 rounded-lg"><Users className="w-5 h-5 text-blue-600"/></div>
-                            <div>
-                                <div className="text-xs font-bold text-[#10172A]">Impact Confirmed</div>
-                                <div className="text-[10px] font-bold text-[#52627A]">421 Beneficiaries</div>
-                            </div>
-                        </motion.div>
                     </div>
 
                 </div>

@@ -31,18 +31,18 @@ export default function NgoGlobalImpactPage() {
     }
 
     return (
-        <div className="p-8 pb-20 max-w-6xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <header className="mb-10">
-                <h1 className="text-3xl font-extrabold font-[Space_Grotesk] text-[#10172A] tracking-tight flex items-center gap-3">
+        <div className="p-4 sm:p-6 lg:p-8 pb-20 max-w-6xl mx-auto space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <header className="mb-6 sm:mb-10">
+                <h1 className="text-2xl sm:text-3xl font-extrabold font-[Space_Grotesk] text-[#10172A] tracking-tight flex items-center gap-3">
                     <Globe className="text-[#00A875]" /> Organization Impact Portfolio
                 </h1>
-                <p className="text-[#52627A] mt-2 font-medium max-w-2xl">
+                <p className="text-[#52627A] mt-2 text-xs sm:text-sm font-medium max-w-2xl">
                     Aggregated verified outcomes across all active projects in your organization.
                 </p>
             </header>
 
             {/* Master Summary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                 <div className="bg-gradient-to-br from-blue-600 to-blue-800 text-white p-6 rounded-2xl shadow-sm flex flex-col justify-between">
                     <div className="flex items-center gap-2 mb-2 text-blue-200">
                         <Users className="w-5 h-5" />

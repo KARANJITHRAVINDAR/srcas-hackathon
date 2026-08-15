@@ -64,14 +64,14 @@ export default function FunderProfilePage() {
     }
 
     return (
-        <div className="p-8 pb-20 max-w-4xl mx-auto space-y-8 animate-fadeIn">
+        <div className="p-4 sm:p-6 lg:p-8 pb-20 max-w-4xl mx-auto space-y-6 sm:space-y-8 animate-fadeIn">
             {/* Header */}
-            <header className="border-b border-[#DDE3EA] pb-6">
-                <h1 className="text-3xl font-extrabold text-[#10172A] tracking-tight">Organisation Profile</h1>
-                <p className="text-[#52627A] mt-1 font-medium">Manage your organisation details, compliance identity, and view contribution summary.</p>
+            <header className="border-b border-[#DDE3EA] pb-4 sm:pb-6">
+                <h1 className="text-2xl sm:text-3xl font-extrabold text-[#10172A] tracking-tight">Organisation Profile</h1>
+                <p className="text-[#52627A] mt-1 text-xs sm:text-sm font-medium">Manage your organisation details, compliance identity, and view contribution summary.</p>
             </header>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 items-start">
                 {/* Profile Card & Info */}
                 <div className="bg-white rounded-2xl border border-[#DDE3EA] p-6 shadow-sm space-y-6 text-center">
                     <div className="w-20 h-20 bg-emerald-50 text-[#00A875] rounded-full flex items-center justify-center mx-auto border border-emerald-100">

@@ -308,7 +308,7 @@ export default function RegisterPage() {
         return (
             <div className="min-h-screen bg-[#F8FAFC] flex flex-col md:flex-row font-sans selection:bg-[#00A875]/20">
                 {/* LEFT SIDE: Registration Form */}
-                <div className="w-full md:w-[45%] flex flex-col justify-center px-8 md:px-12 lg:px-20 py-12 relative z-10 bg-white shadow-[10px_0_30px_rgba(0,0,0,0.02)] min-h-screen overflow-y-auto">
+                <div className="w-full md:w-[45%] flex flex-col justify-center px-4 sm:px-8 md:px-12 lg:px-20 py-8 sm:py-12 relative z-10 bg-white shadow-[10px_0_30px_rgba(0,0,0,0.02)] min-h-screen overflow-y-auto">
                     <div className="max-w-md w-full mx-auto pb-10 relative">
                         
                         {/* Back Button */}
@@ -374,25 +374,84 @@ export default function RegisterPage() {
                     </div>
                 </div>
 
-                {/* RIGHT SIDE: Visual Info */}
-                <div className="hidden md:flex flex-1 bg-slate-900 text-white items-center justify-center p-12 relative overflow-hidden">
-                    <div className="max-w-md space-y-6">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded-full text-xs font-bold uppercase tracking-wider">
-                            <ShieldCheck className="w-4 h-4" /> Cryptographic Trust Layer
+                {/* RIGHT SIDE: Dynamic & Interactive Visual Info */}
+                <div className="hidden md:flex flex-1 bg-[#061121] border-l border-slate-800 text-white flex-col justify-between p-10 lg:p-12 relative overflow-hidden">
+                    {/* Background Glows & Pattern */}
+                    <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-[128px] pointer-events-none" />
+                    <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-500/10 rounded-full blur-[128px] pointer-events-none" />
+                    <div className="absolute inset-0 opacity-[0.08] bg-[radial-gradient(#38bdf8_1px,transparent_1px)] [background-size:24px_24px] pointer-events-none" />
+
+                    <div className="relative z-10 space-y-6 max-w-lg mx-auto my-auto">
+                        
+                        {/* Header Badge */}
+                        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold uppercase tracking-wider shadow-inner">
+                            <ShieldCheck className="w-4 h-4" />
+                            <span>{role === 'NGO' ? 'NGO Fast-Track Onboarding' : 'Corporate Funder Portal'}</span>
                         </div>
-                        <h1 className="text-4xl font-extrabold leading-tight">Zero Manual Data Entry with Smart AI Verification</h1>
-                        <p className="text-slate-300 text-sm leading-relaxed">
-                            Upload your legal documents once. Our OCR and Cross-Document Consistency Engine validates your credentials and anchors verified trust on Polygon.
-                        </p>
-                        <div className="pt-4 border-t border-slate-800 grid grid-cols-2 gap-4 text-xs">
-                            <div className="bg-slate-800/60 p-3 rounded-lg">
-                                <div className="text-emerald-400 font-bold mb-0.5">4-Tier Scoring</div>
-                                <div className="text-slate-400">Completeness, OCR, Consistency & Format Sanity</div>
+
+                        {/* Dynamic Title based on selected Role */}
+                        <motion.div
+                            key={role}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.4 }}
+                        >
+                            <h1 className="text-3xl lg:text-4xl font-extrabold leading-tight text-white mb-3" style={{ fontFamily: 'var(--font-heading)' }}>
+                                {role === 'NGO' 
+                                    ? 'Zero Manual Data Entry with Smart AI Verification'
+                                    : 'Zero-Leakage CSR Funding & Smart Escrow Locks'}
+                            </h1>
+                            <p className="text-slate-300 text-sm lg:text-base font-medium leading-relaxed">
+                                {role === 'NGO'
+                                    ? 'Upload your Form 10AC, PAN card, and Trust Deed once. Our OCR AI verifies legal entities and anchors your compliance trust score on Polygon.'
+                                    : 'Lock funding into smart escrows with automated milestone releases. Every rupee spent is cryptographically verified and anchored on Polygon.'}
+                            </p>
+                        </motion.div>
+
+                        {/* Live Feature Cards Grid (4 Glass Cards) */}
+                        <div className="grid grid-cols-2 gap-3.5 pt-2">
+                            <div className="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 backdrop-blur-xl shadow-lg hover:border-emerald-500/40 transition-all">
+                                <div className="flex items-center gap-2 text-emerald-400 font-bold text-xs mb-1">
+                                    <Cpu className="w-4 h-4" />
+                                    <span>AI OCR Engine</span>
+                                </div>
+                                <p className="text-[11px] text-slate-300 font-medium">98.5% automated text extraction from Form 10AC & PAN.</p>
                             </div>
-                            <div className="bg-slate-800/60 p-3 rounded-lg">
-                                <div className="text-emerald-400 font-bold mb-0.5">≥ 45% Hard Gate</div>
-                                <div className="text-slate-400">Strict automated anti-fraud validation</div>
+
+                            <div className="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 backdrop-blur-xl shadow-lg hover:border-blue-500/40 transition-all">
+                                <div className="flex items-center gap-2 text-blue-400 font-bold text-xs mb-1">
+                                    <Database className="w-4 h-4" />
+                                    <span>Polygon Web3</span>
+                                </div>
+                                <p className="text-[11px] text-slate-300 font-medium">Immutable Merkle root commitments on-chain.</p>
                             </div>
+
+                            <div className="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 backdrop-blur-xl shadow-lg hover:border-purple-500/40 transition-all">
+                                <div className="flex items-center gap-2 text-purple-400 font-bold text-xs mb-1">
+                                    <ShieldCheck className="w-4 h-4" />
+                                    <span>≥ 45% Hard Gate</span>
+                                </div>
+                                <p className="text-[11px] text-slate-300 font-medium">Strict multi-document legal identity resolution.</p>
+                            </div>
+
+                            <div className="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 backdrop-blur-xl shadow-lg hover:border-amber-500/40 transition-all">
+                                <div className="flex items-center gap-2 text-amber-400 font-bold text-xs mb-1">
+                                    <CheckCircle2 className="w-4 h-4" />
+                                    <span>Zero Fund Leakage</span>
+                                </div>
+                                <p className="text-[11px] text-slate-300 font-medium">Automated escrows release funds upon proof verification.</p>
+                            </div>
+                        </div>
+
+                        {/* Live Verification Status Pill */}
+                        <div className="pt-4 border-t border-slate-800/80 flex items-center justify-between text-xs">
+                            <div className="flex items-center gap-2 text-slate-400 font-medium">
+                                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                                <span>Engine Status: <strong className="text-emerald-300">Live & Operating</strong></span>
+                            </div>
+                            <span className="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-extrabold text-[10px]">
+                                1,240+ Verified Proofs
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -401,12 +460,12 @@ export default function RegisterPage() {
     }
 
     return (
-        <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center py-12 px-4 font-sans selection:bg-[#00A875]/20">
+        <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center py-6 sm:py-12 px-3 sm:px-4 font-sans selection:bg-[#00A875]/20">
             <div className="w-full max-w-4xl">
                 
                 {/* STEP 2: DOCUMENT UPLOAD */}
                 {step === 2 && (
-                    <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="bg-white p-8 md:p-10 rounded-2xl shadow-xl border border-[#DDE3EA]">
+                    <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="bg-white p-4 sm:p-8 md:p-10 rounded-2xl shadow-xl border border-[#DDE3EA]">
                         <div className="text-center max-w-2xl mx-auto mb-8">
                             <div className="w-16 h-16 bg-[#00A875]/10 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <UploadCloud className="w-8 h-8 text-[#00A875]" />

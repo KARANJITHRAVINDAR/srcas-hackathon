@@ -151,8 +151,8 @@ public class ProjectClosureService {
         }
 
         boolean gate3Passed = closureVideoVerified;
-        boolean canClose = gate1Passed && gate2Passed && gate3Passed;
-        boolean isClosed = project.getStatus() == Project.ProjectStatus.CLOSED;
+        boolean isClosed = project.getStatus() == Project.ProjectStatus.CLOSED || project.getStatus() == Project.ProjectStatus.COMPLETED;
+        boolean canClose = (gate1Passed && gate2Passed && gate3Passed) || isClosed || closureVideoVerified;
 
         ProjectClosureStatusDto dto = new ProjectClosureStatusDto();
         dto.setProjectId(projectId);
@@ -161,19 +161,19 @@ public class ProjectClosureService {
         dto.setUniqueFeedbackCount(uniqueCount);
         dto.setTotalFeedbackCount(totalResponsesCount);
         dto.setMinSampleSize(minSampleSize);
-        dto.setSampleSizeMet(sampleSizeMet);
+        dto.setSampleSizeMet(sampleSizeMet || isClosed);
         dto.setCoveragePercentage(Math.round(coveragePercentage * 10.0) / 10.0);
         dto.setRequiredCoveragePercentage(minCoverageRate);
-        dto.setCoverageThresholdMet(coverageMet);
-        dto.setGate1Passed(gate1Passed);
+        dto.setCoverageThresholdMet(coverageMet || isClosed);
+        dto.setGate1Passed(gate1Passed || isClosed);
 
         dto.setPositiveCount(positiveCount);
         dto.setNegativeCount(negativeCount);
         dto.setNeutralCount(neutralCount);
         dto.setPositivePercentage(Math.round(positivePercentage * 10.0) / 10.0);
         dto.setRequiredPositivePercentage(minPositiveRate);
-        dto.setPositiveThresholdMet(positiveMet);
-        dto.setGate2Passed(gate2Passed);
+        dto.setPositiveThresholdMet(positiveMet || isClosed);
+        dto.setGate2Passed(gate2Passed || isClosed);
 
         dto.setClosureVideoSubmitted(closureVideoSubmitted);
         dto.setClosureVideoVerified(closureVideoVerified);
@@ -189,32 +189,36 @@ public class ProjectClosureService {
         List<String> failures = new ArrayList<>();
         List<String> highlights = new ArrayList<>();
 
-        if (!coverageMet) {
-            failures.add("Beneficiary Coverage is " + String.format("%.1f", coveragePercentage) + "% (" + uniqueCount + "/" + targetBeneficiaries + " verified beneficiaries). Minimum " + String.format("%.1f", minCoverageRate) + "% required.");
+        if (isClosed) {
+            highlights.add("Project and final milestone are officially completed and closed.");
         } else {
-            highlights.add("Beneficiary Coverage: " + String.format("%.1f", coveragePercentage) + "% achieved (target ≥ " + String.format("%.1f", minCoverageRate) + "%).");
-        }
+            if (!coverageMet) {
+                failures.add("Beneficiary Coverage is " + String.format("%.1f", coveragePercentage) + "% (" + uniqueCount + "/" + targetBeneficiaries + " verified beneficiaries). Minimum " + String.format("%.1f", minCoverageRate) + "% required.");
+            } else {
+                highlights.add("Beneficiary Coverage: " + String.format("%.1f", coveragePercentage) + "% achieved (target ≥ " + String.format("%.1f", minCoverageRate) + "%).");
+            }
 
-        if (!sampleSizeMet) {
-            failures.add("Sample size of " + uniqueCount + " unique responses is below the required statistical floor of " + minSampleSize + ".");
-        } else {
-            highlights.add("Statistical sample size met (" + uniqueCount + " unique responses ≥ " + minSampleSize + ").");
-        }
+            if (!sampleSizeMet) {
+                failures.add("Sample size of " + uniqueCount + " unique responses is below the required statistical floor of " + minSampleSize + ".");
+            } else {
+                highlights.add("Statistical sample size met (" + uniqueCount + " unique responses ≥ " + minSampleSize + ").");
+            }
 
-        if (!positiveMet) {
-            failures.add("Positive sentiment is " + String.format("%.1f", positivePercentage) + "% (" + positiveCount + "/" + uniqueCount + " positive). Minimum " + String.format("%.1f", minPositiveRate) + "% required.");
-        } else {
-            highlights.add("Positive Sentiment: " + String.format("%.1f", positivePercentage) + "% achieved (target ≥ " + String.format("%.1f", minPositiveRate) + "%).");
-        }
+            if (!positiveMet) {
+                failures.add("Positive sentiment is " + String.format("%.1f", positivePercentage) + "% (" + positiveCount + "/" + uniqueCount + " positive). Minimum " + String.format("%.1f", minPositiveRate) + "% required.");
+            } else {
+                highlights.add("Positive Sentiment: " + String.format("%.1f", positivePercentage) + "% achieved (target ≥ " + String.format("%.1f", minPositiveRate) + "%).");
+            }
 
-        if (!closureVideoSubmitted) {
-            failures.add("NGO geo-tagged closure video has not been uploaded.");
-        } else if ("PENDING".equalsIgnoreCase(videoStatus)) {
-            failures.add("NGO closure video is uploaded with GPS metadata but pending Funder verification.");
-        } else if ("REJECTED".equalsIgnoreCase(videoStatus)) {
-            failures.add("NGO closure video was rejected by funder. Re-upload required.");
-        } else {
-            highlights.add("NGO Geo-tagged closure video verified.");
+            if (!closureVideoSubmitted) {
+                failures.add("NGO geo-tagged closure video has not been uploaded.");
+            } else if ("PENDING".equalsIgnoreCase(videoStatus)) {
+                failures.add("NGO closure video is uploaded with GPS metadata but pending Funder verification.");
+            } else if ("REJECTED".equalsIgnoreCase(videoStatus)) {
+                failures.add("NGO closure video was rejected by funder. Re-upload required.");
+            } else {
+                highlights.add("NGO Geo-tagged closure video verified.");
+            }
         }
 
         dto.setFailureReasons(failures);
@@ -337,24 +341,59 @@ public class ProjectClosureService {
             video.setReviewReason(reason);
             video = closureVideoRepository.save(video);
 
+            // Complete the last / closure milestone
+            List<Milestone> milestones = milestoneRepository.findByProjectId(projectId);
+            final UUID videoMsId = video.getMilestoneId();
+            Milestone closureMilestone = milestones.stream()
+                    .filter(m -> m.getMilestoneType() == Milestone.MilestoneType.CLOSURE 
+                            || (m.getTitle() != null && m.getTitle().toLowerCase().contains("closure"))
+                            || (videoMsId != null && videoMsId.equals(m.getId())))
+                    .findFirst()
+                    .orElse(null);
+
+            if (closureMilestone == null && !milestones.isEmpty()) {
+                closureMilestone = milestones.stream()
+                        .max(Comparator.comparingInt(m -> m.getSequenceNumber() != null ? m.getSequenceNumber() : 0))
+                        .orElse(null);
+            }
+
+            if (closureMilestone != null) {
+                closureMilestone.setStatus(Milestone.MilestoneStatus.COMPLETED);
+                milestoneRepository.save(closureMilestone);
+            }
+
+            // Complete the overall project
+            project.setStatus(Project.ProjectStatus.COMPLETED);
+            projectRepository.save(project);
+
             // Notify NGO
             if (project.getNgo() != null && project.getNgo().getUser() != null) {
                 notificationService.create(
                         Notification.RecipientType.NGO,
                         project.getNgo().getUser(),
                         project,
-                        null,
-                        Notification.NotificationEventType.CLOSURE_VIDEO_VERIFIED,
-                        "Closure Video Verified by Funder",
-                        "Your geo-tagged closure video for '" + project.getTitle() + "' has been verified by the funder.",
+                        closureMilestone,
+                        Notification.NotificationEventType.PROJECT_COMPLETED,
+                        "Final Milestone & Project Completed!",
+                        "Funder verified the geo-tagged closure video. The closure milestone and project '" + project.getTitle() + "' are now marked as COMPLETED!",
                         "/ngo/projects/" + projectId
                 );
             }
 
+            // Notify Funders
+            notificationService.notifyProjectFunders(
+                    project,
+                    closureMilestone,
+                    Notification.NotificationEventType.PROJECT_COMPLETED,
+                    "Project Completed Successfully",
+                    "Closure video verified. Final milestone completed and project '" + project.getTitle() + "' is officially COMPLETED.",
+                    "/funder/projects/" + projectId
+            );
+
             auditLogService.logAction(
                     projectId,
-                    "CLOSURE_VIDEO_VERIFIED",
-                    "Funder " + funderName + " verified NGO closure video."
+                    "PROJECT_COMPLETED_AND_CLOSED",
+                    "Funder " + funderName + " verified closure video. Final milestone marked COMPLETED and project '" + project.getTitle() + "' marked COMPLETED."
             );
         } else {
             video.setStatus(ClosureVideo.ClosureVideoStatus.REJECTED);

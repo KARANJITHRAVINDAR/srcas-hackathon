@@ -50,35 +50,37 @@ export default function NgoProfilePage() {
     ];
 
     return (
-        <div className="p-8 pb-20 max-w-6xl mx-auto flex flex-col lg:flex-row gap-8">
+        <div className="p-4 sm:p-6 lg:p-8 pb-20 max-w-6xl mx-auto flex flex-col lg:flex-row gap-6 sm:gap-8">
             
             {/* Sidebar Navigation */}
             <aside className="lg:w-64 shrink-0">
-                <div className="sticky top-24 space-y-2">
-                    <h2 className="text-xl font-extrabold text-[#10172A] mb-6 px-4">My Profile</h2>
-                    {tabs.map(tab => (
-                        <button
-                            key={tab.id}
-                            onClick={() => setActiveTab(tab.id as any)}
-                            className={`w-full text-left px-4 py-3 rounded-xl font-bold transition-all ${
-                                activeTab === tab.id 
-                                ? 'bg-[#10172A] text-white shadow-md' 
-                                : 'text-[#52627A] hover:bg-white hover:text-[#10172A] hover:shadow-sm border border-transparent hover:border-[#DDE3EA]'
-                            }`}
-                        >
-                            {tab.label}
-                        </button>
-                    ))}
+                <div className="lg:sticky lg:top-24 space-y-2">
+                    <h2 className="text-xl font-extrabold text-[#10172A] mb-3 lg:mb-6 px-1 lg:px-4">My Profile</h2>
+                    <div className="flex lg:flex-col gap-2 overflow-x-auto whitespace-nowrap pb-2 lg:pb-0 custom-scrollbar">
+                        {tabs.map(tab => (
+                            <button
+                                key={tab.id}
+                                onClick={() => setActiveTab(tab.id as any)}
+                                className={`text-left px-4 py-2.5 sm:py-3 rounded-xl font-bold transition-all shrink-0 text-xs sm:text-sm ${
+                                    activeTab === tab.id 
+                                    ? 'bg-[#10172A] text-white shadow-md' 
+                                    : 'text-[#52627A] hover:bg-white hover:text-[#10172A] hover:shadow-sm border border-transparent hover:border-[#DDE3EA]'
+                                }`}
+                            >
+                                {tab.label}
+                            </button>
+                        ))}
+                    </div>
                 </div>
             </aside>
 
             {/* Main Content Area */}
             <main className="flex-1 min-w-0">
-                <div className="bg-white rounded-2xl shadow-sm border border-[#DDE3EA] overflow-hidden min-h-[600px]">
+                <div className="bg-white rounded-2xl shadow-sm border border-[#DDE3EA] overflow-hidden min-h-[500px]">
                     
                     {/* SECTION 1: Organisation Information */}
                     {activeTab === 'info' && (
-                        <div className="p-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        <div className="p-4 sm:p-6 lg:p-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
                             <div className="flex items-start gap-6 mb-8 border-b border-[#DDE3EA] pb-8">
                                 <div className="w-24 h-24 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center border border-blue-100 shrink-0">
                                     <Building size={40} />

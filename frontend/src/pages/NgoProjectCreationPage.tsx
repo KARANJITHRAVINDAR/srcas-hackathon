@@ -184,102 +184,94 @@ export default function NgoProjectCreationPage() {
     // ====================================================================
     if (step === 'MILESTONES') {
         return (
-            <div className="min-h-screen bg-[#F8FAFC] p-8">
+            <div className="min-h-screen bg-[#F8FAFC] p-4 sm:p-6 lg:p-8">
                 <div className="max-w-4xl mx-auto">
-                    <div className="flex items-center gap-4 mb-8">
-                        <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center">
+                    <div className="flex items-center gap-4 mb-6 sm:mb-8">
+                        <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center shrink-0">
                             <CheckCircle2 size={24} />
                         </div>
                         <div>
-                            <h1 className="text-3xl font-extrabold text-[#10172A] tracking-tight">Project Created!</h1>
-                            <p className="text-[#52627A] font-medium mt-1">Review the auto-generated milestones below. Edit titles, budgets, or descriptions before finalizing.</p>
+                            <h1 className="text-2xl sm:text-3xl font-extrabold text-[#10172A] tracking-tight">Project Created!</h1>
+                            <p className="text-[#52627A] font-medium text-xs sm:text-sm mt-1">Review the auto-generated milestones below. Edit titles, budgets, or descriptions before finalizing.</p>
                         </div>
                     </div>
 
                     {/* Budget allocation bar */}
-                    <div className="bg-white rounded-2xl shadow-sm border border-[#DDE3EA] p-6 mb-6">
-                        <div className="flex justify-between items-center mb-3">
-                            <span className="font-bold text-[#10172A] flex items-center gap-2">
-                                <DollarSign size={16} className="text-[#00A875]" />
-                                Budget Allocation
-                            </span>
-                            <span className={`font-bold text-sm ${Math.abs(totalAllocated - budget) < 0.01 ? 'text-emerald-600' : 'text-amber-600'}`}>
-                                ₹{totalAllocated.toLocaleString()} / ₹{budget.toLocaleString()}
+                    <div className="bg-white rounded-2xl shadow-sm border border-[#DDE3EA] p-4 sm:p-6 mb-6">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3">
+                            <span className="text-xs font-bold uppercase tracking-wider text-[#52627A]">Budget Allocation</span>
+                            <span className="text-xs font-bold text-[#10172A]">
+                                Allocated: ₹{totalAllocated.toLocaleString()} of ₹{budget.toLocaleString()}
                             </span>
                         </div>
-                        <div className="w-full bg-[#F1F5F9] rounded-full h-2.5 overflow-hidden">
-                            <div
-                                className="h-full bg-[#00A875] rounded-full transition-all duration-500"
-                                style={{ width: `${Math.min(100, budget > 0 ? (totalAllocated / budget) * 100 : 0)}%` }}
+                        <div className="w-full bg-[#E2E8F0] rounded-full h-3 overflow-hidden">
+                            <div 
+                                className={`h-full transition-all duration-300 ${totalAllocated > budget ? 'bg-red-500' : totalAllocated === budget ? 'bg-[#00A875]' : 'bg-amber-500'}`}
+                                style={{ width: `${budget > 0 ? Math.min(100, (totalAllocated / budget) * 100) : 0}%` }}
                             />
                         </div>
                     </div>
 
-                    {/* Milestone cards */}
+                    {/* Milestones list */}
                     <div className="space-y-4 mb-8">
-                        {autoMilestones.map((ms, i) => (
-                            <div key={ms.id || i} className="bg-white rounded-2xl shadow-sm border border-[#DDE3EA] p-6 group hover:border-[#00A875]/40 transition-all">
-                                <div className="flex items-start justify-between mb-4">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 bg-[#00A875]/10 text-[#00A875] rounded-lg flex items-center justify-center font-black text-sm">
-                                            {ms.sequenceNumber || i + 1}
-                                        </div>
-                                        <div>
-                                            <input
-                                                type="text"
-                                                value={ms.title}
-                                                onChange={e => handleMilestoneEdit(i, 'title', e.target.value)}
-                                                className="font-bold text-[#10172A] text-lg bg-transparent border-b border-transparent hover:border-[#DDE3EA] focus:border-[#00A875] outline-none transition-colors w-full"
-                                            />
-                                        </div>
-                                    </div>
-                                    <Edit3 size={16} className="text-[#DDE3EA] group-hover:text-[#52627A] transition-colors mt-2" />
+                        {autoMilestones.map((ms, index) => (
+                            <div key={ms.id || index} className="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-[#DDE3EA] space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-xs font-black text-[#00A875] bg-[#00A875]/10 px-2.5 py-1 rounded-md">
+                                        Milestone {ms.sequenceNumber || index + 1}
+                                    </span>
+                                    <span className="text-xs font-bold text-[#52627A] bg-slate-100 px-2.5 py-1 rounded-md">
+                                        {ms.status || 'PROPOSED'}
+                                    </span>
                                 </div>
-
-                                <textarea
-                                    value={ms.description}
-                                    onChange={e => handleMilestoneEdit(i, 'description', e.target.value)}
-                                    rows={2}
-                                    className="w-full text-sm text-[#52627A] bg-[#F8FAFC] border border-[#DDE3EA] rounded-lg p-3 outline-none focus:border-[#00A875] focus:ring-1 focus:ring-[#00A875] mb-4 resize-none"
-                                />
-
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-xs font-bold text-[#52627A] uppercase mb-1">Budget Allocation (₹)</label>
-                                        <input
-                                            type="number"
-                                            value={ms.amountAllocated}
-                                            onChange={e => handleMilestoneEdit(i, 'amountAllocated', parseFloat(e.target.value) || 0)}
-                                            className="w-full bg-[#F8FAFC] border border-[#DDE3EA] rounded-lg p-2.5 outline-none focus:border-[#00A875] focus:ring-1 focus:ring-[#00A875] font-bold text-[#10172A]"
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                    <div className="sm:col-span-2">
+                                        <label className="block text-xs font-bold text-[#52627A] uppercase mb-1">Title</label>
+                                        <input 
+                                            type="text" 
+                                            value={ms.title} 
+                                            onChange={e => handleMilestoneEdit(index, 'title', e.target.value)}
+                                            className="w-full bg-[#F8FAFC] border border-[#DDE3EA] rounded-lg p-2.5 text-sm font-bold text-[#10172A] focus:border-[#00A875] focus:outline-none"
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-bold text-[#52627A] uppercase mb-1">Due Date</label>
-                                        <div className="flex items-center gap-2 bg-[#F8FAFC] border border-[#DDE3EA] rounded-lg p-2.5 text-sm font-semibold text-[#52627A]">
-                                            <Calendar size={14} className="text-[#00A875]" />
-                                            {ms.dueDate ? new Date(ms.dueDate).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' }) : 'TBD'}
-                                        </div>
+                                        <label className="block text-xs font-bold text-[#52627A] uppercase mb-1">Budget (₹)</label>
+                                        <input 
+                                            type="number" 
+                                            value={ms.amountAllocated} 
+                                            onChange={e => handleMilestoneEdit(index, 'amountAllocated', parseFloat(e.target.value) || 0)}
+                                            className="w-full bg-[#F8FAFC] border border-[#DDE3EA] rounded-lg p-2.5 text-sm font-bold text-[#10172A] focus:border-[#00A875] focus:outline-none"
+                                        />
                                     </div>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-[#52627A] uppercase mb-1">Description</label>
+                                    <textarea 
+                                        rows={2}
+                                        value={ms.description} 
+                                        onChange={e => handleMilestoneEdit(index, 'description', e.target.value)}
+                                        className="w-full bg-[#F8FAFC] border border-[#DDE3EA] rounded-lg p-2.5 text-xs text-[#52627A] font-medium focus:border-[#00A875] focus:outline-none"
+                                    />
                                 </div>
                             </div>
                         ))}
                     </div>
 
-                    <div className="bg-[#F8FAFC] p-6 rounded-2xl border border-[#DDE3EA] flex justify-between items-center">
-                        <p className="text-sm text-[#52627A] font-medium">
+                    <div className="bg-[#F8FAFC] p-4 sm:p-6 rounded-2xl border border-[#DDE3EA] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <p className="text-xs sm:text-sm text-[#52627A] font-medium">
                             <span className="font-bold text-[#10172A]">{autoMilestones.length} milestones</span> auto-generated based on your project duration and budget.
                         </p>
-                        <div className="flex gap-3">
+                        <div className="flex gap-2 sm:gap-3 w-full sm:w-auto">
                             <button 
                                 onClick={() => navigate('/ngo/projects')}
-                                className="px-6 py-2.5 text-[#52627A] font-bold hover:bg-gray-100 rounded-lg transition-colors"
+                                className="flex-1 sm:flex-initial px-4 sm:px-6 py-2.5 text-[#52627A] font-bold hover:bg-gray-100 rounded-lg transition-colors text-xs sm:text-sm min-h-[44px]"
                             >
                                 Skip for Now
                             </button>
                             <button 
                                 onClick={handleSaveMilestones}
                                 disabled={loading}
-                                className="bg-[#00A875] hover:bg-[#009065] text-white px-8 py-2.5 rounded-lg font-bold shadow-lg shadow-[#00A875]/20 transition-all flex items-center gap-2"
+                                className="flex-1 sm:flex-initial bg-[#00A875] hover:bg-[#009065] text-white px-5 sm:px-8 py-2.5 rounded-lg font-bold shadow-lg shadow-[#00A875]/20 transition-all flex items-center justify-center gap-2 text-xs sm:text-sm min-h-[44px]"
                             >
                                 {loading ? 'Saving...' : <><ArrowRight size={18} /> Confirm Milestones</>}
                             </button>
@@ -294,20 +286,20 @@ export default function NgoProjectCreationPage() {
     // STEP 1: Project Creation Form
     // ====================================================================
     return (
-        <div className="min-h-screen bg-[#F8FAFC] p-8">
+        <div className="min-h-screen bg-[#F8FAFC] p-4 sm:p-6 lg:p-8">
             <div className="max-w-4xl mx-auto">
-                <div className="flex items-center gap-4 mb-8">
-                    <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center">
+                <div className="flex items-center gap-4 mb-6 sm:mb-8">
+                    <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center shrink-0">
                         <FileText size={24} />
                     </div>
                     <div>
-                        <h1 className="text-3xl font-extrabold text-[#10172A] tracking-tight">Create Project Proposal</h1>
-                        <p className="text-[#52627A] font-medium mt-1">Submit a new initiative — milestones will be auto-generated for you to review.</p>
+                        <h1 className="text-2xl sm:text-3xl font-extrabold text-[#10172A] tracking-tight">Create Project Proposal</h1>
+                        <p className="text-[#52627A] font-medium text-xs sm:text-sm mt-1">Submit a new initiative — milestones will be auto-generated for you to review.</p>
                     </div>
                 </div>
 
                 <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm border border-[#DDE3EA] overflow-hidden">
-                    <div className="p-8 space-y-8">
+                    <div className="p-4 sm:p-8 space-y-6 sm:space-y-8">
                         
                         {/* Basic Info */}
                         <div>
@@ -436,19 +428,19 @@ export default function NgoProjectCreationPage() {
                     </div>
                     
                     {/* Info banner about auto-milestones */}
-                    <div className="mx-8 mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl flex items-start gap-3">
+                    <div className="mx-4 sm:mx-8 mb-4 sm:mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl flex items-start gap-3">
                         <CheckCircle2 size={18} className="text-blue-600 mt-0.5 shrink-0" />
                         <div>
-                            <span className="font-bold text-blue-900 text-sm">Milestones will be auto-generated</span>
+                            <span className="font-bold text-blue-900 text-xs sm:text-sm">Milestones will be auto-generated</span>
                             <p className="text-xs text-blue-700 mt-0.5">Based on your budget and duration, the system will create a sensible milestone breakdown that you can review and edit before finalizing.</p>
                         </div>
                     </div>
                     
-                    <div className="bg-[#F8FAFC] p-6 border-t border-[#DDE3EA] flex justify-end gap-4">
-                        <button type="button" onClick={() => navigate(-1)} className="px-6 py-2.5 text-[#52627A] font-bold hover:bg-gray-100 rounded-lg transition-colors">
+                    <div className="bg-[#F8FAFC] p-4 sm:p-6 border-t border-[#DDE3EA] flex flex-col sm:flex-row justify-end gap-3 sm:gap-4">
+                        <button type="button" onClick={() => navigate(-1)} className="px-6 py-2.5 text-[#52627A] font-bold hover:bg-gray-100 rounded-lg transition-colors w-full sm:w-auto min-h-[44px]">
                             Cancel
                         </button>
-                        <button type="submit" disabled={loading} className="bg-[#00A875] hover:bg-[#009065] text-white px-8 py-2.5 rounded-lg font-bold shadow-lg shadow-[#00A875]/20 transition-all flex items-center gap-2">
+                        <button type="submit" disabled={loading} className="bg-[#00A875] hover:bg-[#009065] text-white px-6 sm:px-8 py-2.5 rounded-lg font-bold shadow-lg shadow-[#00A875]/20 transition-all flex items-center justify-center gap-2 w-full sm:w-auto min-h-[44px]">
                             {loading ? 'Creating...' : <><Send size={18} /> Create & Generate Milestones</>}
                         </button>
                     </div>

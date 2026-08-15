@@ -31,67 +31,68 @@ export default function NgoExpensesPage() {
     if (loading) return <div className="p-8 font-bold text-gray-500">Loading expenses...</div>;
 
     return (
-        <div className="p-8 max-w-7xl mx-auto space-y-6">
-            <div className="flex justify-between items-center mb-8">
+        <div className="p-4 sm:p-6 lg:p-8 pb-20 max-w-7xl mx-auto space-y-6">
+            <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold font-[Space_Grotesk] text-[#10172A]">Expenses</h1>
-                    <p className="text-[#52627A] mt-1 font-medium">Track project spending, supporting documents, and verification status.</p>
+                    <h1 className="text-2xl sm:text-3xl font-extrabold font-[Space_Grotesk] text-[#10172A] tracking-tight">Expenses & Financial Ledger</h1>
+                    <p className="text-[#52627A] mt-1 text-xs sm:text-sm font-medium">Log and track micro-expenses against allocated milestone budgets.</p>
                 </div>
-                <button onClick={() => navigate('/ngo/expenses/new')} className="bg-[#00A875] hover:bg-[#009060] text-white px-5 py-2.5 rounded-lg font-bold flex items-center gap-2 shadow-sm transition-all">
+                <button onClick={() => navigate('/ngo/expenses/new')} className="bg-[#00A875] hover:bg-[#00A875]/90 text-white px-5 py-2.5 rounded-lg font-bold flex items-center justify-center gap-2 shadow-lg shadow-[#00A875]/20 transition w-full sm:w-auto min-h-[44px]">
                     <PlusCircle size={18} />
-                    Add Expense
+                    Log New Expense
                 </button>
-            </div>
+            </header>
 
-            {/* Summary Cards */}
+            {/* Metrics */}
             {summary && (
-                <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                    <div className="bg-white p-5 rounded-xl shadow-sm border border-[#DDE3EA]">
-                        <p className="text-sm font-bold text-[#52627A] mb-1">Total Allocated</p>
-                        <p className="text-2xl font-bold text-[#10172A]">₹{summary.totalAllocated?.toLocaleString()}</p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+                    <div className="bg-white p-4 sm:p-5 rounded-xl shadow-sm border border-[#DDE3EA]">
+                        <p className="text-xs sm:text-sm font-bold text-[#52627A] mb-1">Total Allocated</p>
+                        <p className="text-xl sm:text-2xl font-bold text-[#10172A]">₹{summary.totalAllocated?.toLocaleString()}</p>
                     </div>
-                    <div className="bg-white p-5 rounded-xl shadow-sm border border-[#DDE3EA]">
-                        <p className="text-sm font-bold text-[#52627A] mb-1">Total Spent</p>
-                        <p className="text-2xl font-bold text-blue-600">₹{summary.totalSpent?.toLocaleString()}</p>
+                    <div className="bg-white p-4 sm:p-5 rounded-xl shadow-sm border border-[#DDE3EA]">
+                        <p className="text-xs sm:text-sm font-bold text-[#52627A] mb-1">Total Spent</p>
+                        <p className="text-xl sm:text-2xl font-bold text-blue-600">₹{summary.totalSpent?.toLocaleString()}</p>
                     </div>
-                    <div className="bg-white p-5 rounded-xl shadow-sm border border-[#DDE3EA]">
-                        <p className="text-sm font-bold text-[#52627A] mb-1">Remaining</p>
-                        <p className="text-2xl font-bold text-[#00A875]">₹{summary.remaining?.toLocaleString()}</p>
+                    <div className="bg-white p-4 sm:p-5 rounded-xl shadow-sm border border-[#DDE3EA]">
+                        <p className="text-xs sm:text-sm font-bold text-[#52627A] mb-1">Remaining</p>
+                        <p className="text-xl sm:text-2xl font-bold text-[#00A875]">₹{summary.remaining?.toLocaleString()}</p>
                     </div>
-                    <div className="bg-white p-5 rounded-xl shadow-sm border border-[#DDE3EA]">
-                        <p className="text-sm font-bold text-[#52627A] mb-1">Pending Review</p>
+                    <div className="bg-white p-4 sm:p-5 rounded-xl shadow-sm border border-[#DDE3EA]">
+                        <p className="text-xs sm:text-sm font-bold text-[#52627A] mb-1">Pending Review</p>
                         <div className="flex items-center gap-2">
                             <Clock size={20} className="text-amber-500" />
-                            <p className="text-2xl font-bold text-[#10172A]">{summary.pendingReviewCount}</p>
+                            <p className="text-xl sm:text-2xl font-bold text-[#10172A]">{summary.pendingReviewCount}</p>
                         </div>
                     </div>
-                    <div className="bg-white p-5 rounded-xl shadow-sm border border-[#DDE3EA]">
-                        <p className="text-sm font-bold text-[#52627A] mb-1">Flagged</p>
+                    <div className="bg-white p-4 sm:p-5 rounded-xl shadow-sm border border-[#DDE3EA] col-span-2 sm:col-span-1">
+                        <p className="text-xs sm:text-sm font-bold text-[#52627A] mb-1">Flagged</p>
                         <div className="flex items-center gap-2">
                             <AlertTriangle size={20} className="text-red-500" />
-                            <p className="text-2xl font-bold text-[#10172A]">{summary.flaggedCount}</p>
+                            <p className="text-xl sm:text-2xl font-bold text-[#10172A]">{summary.flaggedCount}</p>
                         </div>
                     </div>
                 </div>
             )}
 
             {/* Filters */}
-            <div className="flex gap-4 items-center bg-white p-4 rounded-xl shadow-sm border border-[#DDE3EA]">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-center bg-white p-4 rounded-xl shadow-sm border border-[#DDE3EA]">
                 <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
                     <input type="text" placeholder="Search vendor, invoice number..." className="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[#00A875]" />
                 </div>
-                <button className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50">
+                <button className="flex items-center justify-center gap-2 px-4 py-2 border border-gray-200 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50 min-h-[40px]">
                     <Filter size={16} /> All Projects
                 </button>
-                <button className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50">
+                <button className="flex items-center justify-center gap-2 px-4 py-2 border border-gray-200 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50 min-h-[40px]">
                     <Filter size={16} /> All Statuses
                 </button>
             </div>
 
             {/* Ledger Table */}
             <div className="bg-white rounded-xl shadow-sm border border-[#DDE3EA] overflow-hidden">
-                <table className="w-full text-left border-collapse">
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse min-w-[700px]">
                     <thead>
                         <tr className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider border-b border-gray-200">
                             <th className="px-6 py-4 font-bold">Date</th>
@@ -150,6 +151,7 @@ export default function NgoExpensesPage() {
                         ))}
                     </tbody>
                 </table>
+                </div>
             </div>
         </div>
     );

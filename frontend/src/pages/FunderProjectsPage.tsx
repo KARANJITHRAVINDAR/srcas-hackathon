@@ -55,19 +55,19 @@ export default function FunderProjectsPage() {
     };
 
     return (
-        <div className="p-8 pb-20">
+        <div className="p-4 sm:p-6 lg:p-8 pb-20">
             {/* Header */}
-            <header className="mb-8">
-                <h1 className="text-3xl font-extrabold text-[#10172A] tracking-tight">Project Marketplace</h1>
-                <p className="text-[#52627A] mt-1 font-medium">Browse verified NGO projects, review budgets, and commit funds.</p>
+            <header className="mb-6 sm:mb-8">
+                <h1 className="text-2xl sm:text-3xl font-extrabold text-[#10172A] tracking-tight">Project Marketplace</h1>
+                <p className="text-[#52627A] mt-1 text-xs sm:text-sm font-medium">Browse verified NGO projects, review budgets, and commit funds.</p>
             </header>
 
             {/* Filter Panel */}
-            <div className="bg-white p-6 rounded-2xl border border-[#DDE3EA] shadow-sm mb-8">
+            <div className="bg-white p-4 sm:p-6 rounded-2xl border border-[#DDE3EA] shadow-sm mb-6 sm:mb-8">
                 <div className="flex items-center gap-2 mb-4 text-[#10172A] font-bold text-sm">
                     <Filter size={16} /> Filter Projects
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
                     <div>
                         <label className="block text-xs font-bold text-[#52627A] uppercase mb-1.5">SDG Goal</label>
                         <select 

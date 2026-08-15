@@ -53,25 +53,26 @@ export default function FunderDashboardPage() {
     const activities = summary?.recentActivity || [];
 
     return (
-        <div className="p-8 pb-20 max-w-7xl mx-auto space-y-8 animate-fadeIn">
+        <div className="p-4 sm:p-6 lg:p-8 pb-20 max-w-7xl mx-auto space-y-6 sm:space-y-8 animate-fadeIn">
             {/* Header */}
-            <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-[#DDE3EA] pb-6">
+            <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-[#DDE3EA] pb-6">
                 <div>
-                    <h1 className="text-3xl font-extrabold text-[#10172A] tracking-tight">Good Morning, {orgName}</h1>
-                    <p className="text-[#52627A] mt-1 font-medium">Monitor your funding, verification status, and verified impact.</p>
+                    <h1 className="text-2xl sm:text-3xl font-extrabold text-[#10172A] tracking-tight">Good Morning, {orgName}</h1>
+                    <p className="text-[#52627A] mt-1 text-xs sm:text-sm font-medium">Monitor your funding, verification status, and verified impact.</p>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex items-center gap-2 w-full sm:w-auto">
                     <button 
                         onClick={fetchSummary}
                         disabled={refreshing}
-                        className="p-2.5 border border-[#DDE3EA] bg-white rounded-lg font-bold text-[#52627A] hover:bg-[#F8FAFC] transition flex items-center justify-center"
+                        className="p-2.5 border border-[#DDE3EA] bg-white rounded-lg font-bold text-[#52627A] hover:bg-[#F8FAFC] transition flex items-center justify-center shrink-0 min-h-[44px] min-w-[44px]"
                         title="Refresh Data"
+                        aria-label="Refresh data"
                     >
                         <RefreshCw className={`w-5 h-5 ${refreshing ? 'animate-spin' : ''}`} />
                     </button>
                     <button 
                         onClick={() => navigate('/funder/projects')}
-                        className="bg-[#00A875] hover:bg-[#00A875]/90 text-white px-5 py-2.5 rounded-lg font-bold shadow-lg transition flex items-center gap-2"
+                        className="flex-1 sm:flex-initial bg-[#00A875] hover:bg-[#00A875]/90 text-white px-4 sm:px-5 py-2.5 rounded-lg font-bold shadow-lg transition flex items-center justify-center gap-2 text-xs sm:text-sm min-h-[44px]"
                     >
                         Browse Projects Marketplace
                     </button>
@@ -79,7 +80,7 @@ export default function FunderDashboardPage() {
             </header>
 
             {/* KPI Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-[#DDE3EA] hover:shadow-md transition duration-200">
                     <div className="flex items-center gap-3 mb-2 text-[#52627A]">
                         <Wallet size={20} className="text-[#00A875]" />

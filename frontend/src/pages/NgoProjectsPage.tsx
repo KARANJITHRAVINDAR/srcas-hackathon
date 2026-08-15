@@ -58,30 +58,30 @@ export default function NgoProjectsPage() {
     };
 
     return (
-        <div className="p-8 pb-20 max-w-7xl mx-auto space-y-6">
-            <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div className="p-4 sm:p-6 lg:p-8 pb-20 max-w-7xl mx-auto space-y-6">
+            <header className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-extrabold font-[Space_Grotesk] text-[#10172A] tracking-tight">My Projects</h1>
-                    <p className="text-[#52627A] mt-1 font-medium">Manage your assigned SDG initiatives and track milestone progress.</p>
+                    <h1 className="text-2xl sm:text-3xl font-extrabold font-[Space_Grotesk] text-[#10172A] tracking-tight">My Projects</h1>
+                    <p className="text-[#52627A] mt-1 text-xs sm:text-sm font-medium">Manage your assigned SDG initiatives and track milestone progress.</p>
                 </div>
-                <button onClick={() => navigate('/ngo/projects/new')} className="bg-[#10172A] hover:bg-slate-800 text-white px-5 py-2.5 rounded-lg font-bold flex items-center gap-2 transition">
+                <button onClick={() => navigate('/ngo/projects/new')} className="bg-[#10172A] hover:bg-slate-800 text-white px-5 py-2.5 rounded-lg font-bold flex items-center justify-center gap-2 transition w-full sm:w-auto min-h-[44px]">
                     <PlusCircle size={18} />
                     Create Proposal
                 </button>
             </header>
 
             {/* Tabs */}
-            <div className="flex gap-6 border-b border-[#DDE3EA]">
-                <button onClick={() => setActiveTab('CREATED')} className={`pb-3 font-bold text-sm px-1 border-b-2 transition-colors ${activeTab === 'CREATED' ? 'border-[#00A875] text-[#00A875]' : 'border-transparent text-[#52627A] hover:text-[#10172A]'}`}>
+            <div className="flex gap-2 sm:gap-6 border-b border-[#DDE3EA] overflow-x-auto whitespace-nowrap custom-scrollbar">
+                <button onClick={() => setActiveTab('CREATED')} className={`pb-3 font-bold text-xs sm:text-sm px-2 sm:px-1 border-b-2 transition-colors shrink-0 ${activeTab === 'CREATED' ? 'border-[#00A875] text-[#00A875]' : 'border-transparent text-[#52627A] hover:text-[#10172A]'}`}>
                     Created Projects
                 </button>
-                <button onClick={() => setActiveTab('REQUESTS')} className={`pb-3 font-bold text-sm px-1 border-b-2 transition-colors ${activeTab === 'REQUESTS' ? 'border-[#00A875] text-[#00A875]' : 'border-transparent text-[#52627A] hover:text-[#10172A]'}`}>
+                <button onClick={() => setActiveTab('REQUESTS')} className={`pb-3 font-bold text-xs sm:text-sm px-2 sm:px-1 border-b-2 transition-colors shrink-0 ${activeTab === 'REQUESTS' ? 'border-[#00A875] text-[#00A875]' : 'border-transparent text-[#52627A] hover:text-[#10172A]'}`}>
                     Funding Requests
                 </button>
-                <button onClick={() => setActiveTab('APPROVED')} className={`pb-3 font-bold text-sm px-1 border-b-2 transition-colors ${activeTab === 'APPROVED' ? 'border-[#00A875] text-[#00A875]' : 'border-transparent text-[#52627A] hover:text-[#10172A]'}`}>
+                <button onClick={() => setActiveTab('APPROVED')} className={`pb-3 font-bold text-xs sm:text-sm px-2 sm:px-1 border-b-2 transition-colors shrink-0 ${activeTab === 'APPROVED' ? 'border-[#00A875] text-[#00A875]' : 'border-transparent text-[#52627A] hover:text-[#10172A]'}`}>
                     Approved / Active
                 </button>
-                <button onClick={() => setActiveTab('COMPLETED')} className={`pb-3 font-bold text-sm px-1 border-b-2 transition-colors ${activeTab === 'COMPLETED' ? 'border-[#00A875] text-[#00A875]' : 'border-transparent text-[#52627A] hover:text-[#10172A]'}`}>
+                <button onClick={() => setActiveTab('COMPLETED')} className={`pb-3 font-bold text-xs sm:text-sm px-2 sm:px-1 border-b-2 transition-colors shrink-0 ${activeTab === 'COMPLETED' ? 'border-[#00A875] text-[#00A875]' : 'border-transparent text-[#52627A] hover:text-[#10172A]'}`}>
                     Completed
                 </button>
             </div>

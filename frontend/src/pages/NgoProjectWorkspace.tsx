@@ -116,17 +116,25 @@ export default function NgoProjectWorkspace() {
     };
 
     return (
-        <div className="p-8 pb-20 max-w-7xl mx-auto space-y-6">
-            
-            {/* Header / Breadcrumb */}
-            <div className="flex items-center gap-3 text-[#52627A] font-semibold text-sm mb-2 hover:text-[#10172A] cursor-pointer transition-colors w-max" onClick={() => navigate('/ngo/projects')}>
-                <ArrowLeft className="w-4 h-4" />
-                Back to My Projects
+        <div className="p-4 sm:p-6 lg:p-8 pb-20 max-w-7xl mx-auto space-y-6 sm:space-y-8 animate-fadeIn">
+            {/* Top Navigation */}
+            <div className="flex items-center gap-4">
+                <button 
+                    onClick={() => navigate('/ngo/projects')} 
+                    className="p-2 border border-[#DDE3EA] rounded-xl hover:bg-white text-[#52627A] transition min-h-[44px] min-w-[44px] flex items-center justify-center"
+                    aria-label="Back to projects"
+                >
+                    <ArrowLeft className="w-5 h-5" />
+                </button>
+                <div>
+                    <span className="text-xs font-bold text-[#52627A] uppercase tracking-wider">Project Workspace</span>
+                    <h2 className="text-lg sm:text-xl font-black text-[#10172A] leading-tight line-clamp-1">{project.title}</h2>
+                </div>
             </div>
 
-            {/* PERSISTENT WITHDRAWAL BANNER */}
+            {/* WITHDRAWAL BANNER */}
             {project.isWithdrawn && (
-                <div className="bg-rose-50 border-2 border-rose-400 rounded-2xl p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 animate-in fade-in duration-300">
+                <div className="bg-rose-50 border-2 border-rose-200 rounded-2xl p-4 sm:p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-sm animate-in fade-in">
                     <div className="space-y-1">
                         <div className="flex items-center gap-2 text-rose-900 font-black text-base">
                             <AlertTriangle className="w-5 h-5 text-rose-600 shrink-0" />
@@ -144,39 +152,39 @@ export default function NgoProjectWorkspace() {
                     </div>
                     <button
                         onClick={() => setShowRemodifyModal(true)}
-                        className="bg-slate-950 hover:bg-slate-800 text-white font-black text-xs px-5 py-3 rounded-xl shadow-md flex items-center justify-center gap-2 shrink-0 transition"
+                        className="bg-slate-950 hover:bg-slate-800 text-white font-black text-xs px-5 py-3 rounded-xl shadow-md flex items-center justify-center gap-2 shrink-0 transition w-full sm:w-auto min-h-[44px]"
                     >
                         <Sparkles className="w-4 h-4 text-amber-400" /> Remodify & Republish Project
                     </button>
                 </div>
             )}
 
-            <div className="bg-[#10172A] text-white p-8 rounded-2xl shadow-lg relative overflow-hidden">
+            <div className="bg-[#10172A] text-white p-5 sm:p-8 rounded-2xl shadow-lg relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
                 
                 <div className="relative z-10">
-                    <div className="flex justify-between items-start mb-4">
+                    <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4">
                         <div>
-                            <h1 className="text-3xl font-extrabold font-[Space_Grotesk] mb-2">{project.title}</h1>
-                            <p className="text-gray-300 font-medium max-w-2xl">{project.description}</p>
+                            <h1 className="text-2xl sm:text-3xl font-extrabold font-[Space_Grotesk] mb-2">{project.title}</h1>
+                            <p className="text-gray-300 font-medium text-xs sm:text-sm max-w-2xl">{project.description}</p>
                         </div>
-                        <span className={`px-4 py-1.5 rounded-full text-xs font-bold tracking-wider uppercase ${getStatusColor(project.status)}`}>
+                        <span className={`px-4 py-1.5 rounded-full text-xs font-bold tracking-wider uppercase shrink-0 ${getStatusColor(project.status)}`}>
                             {project.status.replace('_', ' ')}
                         </span>
                     </div>
 
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 mt-6 sm:mt-8">
                         <div>
                             <p className="text-gray-400 text-xs font-bold uppercase mb-1">SDG Focus</p>
-                            <p className="font-bold flex items-center gap-2"><Globe className="w-4 h-4 text-[#00A875]" /> {project.sdgGoal}</p>
+                            <p className="font-bold flex items-center gap-2 text-sm sm:text-base"><Globe className="w-4 h-4 text-[#00A875]" /> {project.sdgGoal}</p>
                         </div>
                         <div>
                             <p className="text-gray-400 text-xs font-bold uppercase mb-1">Location</p>
-                            <p className="font-bold">{project.state}, {project.country}</p>
+                            <p className="font-bold text-sm sm:text-base">{project.state}, {project.country}</p>
                         </div>
                         <div>
                             <p className="text-gray-400 text-xs font-bold uppercase mb-1">Approved Budget</p>
-                            <p className="font-bold text-emerald-400">₹{project.totalBudget?.toLocaleString() || 0}</p>
+                            <p className="font-bold text-emerald-400 text-sm sm:text-base">₹{project.totalBudget?.toLocaleString() || 0}</p>
                         </div>
                         <div>
                             <p className="text-gray-400 text-xs font-bold uppercase mb-1">Overall Progress</p>
@@ -210,7 +218,7 @@ export default function NgoProjectWorkspace() {
                             <button
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id as any)}
-                                className={`flex items-center gap-2 px-6 py-4 font-bold text-sm transition-all border-b-2 ${
+                                className={`flex items-center gap-2 px-4 sm:px-6 py-3.5 sm:py-4 font-bold text-xs sm:text-sm transition-all border-b-2 shrink-0 ${
                                     isActive 
                                     ? 'border-[#00A875] text-[#00A875] bg-[#00A875]/5' 
                                     : 'border-transparent text-[#52627A] hover:text-[#10172A] hover:bg-gray-50'
@@ -225,7 +233,7 @@ export default function NgoProjectWorkspace() {
             </div>
 
             {/* Tab Content Area */}
-            <div className="bg-white rounded-2xl shadow-sm border border-[#DDE3EA] p-8 min-h-[400px]">
+            <div className="bg-white rounded-2xl shadow-sm border border-[#DDE3EA] p-4 sm:p-6 lg:p-8 min-h-[400px]">
                 {activeTab === 'OVERVIEW' && (
                     <div className="space-y-8">
                         <h2 className="text-2xl font-bold text-[#10172A] mb-6">Project Overview</h2>

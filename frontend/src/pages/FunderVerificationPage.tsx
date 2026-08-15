@@ -146,31 +146,31 @@ export default function FunderVerificationPage() {
     };
 
     return (
-        <div className="p-8 pb-20 max-w-7xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div className="p-4 sm:p-6 lg:p-8 pb-20 max-w-7xl mx-auto space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h1 className="text-3xl font-extrabold font-[Space_Grotesk] text-[#10172A] tracking-tight">Funder Verification Center</h1>
-                    <p className="text-[#52627A] mt-1 font-medium">Review video evidence and beneficiary feedback to verify milestones and release funds.</p>
+                    <h1 className="text-2xl sm:text-3xl font-extrabold font-[Space_Grotesk] text-[#10172A] tracking-tight">Funder Verification Center</h1>
+                    <p className="text-[#52627A] mt-1 text-xs sm:text-sm font-medium">Review video evidence and beneficiary feedback to verify milestones and release funds.</p>
                 </div>
                 <button 
                     onClick={fetchTickets}
-                    className="flex items-center gap-2 bg-white border border-[#DDE3EA] hover:border-slate-400 px-4 py-2.5 rounded-xl font-bold transition text-[#10172A]"
+                    className="flex items-center justify-center gap-2 bg-white border border-[#DDE3EA] hover:border-slate-400 px-4 py-2.5 rounded-xl font-bold transition text-[#10172A] w-full sm:w-auto min-h-[44px]"
                 >
                     <RefreshCw size={16} /> Refresh
                 </button>
             </header>
 
             {/* Tabs */}
-            <div className="flex gap-4 border-b border-[#DDE3EA] pb-px">
+            <div className="flex gap-2 sm:gap-4 border-b border-[#DDE3EA] pb-px overflow-x-auto whitespace-nowrap custom-scrollbar">
                 <button 
                     onClick={() => { setActiveTab('PENDING'); setSelectedTicket(null); setTicketReviews([]); }}
-                    className={`pb-3 font-bold text-sm border-b-2 transition ${activeTab === 'PENDING' ? 'border-[#00A875] text-[#00A875]' : 'border-transparent text-[#52627A] hover:text-[#10172A]'}`}
+                    className={`pb-3 font-bold text-xs sm:text-sm border-b-2 transition shrink-0 px-2 sm:px-1 ${activeTab === 'PENDING' ? 'border-[#00A875] text-[#00A875]' : 'border-transparent text-[#52627A] hover:text-[#10172A]'}`}
                 >
                     Awaiting Review ({tickets.filter(t => t.status === 'OPEN' || t.status === 'UNDER_ORG_REVIEW' || t.status === 'CLARIFICATION_REQUESTED').length})
                 </button>
                 <button 
                     onClick={() => { setActiveTab('RESOLVED'); setSelectedTicket(null); setTicketReviews([]); }}
-                    className={`pb-3 font-bold text-sm border-b-2 transition ${activeTab === 'RESOLVED' ? 'border-[#00A875] text-[#00A875]' : 'border-transparent text-[#52627A] hover:text-[#10172A]'}`}
+                    className={`pb-3 font-bold text-xs sm:text-sm border-b-2 transition shrink-0 px-2 sm:px-1 ${activeTab === 'RESOLVED' ? 'border-[#00A875] text-[#00A875]' : 'border-transparent text-[#52627A] hover:text-[#10172A]'}`}
                 >
                     Resolved ({tickets.filter(t => t.status === 'ACCEPTED' || t.status === 'REJECTED').length})
                 </button>
@@ -501,11 +501,11 @@ export default function FunderVerificationPage() {
                                             />
                                         </div>
 
-                                        <div className="flex flex-wrap gap-4">
+                                        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                                             <button 
                                                 onClick={() => handleDecision('ACCEPT')}
                                                 disabled={submitting}
-                                                className="bg-[#00A875] hover:bg-emerald-600 disabled:opacity-50 text-white font-bold py-3 px-6 rounded-xl transition text-sm flex-1 flex items-center justify-center gap-2 shadow-sm"
+                                                className="bg-[#00A875] hover:bg-emerald-600 disabled:opacity-50 text-white font-bold py-3 px-6 rounded-xl transition text-sm flex-1 flex items-center justify-center gap-2 shadow-sm min-h-[44px]"
                                             >
                                                 <CheckCircle2 size={16} /> Approve & Release Funds
                                             </button>
@@ -513,7 +513,7 @@ export default function FunderVerificationPage() {
                                             <button 
                                                 onClick={() => handleDecision('REQUEST_CLARIFICATION')}
                                                 disabled={submitting}
-                                                className="bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-white font-bold py-3 px-6 rounded-xl transition text-sm flex-1 flex items-center justify-center gap-2 shadow-sm"
+                                                className="bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-white font-bold py-3 px-6 rounded-xl transition text-sm flex-1 flex items-center justify-center gap-2 shadow-sm min-h-[44px]"
                                             >
                                                 <HelpCircle size={16} /> Request Clarification
                                             </button>

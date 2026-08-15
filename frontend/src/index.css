@@ -1,1 +1,192 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Open+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 @import "tailwindcss";
+
+/* ─── Design Tokens ─────────────────────────────────────────── */
+:root {
+  --navy:        #0B1F3A;
+  --navy-deep:   #061121;
+  --navy-mid:    #123B63;
+  --indigo:      #123B63;
+  --indigo-mid:  #164a7c;
+  --indigo-lite: #2a66a1;
+  --green:       #16834B;
+  --green-lite:  #20a65f;
+  --green-bg:    #E8F5E9;
+  --amber:       #F59E0B;
+  --amber-bg:    #FFF8E1;
+  --red:         #D32F2F;
+  --red-bg:      #FFEBEE;
+  --slate:       #546E7A;
+  --slate-lite:  #90A4AE;
+  --border:      #E0E0E0;
+  --border-mid:  #B0BEC5;
+  --card-bg:     #FFFFFF;
+  --page-bg:     linear-gradient(rgba(0, 40, 10, 0.85), rgba(0, 40, 10, 0.85)), url('https://images.unsplash.com/photo-1639762681485-074b7f938ba0?q=80&w=2832&auto=format&fit=crop') center/cover fixed;
+  --font-heading:'Montserrat', sans-serif;
+  --font-body:   'Open Sans', sans-serif;
+  --font-mono:   'JetBrains Mono', monospace;
+  --shadow-card: 0 1px 2px rgba(0,0,0,.04), 0 2px 4px rgba(0,0,0,.02);
+  --shadow-lifted: 0 2px 8px rgba(0,0,0,.08), 0 4px 12px rgba(0,0,0,.04);
+  --shadow-modal: 0 4px 20px rgba(0,0,0,.15);
+  --radius-sm:   4px;
+  --radius-md:   6px;
+  --radius-lg:   8px;
+  --radius-xl:   8px;
+}
+
+/* ─── Typography utilities ──────────────────────────────────── */
+.font-heading { font-family: var(--font-heading) !important; }
+.font-mono    { font-family: var(--font-mono)    !important; }
+
+/* ─── Page transition ───────────────────────────────────────── */
+@keyframes pageIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.page-enter { animation: pageIn 0.35s cubic-bezier(0.22,1,0.36,1) forwards; }
+
+/* ─── Count-up / stat reveal ─────────────────────────────────── */
+@keyframes countUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-count-up { animation: countUp 0.7s ease forwards; }
+
+/* ─── Fade / slide utilities ─────────────────────────────────── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(16px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.animate-fade-in      { animation: fadeIn 0.5s ease forwards; }
+.animate-fade-in-up   { animation: fadeInUp 0.55s cubic-bezier(0.22,1,0.36,1) forwards; }
+.animate-slide-right  { animation: slideInRight 0.4s cubic-bezier(0.22,1,0.36,1) forwards; }
+
+.stagger-1  { animation-delay: 0.05s; }
+.stagger-2  { animation-delay: 0.10s; }
+.stagger-3  { animation-delay: 0.15s; }
+.stagger-4  { animation-delay: 0.20s; }
+.stagger-5  { animation-delay: 0.25s; }
+.stagger-6  { animation-delay: 0.30s; }
+
+/* ─── Pulsing dot ────────────────────────────────────────────── */
+@keyframes pulseDot {
+  0%,100% { opacity:1; transform:scale(1); }
+  50%      { opacity:.45; transform:scale(1.5); }
+}
+.animate-pulse-dot { animation: pulseDot 1.5s ease-in-out infinite; }
+
+/* ─── Progress bar animated fill ─────────────────────────────── */
+@keyframes progressFill {
+  from { width: 0 !important; }
+}
+.progress-bar-anim { animation: progressFill 1.4s cubic-bezier(0.4,0,0.2,1) forwards; }
+
+/* ─── Shimmer loading skeleton ───────────────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: -600px 0; }
+  100% { background-position:  600px 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg,#F1F5F9 25%,#E2E8F0 50%,#F1F5F9 75%);
+  background-size: 600px 100%;
+  animation: shimmer 1.4s infinite;
+  border-radius: 6px;
+}
+
+/* ─── Check-in animation ─────────────────────────────────────── */
+@keyframes checkIn {
+  0%   { transform:scale(0) rotate(-45deg); opacity:0; }
+  60%  { transform:scale(1.25) rotate(6deg);  opacity:1; }
+  100% { transform:scale(1)   rotate(0deg);  opacity:1; }
+}
+.animate-check-in { animation: checkIn 0.45s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+
+/* ─── Float card hover ───────────────────────────────────────── */
+.card-hover {
+  transition: box-shadow 0.22s ease, transform 0.22s ease;
+  will-change: transform;
+}
+.card-hover:hover {
+  box-shadow: var(--shadow-lifted);
+  transform: translateY(-3px);
+}
+
+/* ─── Button press ───────────────────────────────────────────── */
+.btn-press:active { transform: scale(0.97); }
+
+/* ─── Shimmer text ───────────────────────────────────────────── */
+.shimmer-text {
+  background: linear-gradient(
+    to right,
+    #ffb347 20%,
+    #ffcc33 30%,
+    #4ade80 40%,
+    #3b82f6 50%,
+    #a855f7 60%,
+    #ffcc33 70%,
+    #ffb347 80%
+  );
+  background-size: 200% auto;
+  color: transparent !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  animation: shimmer-text-anim 3s linear infinite;
+  display: inline-block;
+}
+
+@keyframes shimmer-text-anim {
+  to {
+    background-position: 200% center;
+  }
+}
+
+/* ─── SDG Chain Responsive ──────────────────────────────── */
+.sdg-chain-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.sdg-chain-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .sdg-chain-scroll {
+    justify-content: flex-start !important;
+    scroll-snap-type: x mandatory;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+  .sdg-chain-scroll > div > div {
+    scroll-snap-align: center;
+  }
+  .sdg-chain-scroll > div > div > div:first-child {
+    width: 70px !important;
+    height: 70px !important;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .sdg-chain-scroll > div {
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    gap: 8px;
+    max-width: 700px;
+  }
+  .sdg-chain-scroll > div > div {
+    margin-left: -10px !important;
+  }
+  .sdg-chain-scroll > div > div > div:first-child {
+    width: 90px !important;
+    height: 90px !important;
+  }
+}

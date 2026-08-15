@@ -123,9 +123,9 @@ export default function ProjectDetailPage() {
             });
             showAlert({
                 type: decision === 'VERIFY' ? 'success' : 'info',
-                title: decision === 'VERIFY' ? 'Closure Video Verified' : 'Closure Video Rejected',
+                title: decision === 'VERIFY' ? 'Closure Video Verified & Project Completed!' : 'Closure Video Rejected',
                 message: decision === 'VERIFY' 
-                    ? 'Closure video has been verified. The Video Verification Gate is now PASSED.'
+                    ? 'Closure video has been verified. The final milestone and overall project are now marked as COMPLETED.'
                     : 'Closure video rejected. The NGO has been notified to re-upload with required corrections.'
             });
             setShowVideoRejectModal(false);
@@ -500,11 +500,11 @@ export default function ProjectDetailPage() {
     const computedNegotiatedBudget = milestones.reduce((sum, m) => sum + (m.amountAllocated || 0), 0);
 
     return (
-        <div className="min-h-screen bg-slate-50 p-6 lg:p-8">
+        <div className="min-h-screen bg-slate-50 p-3 sm:p-6 lg:p-8">
             <div className="max-w-7xl mx-auto space-y-6">
                 
                 {/* Back Link */}
-                <button onClick={() => navigate(-1)} className="flex items-center text-sm font-bold text-[#00A875] hover:underline">
+                <button onClick={() => navigate(-1)} className="flex items-center text-sm font-bold text-[#00A875] hover:underline min-h-[44px]">
                     ← Back to Projects
                 </button>
 
@@ -1307,9 +1307,9 @@ export default function ProjectDetailPage() {
 
             {/* Modal: Propose Changes (Funder) */}
             {showChangeModal && (
-                <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-xl border border-slate-200">
-                        <h2 className="text-xl font-black text-slate-950 mb-4 flex items-center gap-1.5"><Sparkles size={20} className="text-indigo-600" /> Propose Milestone Changes</h2>
+                <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-3 sm:p-4">
+                    <div className="bg-white rounded-2xl p-4 sm:p-6 max-w-md w-full max-h-[90vh] overflow-y-auto shadow-xl border border-slate-200">
+                        <h2 className="text-lg sm:text-xl font-black text-slate-950 mb-4 flex items-center gap-1.5"><Sparkles size={20} className="text-indigo-600" /> Propose Milestone Changes</h2>
                         <form onSubmit={handleRaiseCR} className="space-y-4">
                             <div>
                                 <label className="block text-xs font-bold text-slate-600 mb-1">Proposed Title</label>
@@ -1364,10 +1364,10 @@ export default function ProjectDetailPage() {
                                 />
                             </div>
                             <div className="flex gap-3 pt-2">
-                                <button type="button" onClick={() => { setShowChangeModal(false); resetChangeForm(); }} className="flex-1 bg-white border border-slate-300 text-slate-700 font-bold py-2.5 rounded-lg text-sm hover:bg-slate-50 transition">
+                                <button type="button" onClick={() => { setShowChangeModal(false); resetChangeForm(); }} className="flex-1 bg-white border border-slate-300 text-slate-700 font-bold py-2.5 rounded-lg text-sm hover:bg-slate-50 transition min-h-[44px]">
                                     Cancel
                                 </button>
-                                <button type="submit" className="flex-1 bg-slate-900 text-white font-bold py-2.5 rounded-lg text-sm hover:bg-slate-800 transition">
+                                <button type="submit" className="flex-1 bg-slate-900 text-white font-bold py-2.5 rounded-lg text-sm hover:bg-slate-800 transition min-h-[44px]">
                                     Submit Proposal
                                 </button>
                             </div>
@@ -1378,9 +1378,9 @@ export default function ProjectDetailPage() {
 
             {/* Modal: NGO Respond to Change Request */}
             {showRespondModal && (
-                <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-xl border border-slate-200">
-                        <h2 className="text-xl font-black text-slate-950 mb-4 flex items-center gap-1.5"><Send size={20} className="text-indigo-600" /> Respond to Change Proposal</h2>
+                <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-3 sm:p-4">
+                    <div className="bg-white rounded-2xl p-4 sm:p-6 max-w-md w-full max-h-[90vh] overflow-y-auto shadow-xl border border-slate-200">
+                        <h2 className="text-lg sm:text-xl font-black text-slate-950 mb-4 flex items-center gap-1.5"><Send size={20} className="text-indigo-600" /> Respond to Change Proposal</h2>
                         <form onSubmit={handleNgoRespond} className="space-y-4">
                             <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs text-slate-700 space-y-1">
                                 <div>Original Title: <strong className="text-slate-950">{selectedCR?.original?.name}</strong></div>
@@ -1462,10 +1462,10 @@ export default function ProjectDetailPage() {
                             </div>
 
                             <div className="flex gap-3 pt-2">
-                                <button type="button" onClick={() => { setShowRespondModal(false); resetRespondForm(); }} className="flex-1 bg-white border border-slate-300 text-slate-700 font-bold py-2.5 rounded-lg text-sm hover:bg-slate-50 transition">
+                                <button type="button" onClick={() => { setShowRespondModal(false); resetRespondForm(); }} className="flex-1 bg-white border border-slate-300 text-slate-700 font-bold py-2.5 rounded-lg text-sm hover:bg-slate-50 transition min-h-[44px]">
                                     Cancel
                                 </button>
-                                <button type="submit" className="flex-1 bg-slate-900 text-white font-bold py-2.5 rounded-lg text-sm hover:bg-slate-800 transition">
+                                <button type="submit" className="flex-1 bg-slate-900 text-white font-bold py-2.5 rounded-lg text-sm hover:bg-slate-800 transition min-h-[44px]">
                                     Submit Response
                                 </button>
                             </div>
@@ -1476,9 +1476,9 @@ export default function ProjectDetailPage() {
 
             {/* Modal: Commit Funding (Funder) */}
             {showCommitModal && (
-                <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-xl border border-slate-200">
-                        <h2 className="text-xl font-black text-slate-950 mb-4 flex items-center gap-1.5"><Coins size={20} className="text-[#00A875]" /> Submit Funding Commitment</h2>
+                <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-3 sm:p-4">
+                    <div className="bg-white rounded-2xl p-4 sm:p-6 max-w-md w-full max-h-[90vh] overflow-y-auto shadow-xl border border-slate-200">
+                        <h2 className="text-lg sm:text-xl font-black text-slate-950 mb-4 flex items-center gap-1.5"><Coins size={20} className="text-[#00A875]" /> Submit Funding Commitment</h2>
                         <form onSubmit={handleCommitFunding} className="space-y-4">
                             <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 text-xs font-semibold text-slate-700 space-y-1">
                                 <div>Original Budget estimate: <strong>₹{project.totalBudget?.toLocaleString()}</strong></div>
@@ -1493,9 +1493,9 @@ export default function ProjectDetailPage() {
                             <div>
                                 <label className="block text-xs font-bold text-slate-600 mb-1">Confirm Total Committed Amount (₹)</label>
                                 <input 
-                                    type="number"
+                                    type="number" 
                                     required
-                                    value={commitTotal}
+                                    value={commitTotal} 
                                     onChange={e => setCommitTotal(e.target.value)}
                                     placeholder={computedNegotiatedBudget.toString()}
                                     className="w-full border border-slate-300 rounded-lg p-2.5 text-sm font-black text-slate-900"
@@ -1503,10 +1503,10 @@ export default function ProjectDetailPage() {
                             </div>
 
                             <div className="flex gap-3 pt-2">
-                                <button type="button" onClick={() => setShowCommitModal(false)} className="flex-1 bg-white border border-slate-300 text-slate-700 font-bold py-2.5 rounded-lg text-sm hover:bg-slate-50 transition" disabled={isSubmittingCommit}>
+                                <button type="button" onClick={() => setShowCommitModal(false)} className="flex-1 bg-white border border-slate-300 text-slate-700 font-bold py-2.5 rounded-lg text-sm hover:bg-slate-50 transition min-h-[44px]" disabled={isSubmittingCommit}>
                                     Cancel
                                 </button>
-                                <button type="submit" className="flex-1 bg-emerald-600 text-white font-bold py-2.5 rounded-lg text-sm hover:bg-emerald-700 transition" disabled={isSubmittingCommit}>
+                                <button type="submit" className="flex-1 bg-emerald-600 text-white font-bold py-2.5 rounded-lg text-sm hover:bg-emerald-700 transition min-h-[44px]" disabled={isSubmittingCommit}>
                                     {isSubmittingCommit ? "Submitting..." : "Confirm Commitment"}
                                 </button>
                             </div>
@@ -1517,18 +1517,18 @@ export default function ProjectDetailPage() {
 
             {/* Modal: Share QR Code (NGO) */}
             {showQrModal && (
-                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden border border-slate-200">
-                        <div className="p-6 border-b border-slate-200 flex justify-between items-center bg-slate-50">
-                            <h3 className="text-lg font-black text-slate-950 flex items-center gap-1.5"><QrCode size={20} className="text-blue-600" /> Share Verification Form</h3>
-                            <button onClick={() => setShowQrModal(false)} className="text-slate-400 hover:text-slate-600 text-lg font-bold">✕</button>
+                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-3 sm:p-4">
+                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto border border-slate-200">
+                        <div className="p-4 sm:p-6 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+                            <h3 className="text-base sm:text-lg font-black text-slate-950 flex items-center gap-1.5"><QrCode size={20} className="text-blue-600" /> Share Verification Form</h3>
+                            <button onClick={() => setShowQrModal(false)} className="text-slate-400 hover:text-slate-600 text-lg font-bold min-w-[32px] min-h-[32px] flex items-center justify-center">✕</button>
                         </div>
-                        <div className="p-6 space-y-6">
-                            <div className="text-sm font-semibold text-slate-700">
+                        <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+                            <div className="text-xs sm:text-sm font-semibold text-slate-700">
                                 Milestone: <strong className="text-slate-950">{qrMilestoneTitle}</strong>
                             </div>
                             <div className="flex justify-center bg-white p-4 rounded-xl border border-slate-200">
-                                <QRCode value={qrUrl} size={200} level="H" />
+                                <QRCode value={qrUrl} size={180} level="H" />
                             </div>
                             <div>
                                 <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Secure Public Link</label>
@@ -1537,17 +1537,17 @@ export default function ProjectDetailPage() {
                                         type="text" 
                                         readOnly 
                                         value={qrUrl} 
-                                        className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-sm text-slate-900 outline-none"
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs sm:text-sm text-slate-900 outline-none"
                                     />
                                     <button 
                                         onClick={() => {
                                             navigator.clipboard.writeText(qrUrl);
                                             showAlert({ type: 'info', message: "Link copied to clipboard!" });
                                         }}
-                                        className="bg-blue-50 text-blue-600 hover:bg-blue-100 p-2.5 rounded-lg transition"
+                                        className="bg-blue-50 text-blue-600 hover:bg-blue-100 p-2 rounded-lg transition min-w-[40px] flex items-center justify-center"
                                         title="Copy Link"
                                     >
-                                        <Link className="w-5 h-5" />
+                                        <Link className="w-4 h-4" />
                                     </button>
                                 </div>
                                 <p className="text-xs text-slate-500 font-medium mt-2">
@@ -1558,44 +1558,45 @@ export default function ProjectDetailPage() {
                     </div>
                 </div>
             )}
+
             {/* Modal: Reject Closure Video */}
             {showVideoRejectModal && (
-                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden border border-slate-200">
-                        <div className="p-5 border-b border-slate-200 flex justify-between items-center bg-rose-50">
-                            <h3 className="text-base font-black text-rose-950 flex items-center gap-1.5">
+                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-3 sm:p-4">
+                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto border border-slate-200">
+                        <div className="p-4 sm:p-5 border-b border-slate-200 flex justify-between items-center bg-rose-50">
+                            <h3 className="text-sm sm:text-base font-black text-rose-950 flex items-center gap-1.5">
                                 <XCircle size={18} className="text-rose-600" /> Reject Closure Video
                             </h3>
-                            <button onClick={() => setShowVideoRejectModal(false)} className="text-slate-400 hover:text-slate-600 text-lg font-bold">✕</button>
+                            <button onClick={() => setShowVideoRejectModal(false)} className="text-slate-400 hover:text-slate-600 text-lg font-bold min-w-[32px] min-h-[32px] flex items-center justify-center">✕</button>
                         </div>
-                        <div className="p-6 space-y-4">
+                        <div className="p-4 sm:p-6 space-y-4">
                             <p className="text-xs text-slate-600 font-medium">
                                 Please specify the rejection reason or required corrections so the NGO can re-upload an appropriate geo-tagged video.
                             </p>
                             <div>
                                 <label className="block text-xs font-bold text-slate-700 mb-1">Rejection Reason / Guidance *</label>
-                                <textarea
+                                <textarea 
                                     required
                                     rows={3}
-                                    value={videoRejectReason}
+                                    value={videoRejectReason} 
                                     onChange={e => setVideoRejectReason(e.target.value)}
                                     placeholder="e.g. Geotag location does not match project site; or video resolution is unclear."
                                     className="w-full border border-slate-300 rounded-xl p-3 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500"
                                 />
                             </div>
                             <div className="flex gap-2 pt-2">
-                                <button
-                                    type="button"
-                                    onClick={() => setShowVideoRejectModal(false)}
-                                    className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl text-xs transition"
+                                <button 
+                                    type="button" 
+                                    onClick={() => setShowVideoRejectModal(false)} 
+                                    className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl text-xs transition min-h-[44px]"
                                 >
                                     Cancel
                                 </button>
-                                <button
-                                    type="button"
-                                    onClick={() => handleVerifyVideo('REJECT', videoRejectReason)}
+                                <button 
+                                    type="button" 
+                                    onClick={() => handleVerifyVideo('REJECT', videoRejectReason)} 
                                     disabled={!videoRejectReason.trim()}
-                                    className="flex-1 bg-rose-600 hover:bg-rose-700 text-white font-bold py-2.5 rounded-xl text-xs transition disabled:opacity-50"
+                                    className="flex-1 bg-rose-600 hover:bg-rose-700 text-white font-bold py-2.5 rounded-xl text-xs transition disabled:opacity-50 min-h-[44px]"
                                 >
                                     Confirm Rejection
                                 </button>

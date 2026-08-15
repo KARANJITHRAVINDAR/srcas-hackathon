@@ -142,25 +142,25 @@ export default function PublicAuditDashboard() {
       </nav>
 
       {/* HERO / PLATFORM METRICS */}
-      <section className="pt-28 pb-12 px-6 bg-gradient-to-b from-slate-100 via-emerald-50/30 to-slate-50">
+      <section className="pt-24 sm:pt-28 pb-8 sm:pb-12 px-4 sm:px-6 bg-gradient-to-b from-slate-100 via-emerald-50/30 to-slate-50">
         <div className="max-w-7xl mx-auto">
-          <div className="max-w-3xl mb-8">
+          <div className="max-w-3xl mb-6 sm:mb-8">
             <div className="inline-flex items-center gap-2 px-3 py-1 text-xs font-bold text-emerald-800 bg-emerald-100 border border-emerald-200 rounded-full mb-3">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
               100% Immutable Public Audit Trail
             </div>
-            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-slate-900 leading-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-slate-900 leading-tight">
               Cryptographically Verified <br />
               <span className="text-emerald-600">CSR Payout & Impact Explorer</span>
             </h1>
-            <p className="text-slate-600 text-base mt-3 leading-relaxed">
+            <p className="text-slate-600 text-sm sm:text-base mt-3 leading-relaxed">
               Every committed grant, evidence milestone, AI fraud inspection score, and escrow release transaction is anchored to an immutable blockchain ledger.
             </p>
           </div>
 
           {/* KEY STATS CARDS */}
           {stats && (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
               <div className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm hover:shadow-md transition">
                 <div className="flex items-center justify-between text-slate-500 text-xs font-semibold mb-2">
                   <span>Committed Capital</span>
@@ -367,22 +367,22 @@ export default function PublicAuditDashboard() {
 
         {/* PROOF GALLERY MODAL */}
         {selectedProofProject && (
-          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-            <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-3xl max-h-[85vh] overflow-hidden flex flex-col shadow-2xl">
-              <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-4">
+            <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
+              <div className="p-4 sm:p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
                 <div>
                   <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider">Verified Proof Gallery</span>
-                  <h3 className="text-xl font-extrabold text-slate-900">{selectedProofProject.title}</h3>
+                  <h3 className="text-lg sm:text-xl font-extrabold text-slate-900">{selectedProofProject.title}</h3>
                 </div>
                 <button
                   onClick={() => setSelectedProofProject(null)}
-                  className="w-8 h-8 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-700 flex items-center justify-center font-bold text-sm transition"
+                  className="w-8 h-8 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-700 flex items-center justify-center font-bold text-sm transition shrink-0"
                 >
                   ✕
                 </button>
               </div>
 
-              <div className="p-6 overflow-y-auto space-y-4 flex-1">
+              <div className="p-4 sm:p-6 overflow-y-auto space-y-4 flex-1">
                 {loadingProofs ? (
                   <div className="text-center py-12 text-slate-500 font-semibold">Loading evidence submissions...</div>
                 ) : projectProofs.length > 0 ? (

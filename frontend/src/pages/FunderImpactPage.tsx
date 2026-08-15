@@ -62,17 +62,17 @@ export default function FunderImpactPage() {
     const activeSdgsCount = sdgBreakdown.length;
 
     return (
-        <div className="p-8 pb-20 max-w-7xl mx-auto space-y-8 animate-fadeIn">
+        <div className="p-4 sm:p-6 lg:p-8 pb-20 max-w-7xl mx-auto space-y-6 sm:space-y-8 animate-fadeIn">
             {/* Header */}
-            <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-[#DDE3EA] pb-6">
+            <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-[#DDE3EA] pb-6">
                 <div>
-                    <h1 className="text-3xl font-extrabold text-[#10172A] tracking-tight">SDG Impact Portfolio</h1>
-                    <p className="text-[#52627A] mt-1 font-medium">Track capital allocation and direct social impact achievements mapped to UN Sustainable Development Goals.</p>
+                    <h1 className="text-2xl sm:text-3xl font-extrabold text-[#10172A] tracking-tight">SDG Impact Portfolio</h1>
+                    <p className="text-[#52627A] mt-1 text-xs sm:text-sm font-medium">Track capital allocation and direct social impact achievements mapped to UN Sustainable Development Goals.</p>
                 </div>
                 <button 
                     onClick={fetchImpactData}
                     disabled={refreshing}
-                    className="p-2.5 border border-[#DDE3EA] bg-white rounded-lg font-bold text-[#52627A] hover:bg-[#F8FAFC] transition flex items-center justify-center gap-2"
+                    className="p-2.5 border border-[#DDE3EA] bg-white rounded-lg font-bold text-[#52627A] hover:bg-[#F8FAFC] transition flex items-center justify-center gap-2 min-h-[44px] w-full sm:w-auto text-xs sm:text-sm"
                 >
                     <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
                     Refresh
@@ -80,7 +80,7 @@ export default function FunderImpactPage() {
             </header>
 
             {/* KPI Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-[#DDE3EA] relative overflow-hidden">
                     <div className="absolute right-4 top-4 text-emerald-100">
                         <TrendingUp size={48} />

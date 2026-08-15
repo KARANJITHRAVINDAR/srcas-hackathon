@@ -57,6 +57,10 @@ public class OcrExtractionService {
         return extractFieldsFromText(extractedText, documentType);
     }
 
+    public String extractRawText(MultipartFile file) {
+        return performOcr(file);
+    }
+
     public String performOcr(MultipartFile file) {
         String originalFilename = file.getOriginalFilename() != null ? file.getOriginalFilename().toLowerCase() : "";
         String extractedText = "";
@@ -85,9 +89,7 @@ public class OcrExtractionService {
             // Step 2: Fallback to Multi-Page Tesseract OCR for scanned image PDFs
             log.info("[PDFBOX] Scanned PDF detected, rendering pages for OCR (pages: {})", document.getNumberOfPages());
             PDFRenderer renderer = new PDFRenderer(document);
-            ITesseract tesseract = new Tesseract();
-            tesseract.setDatapath("C:\\Program Files\\Tesseract-OCR\\tessdata");
-            tesseract.setLanguage("eng");
+            ITesseract tesseract = createTesseractInstance();
 
             int maxPages = Math.min(document.getNumberOfPages(), 6);
             for (int p = 0; p < maxPages; p++) {
@@ -109,13 +111,36 @@ public class OcrExtractionService {
         return fullText.toString();
     }
 
+    @org.springframework.beans.factory.annotation.Value("${ocr.tesseract.datapath:}")
+    private String customDatapath;
+
+    private ITesseract createTesseractInstance() {
+        ITesseract tesseract = new Tesseract();
+        if (customDatapath != null && !customDatapath.trim().isEmpty()) {
+            tesseract.setDatapath(customDatapath.trim());
+        } else {
+            String os = System.getProperty("os.name", "").toLowerCase();
+            if (os.contains("win")) {
+                tesseract.setDatapath("C:\\Program Files\\Tesseract-OCR\\tessdata");
+            } else {
+                // Linux / Docker container path
+                java.io.File linuxPath5 = new java.io.File("/usr/share/tesseract-ocr/5/tessdata");
+                if (linuxPath5.exists()) {
+                    tesseract.setDatapath(linuxPath5.getAbsolutePath());
+                } else {
+                    tesseract.setDatapath("/usr/share/tesseract-ocr/4.00/tessdata");
+                }
+            }
+        }
+        tesseract.setLanguage("eng");
+        return tesseract;
+    }
+
     private String extractTextFromImage(MultipartFile file) {
         try {
             BufferedImage image = ImageIO.read(file.getInputStream());
             if (image != null) {
-                ITesseract tesseract = new Tesseract();
-                tesseract.setDatapath("C:\\Program Files\\Tesseract-OCR\\tessdata");
-                tesseract.setLanguage("eng");
+                ITesseract tesseract = createTesseractInstance();
                 return tesseract.doOCR(image);
             }
         } catch (Exception e) {

@@ -30,17 +30,17 @@ export default function NgoDashboardPage() {
     if (loading) return <div className="p-12 text-center text-[#52627A] font-bold">Loading dashboard...</div>;
 
     return (
-        <div className="p-8 pb-20 max-w-7xl mx-auto space-y-8">
+        <div className="p-4 sm:p-6 lg:p-8 pb-20 max-w-7xl mx-auto space-y-6 sm:space-y-8">
             {/* Header */}
             <div className="flex justify-between items-end">
                 <div>
-                    <h1 className="text-3xl font-extrabold font-[Space_Grotesk] text-[#10172A] tracking-tight">Welcome back, NGO Representative</h1>
-                    <p className="text-[#52627A] mt-1 font-medium">Track your projects, funding, evidence and impact.</p>
+                    <h1 className="text-2xl sm:text-3xl font-extrabold font-[Space_Grotesk] text-[#10172A] tracking-tight">Welcome back, NGO Representative</h1>
+                    <p className="text-[#52627A] mt-1 text-xs sm:text-sm font-medium">Track your projects, funding, evidence and impact.</p>
                 </div>
             </div>
 
             {/* Summary Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
                 <div className="bg-white p-5 rounded-xl shadow-sm border border-[#DDE3EA]">
                     <div className="flex items-center gap-2 mb-2 text-[#52627A]">
                         <FolderKanban size={18} />
