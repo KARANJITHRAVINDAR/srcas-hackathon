@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from '../config';
 import { motion } from 'framer-motion';
 import { ShieldCheck, Eye, EyeOff, ArrowRight, ArrowLeft, Cpu, CheckCircle2, Users, Database } from 'lucide-react';
 
@@ -19,7 +20,7 @@ export default function LoginPage() {
         setError('');
         setIsLoading(true);
         try {
-            const res = await axios.post('http://localhost:8081/api/v1/auth/login', { email, password });
+            const res = await axios.post(`${API_BASE_URL}/api/v1/auth/login`, { email, password });
             login(res.data);
         } catch (err: any) {
             setError(err.response?.data?.message || 'Login failed. Please check your credentials.');

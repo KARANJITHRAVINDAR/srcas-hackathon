@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useAlert } from '../context/AlertContext';
+import { API_BASE_URL } from '../config';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
     ShieldCheck, CheckCircle2, Cpu, Database, Users, Building, 
@@ -54,7 +55,7 @@ export default function RegisterPage() {
         e.preventDefault();
         setIsLoading(true);
         try {
-            await axios.post('http://localhost:8081/api/v1/auth/register', { 
+            await axios.post(`${API_BASE_URL}/api/v1/auth/register`, { 
                 ...authData, 
                 role
             });
@@ -77,7 +78,7 @@ export default function RegisterPage() {
     };
 
     const doLogin = async () => {
-        const res = await axios.post('http://localhost:8081/api/v1/auth/login', {
+        const res = await axios.post(`${API_BASE_URL}/api/v1/auth/login`, {
             email: authData.email,
             password: authData.password
         });

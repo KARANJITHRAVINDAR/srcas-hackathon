@@ -13,4 +13,17 @@ export default defineConfig({
   optimizeDeps: {
     include: ["three", "@react-three/fiber", "@react-three/drei"],
   },
+  server: {
+    port: 5173,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8081',
+        changeOrigin: true,
+      },
+      '/uploads': {
+        target: 'http://localhost:8081',
+        changeOrigin: true,
+      }
+    }
+  }
 })

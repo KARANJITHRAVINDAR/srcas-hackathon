@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '../config';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { 
@@ -26,8 +27,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         if (!user) return;
         try {
             const [countRes, listRes] = await Promise.all([
-                axios.get('http://localhost:8081/api/v1/notifications/unread-count'),
-                axios.get('http://localhost:8081/api/v1/notifications')
+                axios.get(`${API_BASE_URL}/api/v1/notifications/unread-count`),
+                axios.get(`${API_BASE_URL}/api/v1/notifications`)
             ]);
             setUnreadCount(countRes.data?.unreadCount || 0);
             setRecentNotifications((listRes.data || []).slice(0, 6));
@@ -63,7 +64,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     const handleMarkAsRead = async (id: string, e?: React.MouseEvent) => {
         if (e) e.stopPropagation();
         try {
-            await axios.post(`http://localhost:8081/api/v1/notifications/${id}/read`);
+            await axios.post(`${API_BASE_URL}/api/v1/notifications/${id}/read`);
             setRecentNotifications(prev => prev.map(n => n.id === id ? { ...n, readStatus: 'READ' } : n));
             setUnreadCount(prev => Math.max(0, prev - 1));
         } catch (err) {
@@ -73,7 +74,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
     const handleMarkAllRead = async () => {
         try {
-            await axios.post('http://localhost:8081/api/v1/notifications/mark-all-read');
+            await axios.post(`${API_BASE_URL}/api/v1/notifications/mark-all-read`);
             setRecentNotifications(prev => prev.map(n => ({ ...n, readStatus: 'READ' })));
             setUnreadCount(0);
         } catch (err) {

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '../config';
 import { ShieldCheck, CheckCircle2, Clock, ExternalLink, Copy, Check, RefreshCw, AlertCircle, Lock, Link as LinkIcon, Cpu } from 'lucide-react';
 
 interface BlockchainVerificationCardProps {
@@ -33,7 +34,7 @@ export const BlockchainVerificationCard: React.FC<BlockchainVerificationCardProp
         setErrorMsg(null);
         try {
             // Load live record if committed
-            const recRes = await axios.get(`http://localhost:8081/api/blockchain/projects/${projectId}/milestones/${milestoneId}`, { headers });
+            const recRes = await axios.get(`${API_BASE_URL}/api/blockchain/projects/${projectId}/milestones/${milestoneId}`, { headers });
             if (recRes.data && recRes.data.status && recRes.data.status !== 'NOT_COMMITTED') {
                 setRecord(recRes.data);
             } else {
@@ -41,7 +42,7 @@ export const BlockchainVerificationCard: React.FC<BlockchainVerificationCardProp
             }
 
             // Load preview
-            const prevRes = await axios.get(`http://localhost:8081/api/blockchain/projects/${projectId}/milestones/${milestoneId}/preview`, { headers });
+            const prevRes = await axios.get(`${API_BASE_URL}/api/blockchain/projects/${projectId}/milestones/${milestoneId}/preview`, { headers });
             setPreview(prevRes.data);
         } catch (err: any) {
             console.error('Error loading blockchain data:', err);
@@ -59,7 +60,7 @@ export const BlockchainVerificationCard: React.FC<BlockchainVerificationCardProp
         setErrorMsg(null);
         try {
             const res = await axios.post(
-                `http://localhost:8081/api/blockchain/projects/${projectId}/milestones/${milestoneId}/commit`,
+                `${API_BASE_URL}/api/blockchain/projects/${projectId}/milestones/${milestoneId}/commit`,
                 {},
                 { headers }
             );
@@ -76,7 +77,7 @@ export const BlockchainVerificationCard: React.FC<BlockchainVerificationCardProp
         setVerifyingProofId(proofId);
         try {
             const res = await axios.get(
-                `http://localhost:8081/api/blockchain/milestones/${milestoneId}/proofs/${proofId}/verify`,
+                `${API_BASE_URL}/api/blockchain/milestones/${milestoneId}/proofs/${proofId}/verify`,
                 { headers }
             );
             setProofResults(prev => ({ ...prev, [proofId]: res.data }));
