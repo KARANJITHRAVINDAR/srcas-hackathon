@@ -36,24 +36,27 @@ export default function FunderProjectsPage() {
         fetchProjects();
     }, [sdgGoal, geography, budgetMin, budgetMax]);
 
-    const getEngagementBadge = (status: string) => {
-        if (!status) return <span className="text-[10px] font-bold text-gray-500 bg-gray-100 border border-gray-200 px-2 py-0.5 rounded">NEW</span>;
-        switch (status) {
+    const getEngagementBadge = (engagementStatus: string, projectStatus: string) => {
+        if (projectStatus === 'CLOSED' || projectStatus === 'COMPLETED') {
+            return <span className="text-[10px] font-bold text-emerald-800 bg-emerald-100 border border-emerald-300 px-2 py-0.5 rounded">CLOSED & AUDITED</span>;
+        }
+        if (engagementStatus === 'WITHDRAWN') {
+            return <span className="text-[10px] font-bold text-slate-600 bg-slate-100 border border-slate-300 px-2 py-0.5 rounded">WITHDRAWN</span>;
+        }
+        if (!engagementStatus) return <span className="text-[10px] font-bold text-gray-500 bg-gray-100 border border-gray-200 px-2 py-0.5 rounded">NEW</span>;
+        switch (engagementStatus) {
             case 'DISCOVERED':
                 return <span className="text-[10px] font-bold text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded">DISCOVERED</span>;
             case 'UNDER_REVIEW':
                 return <span className="text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded">UNDER REVIEW</span>;
             case 'NEGOTIATING':
-                return <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded animate-pulse">NEGOTIATING</span>;
+                return <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded">NEGOTIATING</span>;
             case 'COMMITTED':
                 return <span className="text-[10px] font-bold text-teal-700 bg-teal-50 border border-teal-200 px-2 py-0.5 rounded">COMMITTED</span>;
             case 'ACTIVE':
                 return <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded">ACTIVE</span>;
-            case 'COMPLETED':
-            case 'CLOSED':
-                return <span className="text-[10px] font-bold text-emerald-800 bg-emerald-100 border border-emerald-300 px-2 py-0.5 rounded">CLOSED & AUDITED</span>;
             default:
-                return <span className="text-[10px] font-bold text-gray-700 bg-gray-50 border border-gray-200 px-2 py-0.5 rounded">{status}</span>;
+                return <span className="text-[10px] font-bold text-gray-700 bg-gray-50 border border-gray-200 px-2 py-0.5 rounded">{engagementStatus}</span>;
         }
     };
 
@@ -142,7 +145,7 @@ export default function FunderProjectsPage() {
                                     <span className="text-xs font-bold text-[#00A875] bg-[#00A875]/10 px-2.5 py-1 rounded-md">
                                         {p.sdgGoal || 'SDG'}
                                     </span>
-                                    {getEngagementBadge(p.engagementStatus)}
+                                    {getEngagementBadge(p.engagementStatus, p.projectStatus)}
                                 </div>
 
                                 <h3 className="text-lg font-black text-[#10172A] mb-2 group-hover:text-[#00A875] transition-colors line-clamp-1">
