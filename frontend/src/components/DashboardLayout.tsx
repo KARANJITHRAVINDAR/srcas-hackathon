@@ -110,7 +110,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         { name: 'Evidence & Verification', path: '/funder/verification', icon: <FileCheck size={20} /> },
         { name: 'SDG Impact', path: '/funder/impact', icon: <Globe size={20} /> },
         { name: 'Beneficiaries', path: '/funder/beneficiaries', icon: <Users size={20} /> },
-        { name: 'Reports', path: '/funder/reports', icon: <FileText size={20} /> },
         { name: 'Notifications', path: '/funder/notifications', icon: <Bell size={20} /> },
         { name: 'Organisation Profile', path: '/funder/profile', icon: <Settings size={20} /> },
     ];
