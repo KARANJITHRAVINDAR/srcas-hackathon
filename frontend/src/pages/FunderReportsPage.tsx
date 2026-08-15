@@ -16,9 +16,20 @@ export default function FunderReportsPage() {
 
     const fetchProjectsAndReports = async () => {
         setLoading(true);
+        const token = localStorage.getItem('token');
+        const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+
         try {
-            const res = await axios.get('http://localhost:8081/api/org/projects');
-            const projectList = res.data || [];
+            let projectList: any[] = [];
+            try {
+                const res = await axios.get('http://localhost:8081/api/org/projects', config);
+                projectList = res.data || [];
+            } catch (e) {
+                // Fallback to public projects endpoint if auth fails
+                const publicRes = await axios.get('http://localhost:8081/api/v1/public/audit/projects');
+                projectList = publicRes.data || [];
+            }
+
             setProjects(projectList);
 
             // Fetch reports for closed/completed projects
@@ -27,7 +38,7 @@ export default function FunderReportsPage() {
                 projectList.map(async (p: any) => {
                     if (p.status === 'CLOSED' || p.status === 'COMPLETED') {
                         try {
-                            const reportRes = await axios.get(`http://localhost:8081/api/projects/${p.id}/audit-report/latest`);
+                            const reportRes = await axios.get(`http://localhost:8081/api/projects/${p.id}/audit-report/latest`, config);
                             newReportsMap[p.id] = reportRes.data;
                         } catch (e) {
                             // Report not generated yet
@@ -49,8 +60,11 @@ export default function FunderReportsPage() {
 
     const handleGenerateReport = async (projectId: string) => {
         setGeneratingMap(prev => ({ ...prev, [projectId]: true }));
+        const token = localStorage.getItem('token');
+        const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+
         try {
-            const res = await axios.post(`http://localhost:8081/api/projects/${projectId}/audit-report/generate`);
+            const res = await axios.post(`http://localhost:8081/api/projects/${projectId}/audit-report/generate`, {}, config);
             showAlert({
                 type: 'success',
                 title: 'Audit Report Generated',

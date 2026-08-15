@@ -122,9 +122,11 @@ export default function ProjectDetailPage() {
 
     const fetchAuditReport = async () => {
         try {
-            const latestRes = await axios.get(`http://localhost:8081/api/projects/${id}/audit-report/latest`);
+            const token = localStorage.getItem('token');
+            const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+            const latestRes = await axios.get(`http://localhost:8081/api/projects/${id}/audit-report/latest`, config);
             setLatestAuditReport(latestRes.data);
-            const historyRes = await axios.get(`http://localhost:8081/api/projects/${id}/audit-report/history`);
+            const historyRes = await axios.get(`http://localhost:8081/api/projects/${id}/audit-report/history`, config);
             setAuditReportHistory(historyRes.data || []);
         } catch (e) {
             // Audit report not generated yet
@@ -134,7 +136,9 @@ export default function ProjectDetailPage() {
     const handleGenerateAuditReport = async () => {
         setIsGeneratingAuditReport(true);
         try {
-            const res = await axios.post(`http://localhost:8081/api/projects/${id}/audit-report/generate`);
+            const token = localStorage.getItem('token');
+            const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+            const res = await axios.post(`http://localhost:8081/api/projects/${id}/audit-report/generate`, {}, config);
             showAlert({ type: 'success', title: 'Audit Report Generated', message: 'Official Audit Report generated and cryptographically signed.' });
             setLatestAuditReport(res.data);
             fetchAuditReport();
