@@ -24,23 +24,42 @@ public class OpenRouterAiService {
     @Value("${openrouter.api.key:${OPENROUTER_API_KEY:}}")
     private String openRouterApiKey;
 
+    @Value("${openrouter.api.model:${OPENROUTER_MODEL:meta-llama/llama-3.3-70b-instruct}}")
+    private String modelName = "meta-llama/llama-3.3-70b-instruct";
+
     private final String OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
-    private final String MODEL_NAME = "meta-llama/llama-3.3-70b-instruct";
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    public OpenRouterAiService() {
+        org.springframework.http.client.SimpleClientHttpRequestFactory factory = new org.springframework.http.client.SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(8000);
+        factory.setReadTimeout(10000);
+        this.restTemplate = new RestTemplate(factory);
+    }
+
+    public String getEffectiveApiKey() {
+        if (openRouterApiKey != null && !openRouterApiKey.trim().isBlank()) {
+            return openRouterApiKey.trim();
+        }
+        String envKey = System.getenv("OPENROUTER_API_KEY");
+        return envKey != null ? envKey.trim() : "";
+    }
+
     public boolean isConfigured() {
-        return openRouterApiKey != null && !openRouterApiKey.trim().isBlank();
+        String key = getEffectiveApiKey();
+        return key != null && !key.isBlank();
     }
 
     public JsonNode callLlamaModel(String prompt) {
         if (!isConfigured()) {
+            log.warn("[OpenRouter AI] API Key not configured.");
             return null;
         }
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.set("Authorization", "Bearer " + openRouterApiKey.trim());
+            headers.set("Authorization", "Bearer " + getEffectiveApiKey());
             headers.set("HTTP-Referer", "http://localhost:8081");
             headers.set("X-Title", "Transparency Chain");
 
@@ -49,7 +68,7 @@ public class OpenRouterAiService {
             message.put("content", prompt);
 
             Map<String, Object> body = new HashMap<>();
-            body.put("model", MODEL_NAME);
+            body.put("model", modelName);
             body.put("messages", Collections.singletonList(message));
             body.put("temperature", 0.1);
 

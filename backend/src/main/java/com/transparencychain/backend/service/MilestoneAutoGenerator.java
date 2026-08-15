@@ -28,6 +28,9 @@ public class MilestoneAutoGenerator {
     @Autowired
     private OpenRouterAiService openRouterAiService;
 
+    @Autowired(required = false)
+    private com.transparencychain.backend.service.ai.AiFallbackChainService aiFallbackChainService;
+
     private int extractPhaseNumber(Map<String, Object> map) {
         if (map == null) return 99;
         String title = (String) map.get("title");
@@ -67,16 +70,31 @@ public class MilestoneAutoGenerator {
         BigDecimal budget = project.getTotalBudget() != null ? project.getTotalBudget() : BigDecimal.ZERO;
         LocalDate startDate = LocalDate.now();
 
-        // 1. Try AI-powered custom milestone generation via OpenRouter
+        // 1. Try AI-powered custom milestone generation via Fallback Chain (OpenRouter -> Second Provider -> Template)
         try {
             String sdgStr = project.getSdgGoal() != null ? project.getSdgGoal().name() : "SDG1";
-            List<Map<String, Object>> aiMilestones = openRouterAiService.generateCustomMilestones(
-                project.getTitle(),
-                project.getDescription(),
-                budget,
-                project.getProjectDuration(),
-                sdgStr
-            );
+            List<Map<String, Object>> aiMilestones = null;
+            if (aiFallbackChainService != null) {
+                com.transparencychain.backend.service.ai.AiFallbackChainService.MilestoneGenerationResult genRes =
+                        aiFallbackChainService.generateMilestonesWithFallback(
+                                project.getTitle(),
+                                project.getDescription(),
+                                budget,
+                                project.getProjectDuration(),
+                                sdgStr
+                        );
+                if (genRes != null) {
+                    aiMilestones = genRes.getMilestones();
+                }
+            } else if (openRouterAiService != null) {
+                aiMilestones = openRouterAiService.generateCustomMilestones(
+                        project.getTitle(),
+                        project.getDescription(),
+                        budget,
+                        project.getProjectDuration(),
+                        sdgStr
+                );
+            }
 
             if (aiMilestones != null && !aiMilestones.isEmpty()) {
                 // Sort aiMilestones by phase number extracted from title or sequenceNumber

@@ -12,8 +12,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.transparencychain.backend.dto.evidence.*;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class AiFraudDetectionService {
@@ -26,6 +29,9 @@ public class AiFraudDetectionService {
 
     @Autowired
     private ReferencePriceRepository referencePriceRepository;
+
+    @Autowired(required = false)
+    private AutomatedEvidenceVerificationService automatedVerificationService;
 
     public EvidenceAnalysis analyzeProof(MultipartFile file, ProofSubmission proof, String expectedType) {
         EvidenceAnalysis analysis = new EvidenceAnalysis();
@@ -54,6 +60,59 @@ public class AiFraudDetectionService {
         analysis.setGstin(extracted.getGstin());
         analysis.setInvoiceAmount(extracted.getTotalAmount());
         analysis.setTaxAmount(extracted.getTaxAmount());
+
+        // Automated Evidence Authenticity Checks (Arithmetic, Geo, Temporal)
+        if (automatedVerificationService != null && proof != null) {
+            Project project = (proof.getMilestone() != null) ? proof.getMilestone().getProject() : null;
+            Milestone milestone = proof.getMilestone();
+
+            List<TaxLineData> taxLines = new ArrayList<>();
+            if (extracted.getTaxAmount() != null) {
+                taxLines.add(new TaxLineData("Tax Amount", BigDecimal.ZERO, extracted.getTaxAmount()));
+            }
+
+            EvidenceItemData itemData = EvidenceItemData.builder()
+                    .id(proof.getId() != null ? proof.getId().toString() : UUID.randomUUID().toString())
+                    .fileName(file != null ? file.getOriginalFilename() : "document.pdf")
+                    .type("INVOICE".equalsIgnoreCase(expectedType) ? EvidenceItemData.EvidenceType.INVOICE : EvidenceItemData.EvidenceType.RECEIPT)
+                    .subtotal(extracted.getTotalAmount() != null && extracted.getTaxAmount() != null ? extracted.getTotalAmount().subtract(extracted.getTaxAmount()) : extracted.getTotalAmount())
+                    .taxLines(taxLines)
+                    .taxAmount(extracted.getTaxAmount())
+                    .statedTotal(extracted.getTotalAmount())
+                    .printedAddress(extracted.getRawText())
+                    .evidenceDate(extracted.getInvoiceDate())
+                    .build();
+
+            Double projLat = project != null ? project.getLatitude() : null;
+            Double projLon = project != null ? project.getLongitude() : null;
+
+            ProjectContextData projContext = project != null ? ProjectContextData.builder()
+                    .projectId(project.getId())
+                    .title(project.getTitle())
+                    .registeredLatitude(projLat)
+                    .registeredLongitude(projLon)
+                    .geography(project.getGeography())
+                    .build() : null;
+
+            MilestoneContextData msContext = milestone != null ? MilestoneContextData.builder()
+                    .milestoneId(milestone.getId())
+                    .title(milestone.getTitle())
+                    .sequenceNumber(milestone.getSequenceNumber())
+                    .evidenceSubmissionDeadline(milestone.getDueDate())
+                    .build() : null;
+
+            ItemVerificationResult itemResult = automatedVerificationService.verifyItem(itemData, projContext, msContext, List.of(itemData));
+            if (itemResult.getOverallStatus() == ItemVerificationResult.Status.HARD_FAIL) {
+                reasons.add("HARD FAIL: " + itemResult.getPrimaryFailureReason());
+            } else if (itemResult.getOverallStatus() == ItemVerificationResult.Status.FLAG_FOR_REVIEW) {
+                reasons.add("REVIEW FLAG: " + itemResult.getPrimaryFailureReason());
+            }
+            if (itemResult.getSoftWarnings() != null) {
+                for (String sw : itemResult.getSoftWarnings()) {
+                    reasons.add("SOFT WARNING: " + sw);
+                }
+            }
+        }
 
         if (extracted.getOcrConfidence() < 50) {
             analysis.setResult(EvidenceAnalysisResult.OCR_FAILED);
