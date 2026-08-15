@@ -16,7 +16,7 @@ export default function NgoDashboardPage() {
     useEffect(() => {
         const fetchSummary = async () => {
             try {
-                const res = await axios.get('http://localhost:8081/api/v1/ngo/dashboard/summary');
+                const res = await axios.get('/api/v1/ngo/dashboard/summary');
                 setStats(res.data);
             } catch (err) {
                 console.error("Failed to fetch dashboard summary", err);

@@ -28,14 +28,14 @@ export default function AddExpensePage() {
     ];
 
     useEffect(() => {
-        axios.get('http://localhost:8081/api/v1/projects')
+        axios.get('/api/v1/projects')
             .then(res => setProjects(res.data))
             .catch(err => console.error(err));
     }, []);
 
     useEffect(() => {
         if (formData.projectId) {
-            axios.get(`http://localhost:8081/api/v1/projects/${formData.projectId}/milestones`)
+            axios.get(`/api/v1/projects/${formData.projectId}/milestones`)
                 .then(res => setMilestones(res.data))
                 .catch(err => console.error(err));
         } else {
@@ -64,7 +64,7 @@ export default function AddExpensePage() {
             data.append('data', JSON.stringify(formData));
             data.append('file', file);
 
-            await axios.post('http://localhost:8081/api/v1/ngo/expenses', data, {
+            await axios.post('/api/v1/ngo/expenses', data, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
             

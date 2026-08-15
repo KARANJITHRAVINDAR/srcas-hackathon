@@ -13,7 +13,7 @@ export default function ProjectEvidenceTab({ project }: { project: any }) {
 
     const fetchEvidence = async () => {
         try {
-            const res = await axios.get(`http://localhost:8081/api/v1/projects/${project.id}/proofs`);
+            const res = await axios.get(`/api/v1/projects/${project.id}/proofs`);
             setEvidence(res.data);
         } catch (error) {
             console.error('Failed to fetch project evidence', error);
@@ -75,11 +75,11 @@ export default function ProjectEvidenceTab({ project }: { project: any }) {
                             <div className="h-40 bg-gray-100 flex items-center justify-center border-b border-[#DDE3EA] relative">
                                 {item.fileType?.includes('image') ? (
                                     <div className="absolute inset-0 bg-gray-200">
-                                        <img src={`http://localhost:8081/uploads/${item.fileUrl}`} alt="Evidence" className="w-full h-full object-cover" />
+                                        <img src={`/uploads/${item.fileUrl}`} alt="Evidence" className="w-full h-full object-cover" />
                                     </div>
                                 ) : item.fileType?.includes('video') ? (
                                     <div className="absolute inset-0 bg-black">
-                                        <video src={`http://localhost:8081/uploads/${item.fileUrl}`} className="w-full h-full object-cover" />
+                                        <video src={`/uploads/${item.fileUrl}`} className="w-full h-full object-cover" />
                                         <div className="absolute inset-0 flex items-center justify-center">
                                             <div className="w-12 h-12 bg-white/30 rounded-full flex items-center justify-center backdrop-blur-sm">
                                                 <div className="w-0 h-0 border-t-8 border-t-transparent border-l-[12px] border-l-white border-b-8 border-b-transparent ml-1" />
@@ -90,10 +90,10 @@ export default function ProjectEvidenceTab({ project }: { project: any }) {
                                     <FileText className="w-16 h-16 text-gray-300" />
                                 )}
                                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
-                                    <a href={`http://localhost:8081/uploads/${item.fileUrl}`} target="_blank" rel="noopener noreferrer" className="p-2 bg-white rounded-full text-[#10172A] hover:scale-110 transition-transform">
+                                    <a href={`/uploads/${item.fileUrl}`} target="_blank" rel="noopener noreferrer" className="p-2 bg-white rounded-full text-[#10172A] hover:scale-110 transition-transform">
                                         <Eye size={20} />
                                     </a>
-                                    <a href={`http://localhost:8081/uploads/${item.fileUrl}`} download className="p-2 bg-white rounded-full text-[#10172A] hover:scale-110 transition-transform">
+                                    <a href={`/uploads/${item.fileUrl}`} download className="p-2 bg-white rounded-full text-[#10172A] hover:scale-110 transition-transform">
                                         <Download size={20} />
                                     </a>
                                 </div>

@@ -14,7 +14,7 @@ export default function NgoGlobalBeneficiariesPage() {
     const fetchSummary = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.get('http://localhost:8081/api/v1/ngo/beneficiary-forms/summary', {
+            const res = await axios.get('/api/v1/ngo/beneficiary-forms/summary', {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setSummary(res.data);

@@ -125,7 +125,7 @@ export default function RegisterPage() {
                 headers['Authorization'] = `Bearer ${token}`;
             }
 
-            const res = await axios.post('http://localhost:8081/api/v1/ngo/register/documents', formData, { headers });
+            const res = await axios.post('/api/v1/ngo/register/documents', formData, { headers });
 
             const data = res.data;
             setSubmissionId(data.submissionId);
@@ -139,7 +139,7 @@ export default function RegisterPage() {
             setRejectionReasons(data.rejectionReasons || []);
 
             // Fetch populated fields for submission
-            const subRes = await axios.get(`http://localhost:8081/api/v1/ngo/register/submission/${data.submissionId}`, { headers });
+            const subRes = await axios.get(`/api/v1/ngo/register/submission/${data.submissionId}`, { headers });
             setExtractedFields(subRes.data.fields || []);
 
             setTimeout(() => {
@@ -219,11 +219,11 @@ export default function RegisterPage() {
     const handleResolveField = async (fieldName: string, value: string) => {
         if (!submissionId) return;
         try {
-            await axios.patch(`http://localhost:8081/api/v1/ngo/register/submission/${submissionId}/fields`, { 
+            await axios.patch(`/api/v1/ngo/register/submission/${submissionId}/fields`, { 
                 fieldName, 
                 finalValue: value 
             });
-            const res = await axios.get(`http://localhost:8081/api/v1/ngo/register/submission/${submissionId}`);
+            const res = await axios.get(`/api/v1/ngo/register/submission/${submissionId}`);
             setExtractedFields(res.data.fields);
         } catch (err) {
             showAlert({ type: 'error', message: 'Failed to update field value' });
@@ -233,7 +233,7 @@ export default function RegisterPage() {
     const handleConfirmRegistration = async () => {
         if (!submissionId) return;
         try {
-            await axios.post(`http://localhost:8081/api/v1/ngo/register/submission/${submissionId}/confirm`);
+            await axios.post(`/api/v1/ngo/register/submission/${submissionId}/confirm`);
             showAlert({ type: 'success', title: 'Registration Verified', message: 'Your verified NGO account has been created!' });
             navigate('/dashboard');
         } catch (err: any) {

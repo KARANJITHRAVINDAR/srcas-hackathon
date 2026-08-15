@@ -34,7 +34,7 @@ export default function FunderImpactPage() {
     const fetchImpactData = async () => {
         setRefreshing(true);
         try {
-            const res = await axios.get('http://localhost:8081/api/org/impact/summary');
+            const res = await axios.get('/api/org/impact/summary');
             setSummary(res.data);
         } catch (err) {
             console.error("Failed to fetch SDG impact summary:", err);

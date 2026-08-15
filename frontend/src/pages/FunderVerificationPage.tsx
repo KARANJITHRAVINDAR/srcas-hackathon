@@ -33,7 +33,7 @@ export default function FunderVerificationPage() {
         setClarifications([]);
         if (!ticket) return;
         try {
-            const res = await axios.get(`http://localhost:8081/api/org/tickets/${ticket.id}`);
+            const res = await axios.get(`/api/org/tickets/${ticket.id}`);
             if (res.data) {
                 if (res.data.reviews) setTicketReviews(res.data.reviews);
                 if (res.data.clarifications) setClarifications(res.data.clarifications);
@@ -66,7 +66,7 @@ export default function FunderVerificationPage() {
     const fetchTickets = async () => {
         try {
             setLoading(true);
-            const res = await axios.get('http://localhost:8081/api/org/tickets');
+            const res = await axios.get('/api/org/tickets');
             const ticketList = res.data || [];
             setTickets(ticketList);
 
@@ -100,7 +100,7 @@ export default function FunderVerificationPage() {
 
         try {
             setSubmitting(true);
-            await axios.post(`http://localhost:8081/api/org/tickets/${selectedTicket.id}/decision`, {
+            await axios.post(`/api/org/tickets/${selectedTicket.id}/decision`, {
                 decision: decisionType,
                 comment: comment
             });
@@ -112,7 +112,7 @@ export default function FunderVerificationPage() {
             setComment('');
             
             // Reload tickets
-            const res = await axios.get('http://localhost:8081/api/org/tickets');
+            const res = await axios.get('/api/org/tickets');
             setTickets(res.data);
         } catch (error: any) {
             showAlert({ type: 'error', message: error.response?.data?.message || "Failed to submit decision" });
@@ -254,7 +254,7 @@ export default function FunderVerificationPage() {
                                             <div className="relative rounded-2xl overflow-hidden border border-[#DDE3EA] bg-black aspect-video max-w-xl shadow-inner group flex items-center justify-center">
                                                 {selectedTicket.evidence?.fileType?.includes('image') ? (
                                                     <img 
-                                                        src={`http://localhost:8081/uploads/${selectedTicket.evidence.fileUrl}`} 
+                                                        src={`/uploads/${selectedTicket.evidence.fileUrl}`} 
                                                         alt="Evidence" 
                                                         className="w-full h-full object-contain bg-slate-900"
                                                     />
@@ -263,7 +263,7 @@ export default function FunderVerificationPage() {
                                                         <FileText size={48} className="mx-auto text-emerald-400" />
                                                         <p className="font-bold text-sm">PDF Document Attached</p>
                                                         <a 
-                                                            href={`http://localhost:8081/uploads/${selectedTicket.evidence.fileUrl}`} 
+                                                            href={`/uploads/${selectedTicket.evidence.fileUrl}`} 
                                                             target="_blank" 
                                                             rel="noopener noreferrer"
                                                             className="inline-flex items-center gap-2 bg-white text-slate-900 font-bold px-4 py-2 rounded-lg text-xs hover:bg-slate-100 transition"
@@ -273,7 +273,7 @@ export default function FunderVerificationPage() {
                                                     </div>
                                                 ) : (
                                                     <video 
-                                                        src={`http://localhost:8081/uploads/${selectedTicket.evidence.fileUrl}`} 
+                                                        src={`/uploads/${selectedTicket.evidence.fileUrl}`} 
                                                         controls 
                                                         className="w-full h-full object-cover"
                                                     />
@@ -424,7 +424,7 @@ export default function FunderVerificationPage() {
                                                                  {c.ngoEvidence && (
                                                                      <div className="pt-1">
                                                                          <a
-                                                                             href={`http://localhost:8081/uploads/${c.ngoEvidence.fileUrl}`}
+                                                                             href={`/uploads/${c.ngoEvidence.fileUrl}`}
                                                                              target="_blank"
                                                                              rel="noopener noreferrer"
                                                                              className="inline-flex items-center gap-1.5 bg-white border border-[#DDE3EA] hover:border-slate-400 text-slate-800 font-bold px-3 py-1.5 rounded-lg text-xs transition shadow-xs"

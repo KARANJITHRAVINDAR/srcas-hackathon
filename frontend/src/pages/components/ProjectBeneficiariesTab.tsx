@@ -20,7 +20,7 @@ export default function ProjectBeneficiariesTab({ project }: ProjectBeneficiarie
     const fetchForm = async () => {
         try {
             setLoading(true);
-            const res = await axios.get(`http://localhost:8081/api/v1/ngo/projects/${project.id}/beneficiary-form`);
+            const res = await axios.get(`/api/v1/ngo/projects/${project.id}/beneficiary-form`);
             if (res.data) {
                 setForm(res.data);
                 if (res.data.status === 'ACTIVE') {
@@ -39,7 +39,7 @@ export default function ProjectBeneficiariesTab({ project }: ProjectBeneficiarie
 
     const fetchSummary = async (formId: string) => {
         try {
-            const res = await axios.get(`http://localhost:8081/api/v1/ngo/projects/${project.id}/beneficiary-form/${formId}/summary`);
+            const res = await axios.get(`/api/v1/ngo/projects/${project.id}/beneficiary-form/${formId}/summary`);
             setSummary(res.data);
         } catch (error) {
             console.error("Error fetching form summary", error);
@@ -51,7 +51,7 @@ export default function ProjectBeneficiariesTab({ project }: ProjectBeneficiarie
     const generateForm = async () => {
         try {
             setLoading(true);
-            const res = await axios.post(`http://localhost:8081/api/v1/ngo/projects/${project.id}/beneficiary-form`);
+            const res = await axios.post(`/api/v1/ngo/projects/${project.id}/beneficiary-form`);
             setForm(res.data);
         } catch (error) {
             console.error("Error generating form", error);
@@ -63,7 +63,7 @@ export default function ProjectBeneficiariesTab({ project }: ProjectBeneficiarie
     const publishForm = async () => {
         try {
             setLoading(true);
-            await axios.post(`http://localhost:8081/api/v1/ngo/projects/${project.id}/beneficiary-form/${form.id}/publish`);
+            await axios.post(`/api/v1/ngo/projects/${project.id}/beneficiary-form/${form.id}/publish`);
             fetchForm(); // Reload form and summary
         } catch (error) {
             console.error("Error publishing form", error);

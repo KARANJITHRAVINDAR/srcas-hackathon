@@ -13,12 +13,12 @@ export default function ExpenseDetailPage() {
     useEffect(() => {
         const fetchDetails = async () => {
             try {
-                const expRes = await axios.get(`http://localhost:8081/api/v1/ngo/expenses/${id}`);
+                const expRes = await axios.get(`/api/v1/ngo/expenses/${id}`);
                 setExpense(expRes.data);
 
                 if (expRes.data.evidenceId) {
                     try {
-                        const analysisRes = await axios.get(`http://localhost:8081/api/v1/evidence/${expRes.data.evidenceId}/analysis`);
+                        const analysisRes = await axios.get(`/api/v1/evidence/${expRes.data.evidenceId}/analysis`);
                         setAnalysis(analysisRes.data);
                     } catch (e) {
                         console.log("No analysis found yet");

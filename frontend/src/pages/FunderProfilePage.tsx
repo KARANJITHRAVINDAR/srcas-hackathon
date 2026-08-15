@@ -20,7 +20,7 @@ export default function FunderProfilePage() {
 
     const fetchProfile = async () => {
         try {
-            const res = await axios.get('http://localhost:8081/api/org/profile');
+            const res = await axios.get('/api/org/profile');
             setProfile(res.data);
             setOrgName(res.data.orgName || '');
             setOrgType(res.data.orgType || 'COMPANY');
@@ -40,7 +40,7 @@ export default function FunderProfilePage() {
         e.preventDefault();
         setSaving(true);
         try {
-            const res = await axios.put('http://localhost:8081/api/org/profile', {
+            const res = await axios.put('/api/org/profile', {
                 orgName,
                 orgType,
                 cinNumber

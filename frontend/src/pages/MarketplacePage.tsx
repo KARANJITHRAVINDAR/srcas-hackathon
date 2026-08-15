@@ -7,7 +7,7 @@ export default function MarketplacePage() {
     const [needs, setNeeds] = useState<any[]>([]);
 
     useEffect(() => {
-        axios.get('http://localhost:8081/api/v1/public/needs')
+        axios.get('/api/v1/public/needs')
             .then(res => setNeeds(res.data))
             .catch(console.error);
     }, []);
@@ -18,7 +18,7 @@ export default function MarketplacePage() {
             return;
         }
         try {
-            await axios.post(`http://localhost:8081/api/v1/needs/${id}/express-interest`);
+            await axios.post(`/api/v1/needs/${id}/express-interest`);
             alert('Interest expressed successfully! The NGO will be notified.');
         } catch (err: any) {
             alert(err.response?.data?.message || 'Failed to express interest');

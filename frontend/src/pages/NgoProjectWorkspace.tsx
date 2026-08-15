@@ -39,8 +39,8 @@ export default function NgoProjectWorkspace() {
     const loadProjectData = () => {
         setLoading(true);
         Promise.all([
-            axios.get(`http://localhost:8081/api/v1/projects/${id}`),
-            axios.get(`http://localhost:8081/api/v1/projects/${id}/milestones`)
+            axios.get(`/api/v1/projects/${id}`),
+            axios.get(`/api/v1/projects/${id}/milestones`)
         ])
         .then(([projRes, msRes]) => {
             setProject(projRes.data);
@@ -84,7 +84,7 @@ export default function NgoProjectWorkspace() {
         e.preventDefault();
         setIsSubmittingRemodify(true);
         try {
-            await axios.post(`http://localhost:8081/api/v1/projects/${id}/remodify`, remodifyData);
+            await axios.post(`/api/v1/projects/${id}/remodify`, remodifyData);
             showAlert({
                 type: 'success',
                 title: 'Project Republished!',

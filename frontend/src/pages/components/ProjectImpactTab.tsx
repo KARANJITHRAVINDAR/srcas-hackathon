@@ -18,8 +18,8 @@ export default function ProjectImpactTab({ project }: ProjectImpactTabProps) {
     const fetchData = async () => {
         try {
             const [dashRes, histRes] = await Promise.all([
-                axios.get(`http://localhost:8081/api/v1/projects/${project.id}/impact/dashboard`),
-                axios.get(`http://localhost:8081/api/v1/projects/${project.id}/impact/history`)
+                axios.get(`/api/v1/projects/${project.id}/impact/dashboard`),
+                axios.get(`/api/v1/projects/${project.id}/impact/history`)
             ]);
             setDashboard(dashRes.data);
             setHistory(histRes.data || dashRes.data.history || []);

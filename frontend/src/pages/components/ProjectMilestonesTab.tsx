@@ -160,15 +160,15 @@ function MilestoneDetailView({ project, milestoneId, onBack, user }: { project: 
     const loadData = () => {
         setLoading(true);
         const crEndpoint = user?.role === 'FUNDER'
-            ? `http://localhost:8081/api/org/milestones/${milestoneId}/change-requests`
-            : `http://localhost:8081/api/ngo/milestones/${milestoneId}/change-requests`;
+            ? `/api/org/milestones/${milestoneId}/change-requests`
+            : `/api/ngo/milestones/${milestoneId}/change-requests`;
 
         Promise.all([
-            axios.get(`http://localhost:8081/api/v1/projects/${project.id}/milestones`),
-            axios.get(`http://localhost:8081/api/v1/projects/${project.id}/milestones/${milestoneId}/tasks`),
+            axios.get(`/api/v1/projects/${project.id}/milestones`),
+            axios.get(`/api/v1/projects/${project.id}/milestones/${milestoneId}/tasks`),
             axios.get(crEndpoint).catch(() => ({ data: [] })),
-            axios.get(`http://localhost:8081/api/v1/milestones/${milestoneId}/clarifications`).catch(() => ({ data: [] })),
-            axios.get(`http://localhost:8081/api/v1/projects/${project.id}/closure-gates`).catch(() => ({ data: null }))
+            axios.get(`/api/v1/milestones/${milestoneId}/clarifications`).catch(() => ({ data: [] })),
+            axios.get(`/api/v1/projects/${project.id}/closure-gates`).catch(() => ({ data: null }))
         ]).then(([msRes, tasksRes, crRes, clarRes, closureRes]) => {
             const m = msRes.data.find((x: any) => x.id === milestoneId);
             setMilestone(m);
@@ -225,7 +225,7 @@ function MilestoneDetailView({ project, milestoneId, onBack, user }: { project: 
         if (token) headers['Authorization'] = `Bearer ${token}`;
 
         try {
-            await axios.post(`http://localhost:8081/api/v1/projects/${project.id}/closure-video`, formData, { headers });
+            await axios.post(`/api/v1/projects/${project.id}/closure-video`, formData, { headers });
             showAlert({ 
                 type: 'success', 
                 title: 'Closure Video Uploaded', 
@@ -266,7 +266,7 @@ function MilestoneDetailView({ project, milestoneId, onBack, user }: { project: 
         setProposing(true);
         try {
             await axios.post(
-                `http://localhost:8081/api/ngo/projects/${project.id}/milestones/${milestoneId}/change-request`,
+                `/api/ngo/projects/${project.id}/milestones/${milestoneId}/change-request`,
                 body
             );
             showAlert({ type: 'success', message: 'Change proposal submitted successfully!' });
@@ -282,7 +282,7 @@ function MilestoneDetailView({ project, milestoneId, onBack, user }: { project: 
 
     const handleRespondCR = async (crId: string, decision: 'ACCEPT' | 'REJECT') => {
         try {
-            await axios.post(`http://localhost:8081/api/ngo/change-requests/${crId}/respond`, {
+            await axios.post(`/api/ngo/change-requests/${crId}/respond`, {
                 decision,
                 responseNote: `NGO ${decision.toLowerCase()}ed the funder proposal.`
             });
@@ -318,7 +318,7 @@ function MilestoneDetailView({ project, milestoneId, onBack, user }: { project: 
         }
 
         try {
-            await axios.post(`http://localhost:8081/api/v1/milestones/${milestoneId}/proofs`, formData, { headers });
+            await axios.post(`/api/v1/milestones/${milestoneId}/proofs`, formData, { headers });
             showAlert({ 
                 type: 'success', 
                 title: isClarificationPending ? 'Clarification & Evidence Submitted' : 'Evidence Uploaded', 
@@ -925,7 +925,7 @@ function TaskCard({ task, projectId, milestoneId, onUploadComplete }: { task: an
         formData.append('expectedType', task.requiredEvidenceType || 'DOCUMENT');
 
         try {
-            await axios.post(`http://localhost:8081/api/v1/projects/${projectId}/milestones/${milestoneId}/tasks/${task.id}/evidence`, formData, {
+            await axios.post(`/api/v1/projects/${projectId}/milestones/${milestoneId}/tasks/${task.id}/evidence`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
             onUploadComplete();

@@ -21,10 +21,10 @@ export default function ProjectFundsTab({ project }: { project: any }) {
     const fetchData = async () => {
         try {
             const [summaryRes, milestonesRes, txsRes, reqsRes] = await Promise.all([
-                axios.get(`http://localhost:8081/api/v1/projects/${project.id}/funds/summary`),
-                axios.get(`http://localhost:8081/api/v1/projects/${project.id}/funds/milestones`),
-                axios.get(`http://localhost:8081/api/v1/projects/${project.id}/funds/transactions`),
-                axios.get(`http://localhost:8081/api/v1/projects/${project.id}/funds/additional-requests`)
+                axios.get(`/api/v1/projects/${project.id}/funds/summary`),
+                axios.get(`/api/v1/projects/${project.id}/funds/milestones`),
+                axios.get(`/api/v1/projects/${project.id}/funds/transactions`),
+                axios.get(`/api/v1/projects/${project.id}/funds/additional-requests`)
             ]);
             const mappedSummary = {
                 ...summaryRes.data,
@@ -65,7 +65,7 @@ export default function ProjectFundsTab({ project }: { project: any }) {
             formData.append('reason', requestReason);
             // mock file if needed, skipping for simple form
 
-            await axios.post(`http://localhost:8081/api/v1/projects/${project.id}/funds/additional-requests`, formData, {
+            await axios.post(`/api/v1/projects/${project.id}/funds/additional-requests`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
             setShowRequestModal(false);

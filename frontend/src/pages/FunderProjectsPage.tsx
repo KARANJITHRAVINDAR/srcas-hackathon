@@ -22,7 +22,7 @@ export default function FunderProjectsPage() {
         if (budgetMin) params.budgetMin = budgetMin;
         if (budgetMax) params.budgetMax = budgetMax;
 
-        axios.get('http://localhost:8081/api/org/projects', { params })
+        axios.get('/api/org/projects', { params })
             .then(res => {
                 setProjects(res.data);
             })

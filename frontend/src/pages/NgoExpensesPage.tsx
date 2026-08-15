@@ -16,8 +16,8 @@ export default function NgoExpensesPage() {
     const fetchData = async () => {
         try {
             const [expRes, sumRes] = await Promise.all([
-                axios.get('http://localhost:8081/api/v1/ngo/expenses'),
-                axios.get('http://localhost:8081/api/v1/ngo/expenses/summary')
+                axios.get('/api/v1/ngo/expenses'),
+                axios.get('/api/v1/ngo/expenses/summary')
             ]);
             setExpenses(expRes.data);
             setSummary(sumRes.data);

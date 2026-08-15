@@ -70,9 +70,9 @@ export default function PublicAuditDashboard() {
     setLoading(true);
     try {
       const [statsRes, projectsRes, ledgerRes] = await Promise.all([
-        axios.get('http://localhost:8081/api/v1/public/dashboard/stats'),
-        axios.get('http://localhost:8081/api/v1/projects'),
-        axios.get('http://localhost:8081/api/v1/public/blockchain-ledger')
+        axios.get('/api/v1/public/dashboard/stats'),
+        axios.get('/api/v1/projects'),
+        axios.get('/api/v1/public/blockchain-ledger')
       ]);
       setStats(statsRes.data);
       setProjects(projectsRes.data.filter((p: any) => p.status !== 'DRAFT'));
@@ -88,7 +88,7 @@ export default function PublicAuditDashboard() {
     setSelectedProofProject(project);
     setLoadingProofs(true);
     try {
-      const res = await axios.get(`http://localhost:8081/api/v1/public/projects/${project.id}/proof-gallery`);
+      const res = await axios.get(`/api/v1/public/projects/${project.id}/proof-gallery`);
       setProjectProofs(res.data);
     } catch (err) {
       console.error('Error fetching proofs', err);

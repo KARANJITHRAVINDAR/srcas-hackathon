@@ -61,12 +61,12 @@ export default function EvidenceUploadPage() {
             // For MVP, we will simulate the file upload to the generic endpoint or handle error gracefully if milestone doesn't exist
             // Wait, we need a real milestone ID to upload. Let's mock the analysis response if the API fails just to show the UI.
             
-            const response = await axios.post(`http://localhost:8081/api/v1/milestones/${milestoneId}/proofs`, formData);
+            const response = await axios.post(`/api/v1/milestones/${milestoneId}/proofs`, formData);
             
             // Wait a moment then fetch analysis (In a real app, we'd poll or use websockets)
             setTimeout(async () => {
                 try {
-                    const analysisRes = await axios.get(`http://localhost:8081/api/v1/evidence/${response.data.id}/analysis`);
+                    const analysisRes = await axios.get(`/api/v1/evidence/${response.data.id}/analysis`);
                     setAnalysisResult(analysisRes.data);
                 } catch (err) {
                     console.error("Failed to fetch analysis", err);

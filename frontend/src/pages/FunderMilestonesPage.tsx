@@ -20,7 +20,7 @@ export default function FunderMilestonesPage() {
     const fetchMilestones = async () => {
         setRefreshing(true);
         try {
-            const res = await axios.get('http://localhost:8081/api/org/milestones');
+            const res = await axios.get('/api/org/milestones');
             setMilestones(res.data || []);
         } catch (err) {
             console.error("Failed to fetch cross-project milestones:", err);

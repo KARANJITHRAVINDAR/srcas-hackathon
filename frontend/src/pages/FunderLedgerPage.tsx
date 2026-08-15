@@ -18,7 +18,7 @@ export default function FunderLedgerPage() {
     const fetchCommitments = async () => {
         setRefreshing(true);
         try {
-            const res = await axios.get('http://localhost:8081/api/org/commitments');
+            const res = await axios.get('/api/org/commitments');
             setCommitments(res.data || []);
         } catch (err) {
             console.error("Failed to fetch commitments:", err);
@@ -40,7 +40,7 @@ export default function FunderLedgerPage() {
         });
         if (!confirmed) return;
         try {
-            await axios.post(`http://localhost:8081/api/org/commitments/${commitmentId}/activate`);
+            await axios.post(`/api/org/commitments/${commitmentId}/activate`);
             showAlert({ type: 'success', title: 'Escrow Deployed', message: 'Smart contract deployed successfully! Funds locked in escrow.' });
             fetchCommitments();
         } catch (err: any) {
@@ -56,7 +56,7 @@ export default function FunderLedgerPage() {
         });
         if (!confirmed) return;
         try {
-            await axios.post(`http://localhost:8081/api/org/commitments/${commitmentId}/cancel`);
+            await axios.post(`/api/org/commitments/${commitmentId}/cancel`);
             showAlert({ type: 'info', message: 'Funding commitment cancelled.' });
             fetchCommitments();
         } catch (err: any) {

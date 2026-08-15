@@ -15,7 +15,7 @@ export default function PublicBeneficiaryFormPage() {
     useEffect(() => {
         const fetchForm = async () => {
             try {
-                const res = await axios.get(`http://localhost:8081/api/v1/public/beneficiary-forms/${token}`);
+                const res = await axios.get(`/api/v1/public/beneficiary-forms/${token}`);
                 setForm(res.data);
             } catch (err) {
                 setError("This verification form is no longer active or does not exist.");
@@ -36,7 +36,7 @@ export default function PublicBeneficiaryFormPage() {
 
         try {
             setLoading(true);
-            await axios.post(`http://localhost:8081/api/v1/public/beneficiary-forms/${token}/responses`, {
+            await axios.post(`/api/v1/public/beneficiary-forms/${token}/responses`, {
                 answers: answerPayload
             });
             setSubmitted(true);

@@ -25,7 +25,7 @@ export default function ProjectCreationPage() {
     const sdgs = Array.from({length: 17}, (_, i) => `SDG${i+1}`);
 
     useEffect(() => {
-        axios.get('http://localhost:8081/api/v1/ngos/verified')
+        axios.get('/api/v1/ngos/verified')
             .then(res => setNgos(res.data))
             .catch(err => console.error("Error fetching NGOs", err));
     }, []);
@@ -71,7 +71,7 @@ export default function ProjectCreationPage() {
         };
 
         try {
-            const res = await axios.post('http://localhost:8081/api/v1/projects', payload);
+            const res = await axios.post('/api/v1/projects', payload);
             navigate(`/projects/${res.data.id}`);
         } catch (err: any) {
             alert(err.response?.data?.message || 'Failed to create project');

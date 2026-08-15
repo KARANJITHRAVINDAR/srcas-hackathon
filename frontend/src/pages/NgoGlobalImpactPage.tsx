@@ -11,7 +11,7 @@ export default function NgoGlobalImpactPage() {
     useEffect(() => {
         const fetchImpact = async () => {
             try {
-                const res = await axios.get('http://localhost:8081/api/v1/ngo/impact/summary');
+                const res = await axios.get('/api/v1/ngo/impact/summary');
                 setImpactData(res.data);
             } catch (error) {
                 console.error("Error fetching global impact summary", error);

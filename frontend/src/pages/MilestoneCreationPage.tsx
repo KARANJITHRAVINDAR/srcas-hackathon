@@ -22,8 +22,8 @@ export default function MilestoneCreationPage() {
         const fetchData = async () => {
             try {
                 const [projectRes, milestonesRes] = await Promise.all([
-                    axios.get(`http://localhost:8081/api/v1/projects/${id}`),
-                    axios.get(`http://localhost:8081/api/v1/projects/${id}/milestones`)
+                    axios.get(`/api/v1/projects/${id}`),
+                    axios.get(`/api/v1/projects/${id}/milestones`)
                 ]);
                 setProject(projectRes.data);
                 
@@ -71,7 +71,7 @@ export default function MilestoneCreationPage() {
         }
         setSaving(true);
         try {
-            await axios.post(`http://localhost:8081/api/v1/projects/${id}/milestones/bulk`, milestones);
+            await axios.post(`/api/v1/projects/${id}/milestones/bulk`, milestones);
             showAlert({ type: 'success', message: 'Milestones saved successfully!' });
             navigate(`/projects/${id}`);
         } catch (err: any) {

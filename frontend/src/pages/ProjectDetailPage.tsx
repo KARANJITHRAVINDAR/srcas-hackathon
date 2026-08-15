@@ -72,7 +72,7 @@ export default function ProjectDetailPage() {
         try {
             if (isFunder) {
                 // Fetch Funder-specific details (Phase 1)
-                const projRes = await axios.get(`http://localhost:8081/api/org/projects/${id}`);
+                const projRes = await axios.get(`/api/org/projects/${id}`);
                 setProject(projRes.data);
                 setMilestones(projRes.data.milestones || []);
                 setEngagement({
@@ -82,7 +82,7 @@ export default function ProjectDetailPage() {
 
                 // Fetch current commitment if active or committed (Phase 3)
                 try {
-                    const commitRes = await axios.get(`http://localhost:8081/api/org/projects/${id}/commitment`);
+                    const commitRes = await axios.get(`/api/org/projects/${id}/commitment`);
                     setCommitment(commitRes.data);
                 } catch (e) {
                     setCommitment(null);
@@ -90,8 +90,8 @@ export default function ProjectDetailPage() {
             } else {
                 // Fetch standard NGO/Public details
                 const [projRes, msRes] = await Promise.all([
-                    axios.get(`http://localhost:8081/api/v1/projects/${id}`),
-                    axios.get(`http://localhost:8081/api/v1/projects/${id}/milestones`)
+                    axios.get(`/api/v1/projects/${id}`),
+                    axios.get(`/api/v1/projects/${id}/milestones`)
                 ]);
                 setProject(projRes.data);
                 setMilestones(msRes.data || []);
@@ -99,7 +99,7 @@ export default function ProjectDetailPage() {
 
             // Fetch Project Closure Status
             try {
-                const closureRes = await axios.get(`http://localhost:8081/api/v1/projects/${id}/closure-gates`);
+                const closureRes = await axios.get(`/api/v1/projects/${id}/closure-gates`);
                 setClosureStatus(closureRes.data);
             } catch (e) {
                 console.error("Closure status fetch error", e);
@@ -124,9 +124,9 @@ export default function ProjectDetailPage() {
         try {
             const token = localStorage.getItem('token');
             const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-            const latestRes = await axios.get(`http://localhost:8081/api/projects/${id}/audit-report/latest`, config);
+            const latestRes = await axios.get(`/api/projects/${id}/audit-report/latest`, config);
             setLatestAuditReport(latestRes.data);
-            const historyRes = await axios.get(`http://localhost:8081/api/projects/${id}/audit-report/history`, config);
+            const historyRes = await axios.get(`/api/projects/${id}/audit-report/history`, config);
             setAuditReportHistory(historyRes.data || []);
         } catch (e) {
             // Audit report not generated yet
@@ -138,7 +138,7 @@ export default function ProjectDetailPage() {
         try {
             const token = localStorage.getItem('token');
             const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-            const res = await axios.post(`http://localhost:8081/api/projects/${id}/audit-report/generate`, {}, config);
+            const res = await axios.post(`/api/projects/${id}/audit-report/generate`, {}, config);
             showAlert({ type: 'success', title: 'Audit Report Generated', message: 'Official Audit Report generated and cryptographically signed.' });
             setLatestAuditReport(res.data);
             fetchAuditReport();
@@ -155,7 +155,7 @@ export default function ProjectDetailPage() {
 
     const handleVerifyVideo = async (decision: 'VERIFY' | 'REJECT', reason?: string) => {
         try {
-            await axios.post(`http://localhost:8081/api/v1/projects/${id}/closure-video/verify`, {
+            await axios.post(`/api/v1/projects/${id}/closure-video/verify`, {
                 decision,
                 reason: reason || ''
             });
@@ -182,7 +182,7 @@ export default function ProjectDetailPage() {
         });
         if (!confirmed) return;
         try {
-            const res = await axios.post(`http://localhost:8081/api/v1/projects/${id}/mark-done`);
+            const res = await axios.post(`/api/v1/projects/${id}/mark-done`);
             setClosureStatus(res.data);
             showAlert({
                 type: 'success',
@@ -209,8 +209,8 @@ export default function ProjectDetailPage() {
         setOpenHistoryMilestone(milestoneId);
         try {
             const endpoint = isFunder 
-                ? `http://localhost:8081/api/org/milestones/${milestoneId}/change-requests`
-                : `http://localhost:8081/api/ngo/milestones/${milestoneId}/change-requests`;
+                ? `/api/org/milestones/${milestoneId}/change-requests`
+                : `/api/ngo/milestones/${milestoneId}/change-requests`;
             const res = await axios.get(endpoint);
             setActiveMilestoneCRs(prev => ({ ...prev, [milestoneId]: res.data }));
         } catch (e) {
@@ -221,7 +221,7 @@ export default function ProjectDetailPage() {
     // Funder Phase 1: Mark Under Review
     const markUnderReview = async () => {
         try {
-            await axios.post(`http://localhost:8081/api/org/projects/${id}/review`);
+            await axios.post(`/api/org/projects/${id}/review`);
             showAlert({ type: 'success', message: "Project successfully marked as Under Review!" });
             fetchData();
         } catch (err: any) {
@@ -239,7 +239,7 @@ export default function ProjectDetailPage() {
     // Funder Phase 2: Initiate Negotiations
     const initiateNegotiations = async () => {
         try {
-            await axios.post(`http://localhost:8081/api/org/projects/${id}/negotiate`);
+            await axios.post(`/api/org/projects/${id}/negotiate`);
             showAlert({ type: 'success', message: "Milestone negotiation initiated successfully!" });
             fetchData();
         } catch (err: any) {
@@ -257,7 +257,7 @@ export default function ProjectDetailPage() {
             if (changeSequence) body.sequence = parseInt(changeSequence);
             if (changeDueDate) body.dueDate = changeDueDate;
 
-            await axios.post(`http://localhost:8081/api/org/projects/${id}/milestones/${selectedMilestone.id}/change-request`, body);
+            await axios.post(`/api/org/projects/${id}/milestones/${selectedMilestone.id}/change-request`, body);
             showAlert({ type: 'success', message: "Change proposal submitted successfully!" });
             setShowChangeModal(false);
             resetChangeForm();
@@ -285,7 +285,7 @@ export default function ProjectDetailPage() {
         });
         if (!confirmed) return;
         try {
-            await axios.post(`http://localhost:8081/api/org/change-requests/${crId}/withdraw`);
+            await axios.post(`/api/org/change-requests/${crId}/withdraw`);
             showAlert({ type: 'info', message: "Proposal withdrawn successfully." });
             fetchData();
         } catch (err: any) {
@@ -309,8 +309,8 @@ export default function ProjectDetailPage() {
             }
 
             const endpoint = isFunder
-                ? `http://localhost:8081/api/org/change-requests/${selectedCR.id}/respond`
-                : `http://localhost:8081/api/ngo/change-requests/${selectedCR.id}/respond`;
+                ? `/api/org/change-requests/${selectedCR.id}/respond`
+                : `/api/ngo/change-requests/${selectedCR.id}/respond`;
 
             await axios.post(endpoint, body);
             showAlert({ type: 'success', message: `Decision [${decision}] submitted successfully!` });
@@ -324,7 +324,7 @@ export default function ProjectDetailPage() {
 
     const handleAcceptLockMilestone = async (milestoneId: string) => {
         try {
-            await axios.post(`http://localhost:8081/api/org/projects/${id}/milestones/${milestoneId}/accept-lock`);
+            await axios.post(`/api/org/projects/${id}/milestones/${milestoneId}/accept-lock`);
             showAlert({ type: 'success', title: 'Milestone Locked', message: "Milestone accepted and locked. Negotiation finalized for this milestone." });
             fetchData();
         } catch (err: any) {
@@ -340,7 +340,7 @@ export default function ProjectDetailPage() {
         });
         if (!confirmed) return;
         try {
-            await axios.post(`http://localhost:8081/api/org/projects/${id}/milestones/accept-lock-all`);
+            await axios.post(`/api/org/projects/${id}/milestones/accept-lock-all`);
             showAlert({ type: 'success', title: 'Project Activated', message: "All milestones accepted and locked! Project status updated to ACTIVE." });
             fetchData();
         } catch (err: any) {
@@ -350,7 +350,7 @@ export default function ProjectDetailPage() {
 
     const handleFinalizeClosure = async () => {
         try {
-            const res = await axios.post(`http://localhost:8081/api/v1/projects/${id}/evaluate-closure`);
+            const res = await axios.post(`/api/v1/projects/${id}/evaluate-closure`);
             setClosureStatus(res.data);
             if (res.data.closed) {
                 showAlert({ type: 'success', title: 'Project Closed', message: 'Project successfully verified and closed! All milestones complete and beneficiary feedback verified.' });
@@ -372,7 +372,7 @@ export default function ProjectDetailPage() {
         if (!confirmed) return;
         try {
             const reason = window.prompt("Optional withdrawal reason for the NGO (e.g. Budget constraints, Milestone timeline change needed):") || "";
-            await axios.post(`http://localhost:8081/api/org/projects/${id}/withdraw`, { reason });
+            await axios.post(`/api/org/projects/${id}/withdraw`, { reason });
             showAlert({ type: 'info', message: 'Funding engagement withdrawn.' });
             fetchData();
         } catch (err: any) {
@@ -404,7 +404,7 @@ export default function ProjectDetailPage() {
                 milestoneBreakdown: breakdown
             };
 
-            await axios.post(`http://localhost:8081/api/org/projects/${id}/commit`, body);
+            await axios.post(`/api/org/projects/${id}/commit`, body);
             showAlert({ type: 'success', message: "Funding commitment submitted successfully! Preview the simulated escrow ledger below." });
             setShowCommitModal(false);
             setCommitTotal('');
@@ -426,7 +426,7 @@ export default function ProjectDetailPage() {
         });
         if (!confirmed) return;
         try {
-            await axios.post(`http://localhost:8081/api/org/commitments/${commitment.id}/activate`);
+            await axios.post(`/api/org/commitments/${commitment.id}/activate`);
             showAlert({ type: 'success', message: "Simulated Blockchain Smart Contract Deployed! Funds are locked in escrow." });
             fetchData();
         } catch (err: any) {
@@ -444,7 +444,7 @@ export default function ProjectDetailPage() {
         });
         if (!confirmed) return;
         try {
-            await axios.post(`http://localhost:8081/api/org/commitments/${commitment.id}/cancel`);
+            await axios.post(`/api/org/commitments/${commitment.id}/cancel`);
             showAlert({ type: 'info', message: "Funding commitment cancelled. Milestones negotiation reopened." });
             fetchData();
         } catch (err: any) {
@@ -466,7 +466,7 @@ export default function ProjectDetailPage() {
             formData.append('metadata', '{"lat": 12.9716, "lng": 77.5946}');
             
             try {
-                await axios.post(`http://localhost:8081/api/v1/milestones/${milestoneId}/proofs`, formData, {
+                await axios.post(`/api/v1/milestones/${milestoneId}/proofs`, formData, {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 });
                 showAlert({ type: 'success', title: 'Evidence Uploaded', message: "Proof submitted successfully and anchored to blockchain. AI verification ticket raised." });
@@ -481,7 +481,7 @@ export default function ProjectDetailPage() {
     // Activate milestone (NGO)
     const handleActivateMilestone = async (milestoneId: string) => {
         try {
-            await axios.post(`http://localhost:8081/api/v1/projects/${id}/milestones/${milestoneId}/activate`);
+            await axios.post(`/api/v1/projects/${id}/milestones/${milestoneId}/activate`);
             showAlert({ type: 'success', message: "Milestone activated successfully! You can now upload video proof and verify with beneficiaries." });
             fetchData();
         } catch (err: any) {
@@ -492,7 +492,7 @@ export default function ProjectDetailPage() {
     // Share QR code (NGO)
     const handleShareQrCode = async (milestoneId: string, milestoneTitle: string) => {
         try {
-            const res = await axios.get(`http://localhost:8081/api/v1/ngo/projects/${id}/beneficiary-form/milestones/${milestoneId}`);
+            const res = await axios.get(`/api/v1/ngo/projects/${id}/beneficiary-form/milestones/${milestoneId}`);
             if (res.data) {
                 const url = `${window.location.origin}/verify/${res.data.shareToken}`;
                 setQrUrl(url);
@@ -513,7 +513,7 @@ export default function ProjectDetailPage() {
         });
         if (!confirmed) return;
         try {
-            await axios.post(`http://localhost:8081/api/v1/projects/${id}/milestones/${milestoneId}/submit`);
+            await axios.post(`/api/v1/projects/${id}/milestones/${milestoneId}/submit`);
             showAlert({ type: 'success', message: 'Milestone submitted to Funder for approval!' });
             fetchData();
         } catch (err: any) {
@@ -523,7 +523,7 @@ export default function ProjectDetailPage() {
 
     const handleReviewProposal = async (status: string) => {
         try {
-            await axios.patch(`http://localhost:8081/api/v1/projects/${id}/status`, { status });
+            await axios.patch(`/api/v1/projects/${id}/status`, { status });
             showAlert({ type: 'success', message: `Project ${status} successfully!` });
             window.location.reload();
         } catch (err: any) {
@@ -1128,7 +1128,7 @@ export default function ProjectDetailPage() {
                                                     Closure Video File
                                                 </div>
                                                 <a 
-                                                    href={`http://localhost:8081${closureStatus.closureVideo.fileUrl}`} 
+                                                    href={`${closureStatus.closureVideo.fileUrl}`} 
                                                     target="_blank" 
                                                     rel="noreferrer"
                                                     className="text-[#00A875] hover:underline font-bold text-[11px] flex items-center gap-1"
@@ -1288,7 +1288,7 @@ export default function ProjectDetailPage() {
                                             ) : (
                                                 <div className="flex gap-2 pt-1">
                                                     <a
-                                                        href={`http://localhost:8081${latestAuditReport.reportFileUrl}`}
+                                                        href={`${latestAuditReport.reportFileUrl}`}
                                                         target="_blank"
                                                         rel="noreferrer"
                                                         className="flex-1 bg-[#00A875] hover:bg-emerald-600 text-white font-bold py-2.5 px-3 rounded-lg text-xs transition flex items-center justify-center gap-1.5 shadow-sm"

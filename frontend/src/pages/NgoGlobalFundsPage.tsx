@@ -11,7 +11,7 @@ export default function NgoGlobalFundsPage() {
     useEffect(() => {
         const fetchTreasury = async () => {
             try {
-                const res = await axios.get('http://localhost:8081/api/v1/ngo/treasury/summary');
+                const res = await axios.get('/api/v1/ngo/treasury/summary');
                 setTreasuryData(res.data);
             } catch (error) {
                 console.error("Error fetching treasury summary", error);

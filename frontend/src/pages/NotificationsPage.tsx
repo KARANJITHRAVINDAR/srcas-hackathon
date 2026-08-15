@@ -35,7 +35,7 @@ export default function NotificationsPage() {
     const fetchNotifications = async () => {
         try {
             setLoading(true);
-            const res = await axios.get('http://localhost:8081/api/v1/notifications');
+            const res = await axios.get('/api/v1/notifications');
             setNotifications(res.data || []);
         } catch (err: any) {
             console.error('Failed to load notifications', err);
@@ -53,7 +53,7 @@ export default function NotificationsPage() {
     const handleMarkAsRead = async (id: string, e?: React.MouseEvent) => {
         if (e) e.stopPropagation();
         try {
-            await axios.post(`http://localhost:8081/api/v1/notifications/${id}/read`);
+            await axios.post(`/api/v1/notifications/${id}/read`);
             setNotifications(prev => prev.map(n => n.id === id ? { ...n, readStatus: 'READ' } : n));
         } catch (err) {
             console.error('Failed to mark read', err);
@@ -62,7 +62,7 @@ export default function NotificationsPage() {
 
     const handleMarkAllAsRead = async () => {
         try {
-            await axios.post('http://localhost:8081/api/v1/notifications/mark-all-read');
+            await axios.post('/api/v1/notifications/mark-all-read');
             setNotifications(prev => prev.map(n => ({ ...n, readStatus: 'READ' })));
             showAlert({ type: 'success', message: 'All notifications marked as read.' });
         } catch (err) {

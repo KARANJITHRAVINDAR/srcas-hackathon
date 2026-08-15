@@ -22,11 +22,11 @@ export default function FunderReportsPage() {
         try {
             let projectList: any[] = [];
             try {
-                const res = await axios.get('http://localhost:8081/api/org/projects', config);
+                const res = await axios.get('/api/org/projects', config);
                 projectList = res.data || [];
             } catch (e) {
                 // Fallback to public projects endpoint if auth fails
-                const publicRes = await axios.get('http://localhost:8081/api/v1/public/audit/projects');
+                const publicRes = await axios.get('/api/v1/public/audit/projects');
                 projectList = publicRes.data || [];
             }
 
@@ -38,7 +38,7 @@ export default function FunderReportsPage() {
                 projectList.map(async (p: any) => {
                     if (p.status === 'CLOSED' || p.status === 'COMPLETED') {
                         try {
-                            const reportRes = await axios.get(`http://localhost:8081/api/projects/${p.id}/audit-report/latest`, config);
+                            const reportRes = await axios.get(`/api/projects/${p.id}/audit-report/latest`, config);
                             newReportsMap[p.id] = reportRes.data;
                         } catch (e) {
                             // Report not generated yet
@@ -64,7 +64,7 @@ export default function FunderReportsPage() {
         const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
 
         try {
-            const res = await axios.post(`http://localhost:8081/api/projects/${projectId}/audit-report/generate`, {}, config);
+            const res = await axios.post(`/api/projects/${projectId}/audit-report/generate`, {}, config);
             showAlert({
                 type: 'success',
                 title: 'Audit Report Generated',
@@ -187,7 +187,7 @@ export default function FunderReportsPage() {
 
                                             <div className="flex gap-2">
                                                 <a
-                                                    href={`http://localhost:8081${report.reportFileUrl}`}
+                                                    href={`${report.reportFileUrl}`}
                                                     target="_blank"
                                                     rel="noreferrer"
                                                     className="flex-1 bg-[#00A875] hover:bg-emerald-600 text-white font-bold py-2 px-3 rounded-lg text-xs transition flex items-center justify-center gap-1.5"

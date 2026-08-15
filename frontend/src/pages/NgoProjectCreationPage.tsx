@@ -90,7 +90,7 @@ export default function NgoProjectCreationPage() {
         }
         setAiSuggestingSdg(true);
         try {
-            const res = await axios.post('http://localhost:8081/api/v1/ai/suggest-sdg', {
+            const res = await axios.post('/api/v1/ai/suggest-sdg', {
                 title: formData.title,
                 description: formData.description,
                 category: formData.geography
@@ -131,7 +131,7 @@ export default function NgoProjectCreationPage() {
                 funderId: formData.funderId === 'OPEN' ? null : formData.funderId
             };
             
-            const res = await axios.post('http://localhost:8081/api/v1/projects/propose', payload);
+            const res = await axios.post('/api/v1/projects/propose', payload);
             
             // New response shape: { project: {...}, milestones: [...] }
             const data = res.data;
@@ -165,7 +165,7 @@ export default function NgoProjectCreationPage() {
                 amountAllocated: ms.amountAllocated,
                 sequenceNumber: ms.sequenceNumber || (index + 1)
             }));
-            await axios.post(`http://localhost:8081/api/v1/projects/${projectId}/milestones/bulk`, payload);
+            await axios.post(`/api/v1/projects/${projectId}/milestones/bulk`, payload);
             showAlert({ type: 'success', message: 'Project and milestones saved successfully!' });
             navigate('/ngo/projects');
         } catch (error: any) {

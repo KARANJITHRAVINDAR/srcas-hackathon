@@ -16,7 +16,7 @@ export default function ProjectExpensesTab({ project, milestones }: { project: a
 
     const fetchExpenses = async () => {
         try {
-            const res = await axios.get(`http://localhost:8081/api/v1/ngo/expenses/project/${project.id}`);
+            const res = await axios.get(`/api/v1/ngo/expenses/project/${project.id}`);
             setExpenses(res.data);
         } catch (error) {
             console.error('Failed to fetch project expenses', error);
@@ -154,7 +154,7 @@ function AddExpenseModal({ project, milestones, onClose, onSuccess }: { project:
             if (file) {
                 formDataObj.append('file', file);
             }
-            await axios.post('http://localhost:8081/api/v1/ngo/expenses', formDataObj, {
+            await axios.post('/api/v1/ngo/expenses', formDataObj, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
             showAlert({ type: 'success', message: "Expense logged successfully!" });

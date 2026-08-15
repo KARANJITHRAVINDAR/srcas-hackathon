@@ -14,7 +14,7 @@ export default function NgoProjectsPage() {
 
     useEffect(() => {
         if (user?.id) {
-            axios.get(`http://localhost:8081/api/v1/projects?ngoUserId=${user.id}`)
+            axios.get(`/api/v1/projects?ngoUserId=${user.id}`)
                 .then(res => {
                     setProjects(res.data);
                 })

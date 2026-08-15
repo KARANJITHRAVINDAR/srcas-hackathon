@@ -11,14 +11,14 @@ export default function NgoMatchRequestsPage() {
     }, []);
 
     const fetchMatchRequests = () => {
-        axios.get('http://localhost:8081/api/v1/ngo/match-requests')
+        axios.get('/api/v1/ngo/match-requests')
             .then(res => setMatchRequests(res.data))
             .catch(console.error);
     };
 
     const acceptMatch = async (id: string) => {
         try {
-            const res = await axios.post(`http://localhost:8081/api/v1/match-requests/${id}/accept`);
+            const res = await axios.post(`/api/v1/match-requests/${id}/accept`);
             alert('Match accepted! Project Draft Created.');
             navigate(`/projects/${res.data.id}`);
         } catch (err: any) {

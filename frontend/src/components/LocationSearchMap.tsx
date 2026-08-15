@@ -140,7 +140,7 @@ export default function LocationSearchMap({
             // First attempt: Backend Geocoding Service
             let responseData: any = null;
             try {
-                const res = await axios.get(`http://localhost:8081/api/v1/location/reverse?latitude=${lat}&longitude=${lng}`);
+                const res = await axios.get(`/api/v1/location/reverse?latitude=${lat}&longitude=${lng}`);
                 responseData = res.data;
             } catch {
                 // Fallback direct to OpenStreetMap Nominatim
@@ -224,7 +224,7 @@ export default function LocationSearchMap({
                 // Try backend search first
                 let results: SearchSuggestion[] = [];
                 try {
-                    const res = await axios.get(`http://localhost:8081/api/v1/location/search?query=${encodeURIComponent(query.trim())}`);
+                    const res = await axios.get(`/api/v1/location/search?query=${encodeURIComponent(query.trim())}`);
                     results = res.data || [];
                 } catch {
                     // Fallback to OSM Nominatim
@@ -326,7 +326,7 @@ export default function LocationSearchMap({
         }
 
         try {
-            const res = await axios.post('http://localhost:8081/api/v1/location/confirm', {
+            const res = await axios.post('/api/v1/location/confirm', {
                 latitude: locationDetails.latitude,
                 longitude: locationDetails.longitude,
                 displayAddress: locationDetails.displayAddress,

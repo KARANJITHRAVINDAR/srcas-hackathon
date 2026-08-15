@@ -11,7 +11,7 @@ export default function VerificationCenter() {
     useEffect(() => {
         const fetchActions = async () => {
             try {
-                const res = await axios.get('http://localhost:8081/api/v1/ngo/verification/actions');
+                const res = await axios.get('/api/v1/ngo/verification/actions');
                 setActionItems(res.data);
             } catch (error) {
                 console.error("Failed to fetch verification actions", error);

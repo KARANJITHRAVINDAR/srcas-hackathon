@@ -15,7 +15,7 @@ export default function FunderDashboardPage() {
     const fetchSummary = async () => {
         setRefreshing(true);
         try {
-            const res = await axios.get('http://localhost:8081/api/org/dashboard/summary');
+            const res = await axios.get('/api/org/dashboard/summary');
             setSummary(res.data);
         } catch (err) {
             console.error("Failed to fetch funder dashboard summary:", err);

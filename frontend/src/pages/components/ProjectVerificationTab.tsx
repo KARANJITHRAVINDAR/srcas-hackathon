@@ -24,7 +24,7 @@ export default function ProjectVerificationTab({ project, milestones }: ProjectV
     const fetchVerificationHub = async () => {
         try {
             setLoading(true);
-            const res = await axios.get(`http://localhost:8081/api/v1/projects/${project.id}/verification/hub`);
+            const res = await axios.get(`/api/v1/projects/${project.id}/verification/hub`);
             setHubData(res.data);
         } catch (error) {
             console.error('Failed to fetch verification hub data', error);
@@ -278,7 +278,7 @@ export default function ProjectVerificationTab({ project, milestones }: ProjectV
                                                     </div>
                                                 </div>
                                                 <a
-                                                    href={`http://localhost:8081/uploads/${item.fileUrl}`}
+                                                    href={`/uploads/${item.fileUrl}`}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     className="inline-flex items-center gap-1.5 bg-[#10172A] hover:bg-slate-800 text-white text-xs font-bold px-4 py-2 rounded-lg transition shrink-0 shadow-sm"
